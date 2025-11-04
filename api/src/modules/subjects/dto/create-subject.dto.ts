@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength, IsArray } from 'class-validator';
 
 export class CreateSubjectDto {
   @IsString()
@@ -8,5 +8,33 @@ export class CreateSubjectDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(255)
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  aiPrompt?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  seoTitle?: string;
+
+  @IsString()
+  @IsOptional()
+  seoDescription?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  seoTags?: string[];
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  seoImage?: string;
 }

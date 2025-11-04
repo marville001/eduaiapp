@@ -21,13 +21,13 @@ export class SubjectService {
 
   async create(createSubjectDto: CreateSubjectDto): Promise<Subject> {
 
-    const slug = this.generateSlug(createSubjectDto.name);
+    const slug = createSubjectDto.slug || this.generateSlug(createSubjectDto.name);
 
-    const existing = await this.subjectRepository.findBySlug(slug,);
+    const existing = await this.subjectRepository.findBySlug(slug);
 
     if (existing) {
       throw new ConflictException(
-        `Subject with name "${createSubjectDto.name}" already exists.`
+        `Subject with slug "${slug}" already exists.`
       );
     }
 
@@ -73,6 +73,16 @@ export class SubjectService {
 
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+
+    // If updating slug, check for conflicts
+    if (updateSubjectDto.slug && updateSubjectDto.slug !== subject.slug) {
+      const existing = await this.subjectRepository.findBySlug(updateSubjectDto.slug);
+      if (existing && existing.id !== id) {
+        throw new ConflictException(
+          `Subject with slug "${updateSubjectDto.slug}" already exists.`
+        );
+      }
     }
 
     Object.assign(subject, updateSubjectDto);

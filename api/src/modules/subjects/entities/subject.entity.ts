@@ -22,6 +22,22 @@ export class Subject extends AbstractEntity<Subject> {
   @Column({ type: 'int', nullable: true })
   parentSubjectId?: number;
 
+  @Column({ type: 'text', nullable: true })
+  aiPrompt?: string;
+
+  // SEO Fields
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  seoTitle?: string;
+
+  @Column({ type: 'text', nullable: true })
+  seoDescription?: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  seoTags?: string[];
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  seoImage?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
