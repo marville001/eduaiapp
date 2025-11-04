@@ -64,6 +64,10 @@ const menuItems = [
     title: "Pages",
     href: "/admin/pages",
     icon: Upload,
+    children: [
+      { title: "All Pages", href: "/admin/pages" },
+      { title: "New Page", href: "/admin/pages/new" },
+    ],
   },
   {
     title: "Subscriptions",
