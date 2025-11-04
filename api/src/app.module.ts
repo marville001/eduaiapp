@@ -17,6 +17,8 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { UsersModule } from './modules/users/users.module';
 import { SubjectModule } from './modules/subjects/subject.module';
+import { BlogModule } from './modules/blogs/blog.module';
+import { PageModule } from './modules/pages/page.module';
 
 @Module({
 	imports: [
@@ -83,6 +85,8 @@ import { SubjectModule } from './modules/subjects/subject.module';
 		AuthModule,
 		SettingsModule,
 		SubjectModule,
+		BlogModule,
+		PageModule,
 	],
 	providers: [
 		// Global guards

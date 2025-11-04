@@ -7,6 +7,7 @@ import { Subject } from '@/modules/subjects/entities/subject.entity';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { entities } from '@/config/database.config';
 
 @Global()
 @Module({
@@ -19,14 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				database: configService.getOrThrow('DATABASE_NAME'),
 				username: configService.getOrThrow('DATABASE_USERNAME'),
 				password: configService.getOrThrow('DATABASE_PASSWORD'),
-				entities: [
-					User,
-					Role,
-					Permission,
-					SystemSetting,
-					AuditLog,
-					Subject,
-				],
+				entities,
 				migrationsTableName: 'migrations',
 				migrationsRun: true,
 				logging: false, // process.env.ENV !== 'production',

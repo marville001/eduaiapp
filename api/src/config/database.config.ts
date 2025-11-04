@@ -7,10 +7,25 @@ import { Subject } from '@/modules/subjects/entities/subject.entity';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+import { Blog } from '@/modules/blogs/entities/blog.entity';
+import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
+import { Page } from '@/modules/pages/entities/page.entity';
 
 config();
 
 const configService = new ConfigService();
+
+export const entities = [
+  User,
+  Role,
+  Permission,
+  SystemSetting,
+  AuditLog,
+  Subject,
+  Blog,
+  BlogCategory,
+  Page
+];
 
 export default new DataSource({
   type: 'postgres',
@@ -32,12 +47,5 @@ export default new DataSource({
       }
     } : {})
   },
-  entities: [
-    User,
-    Role,
-    Permission,
-    SystemSetting,
-    AuditLog,
-    Subject,
-  ],
+  entities,
 });
