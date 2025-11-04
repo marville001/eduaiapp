@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,6 +45,19 @@ const formSchema = z.object({
 	seoDescription: z.string().optional(),
 	seoTags: z.array(z.string()).optional(),
 	seoImage: z.string().optional(),
+}).refine((data) => {
+	if (data.status === 'scheduled') {
+		if (!data.scheduledAt) {
+			return false;
+		}
+		const scheduledDate = new Date(data.scheduledAt);
+		const now = new Date();
+		return scheduledDate > now;
+	}
+	return true;
+}, {
+	message: "Scheduled date is required and must be in the future",
+	path: ["scheduledAt"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,13 +66,15 @@ interface BlogFormProps {
 	blog?: Blog;
 	onSuccess?: () => void;
 	onCancel?: () => void;
+	redirectToViewAll?: boolean;
 }
 
-export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
+export default function BlogForm({ blog, onSuccess, onCancel, redirectToViewAll }: BlogFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
 	const [seoTagInput, setSeoTagInput] = useState('');
 	const [isSlugManual, setIsSlugManual] = useState(false);
+	const [currentStatus, setCurrentStatus] = useState<string>(blog?.status || 'draft');
 
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -117,7 +132,9 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 			if (onSuccess) {
 				onSuccess();
 			} else {
-				router.push('/admin/blog');
+				if (redirectToViewAll) {
+					router.push('/admin/blog');
+				}
 			}
 		},
 		onError: (error: Error) => {
@@ -179,6 +196,24 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 		}
 	};
 
+	const { setValue } = form;
+	useEffect(() => {
+		if (blog) {
+			setValue('title', blog.title);
+			setValue('slug', blog.slug || '');
+			setValue('excerpt', blog.excerpt || '');
+			setValue('content', blog.content);
+			setValue('featuredImage', blog.featuredImage || '');
+			setValue('status', blog.status || 'draft');
+			setValue('scheduledAt', blog.scheduledAt ? new Date(blog.scheduledAt).toISOString().slice(0, 16) : '');
+			setValue('categoryId', blog.categoryId || undefined);
+			setValue('seoTitle', blog.seoTitle || '');
+			setValue('seoDescription', blog.seoDescription || '');
+			setValue('seoTags', blog.seoTags || []);
+			setValue('seoImage', blog.seoImage || '');
+		}
+	}, [setValue, blog]);
+
 	return (
 		<div className="space-y-6">
 			<Form {...form}>
@@ -210,8 +245,8 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 							type="button"
 							onClick={() => setActiveTab('content')}
 							className={`px-4 py-2 font-medium ${activeTab === 'content'
-									? 'border-b-2 border-blue-500 text-blue-600'
-									: 'text-gray-500 hover:text-gray-700'
+								? 'border-b-2 border-blue-500 text-blue-600'
+								: 'text-gray-500 hover:text-gray-700'
 								}`}
 						>
 							Content
@@ -220,8 +255,8 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 							type="button"
 							onClick={() => setActiveTab('seo')}
 							className={`px-4 py-2 font-medium ${activeTab === 'seo'
-									? 'border-b-2 border-blue-500 text-blue-600'
-									: 'text-gray-500 hover:text-gray-700'
+								? 'border-b-2 border-blue-500 text-blue-600'
+								: 'text-gray-500 hover:text-gray-700'
 								}`}
 						>
 							SEO Settings
@@ -244,15 +279,15 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 												<FormItem>
 													<FormLabel>Title *</FormLabel>
 													<FormControl>
-													<Input
-														placeholder="Enter blog title..."
-														{...field}
-														onChange={(e) => {
-															field.onChange(e);
-															if (!isSlugManual) {
-																generateSlug(e.target.value);
-															}
-														}}
+														<Input
+															placeholder="Enter blog title..."
+															{...field}
+															onChange={(e) => {
+																field.onChange(e);
+																if (!isSlugManual) {
+																	generateSlug(e.target.value);
+																}
+															}}
 														/>
 													</FormControl>
 													<FormMessage />
@@ -357,7 +392,7 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 															onChange={({ html }) => field.onChange(html)}
 															showToolbar={true}
 															containerClasses="h-[500px]"
-															// className="min-h-[350px]"
+														// className="min-h-[350px]"
 														/>
 													</FormControl>
 													<FormMessage />
@@ -381,7 +416,17 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Status</FormLabel>
-													<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<Select
+														onValueChange={(value) => {
+															field.onChange(value);
+															setCurrentStatus(value);
+															// Clear scheduledAt if status is not scheduled
+															if (value !== 'scheduled') {
+																form.setValue('scheduledAt', '');
+															}
+														}}
+														value={field.value}
+													>
 														<FormControl>
 															<SelectTrigger>
 																<SelectValue placeholder="Select status" />
@@ -399,22 +444,32 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 											)}
 										/>
 
-										{form.getValues('status') === 'scheduled' && (
+										{currentStatus === 'scheduled' && (
 											<FormField
 												control={form.control}
 												name="scheduledAt"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Scheduled Date & Time</FormLabel>
-														<FormControl>
-															<Input
-																type="datetime-local"
-																{...field}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
+												render={({ field }) => {
+													// Set minimum date to current date/time
+													const now = new Date();
+													const minDateTime = now.toISOString().slice(0, 16);
+
+													return (
+														<FormItem>
+															<FormLabel>Scheduled Date & Time *</FormLabel>
+															<FormControl>
+																<Input
+																	type="datetime-local"
+																	min={minDateTime}
+																	{...field}
+																/>
+															</FormControl>
+															<FormDescription>
+																Select when this blog post should be published
+															</FormDescription>
+															<FormMessage />
+														</FormItem>
+													);
+												}}
 											/>
 										)}
 
@@ -425,8 +480,6 @@ export default function BlogForm({ blog, onSuccess, onCancel }: BlogFormProps) {
 												<FormItem>
 													<FormLabel>Category</FormLabel>
 													<Select
-														// onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
-														//   defaultValue={field.value?.toString()}
 														onValueChange={(value) => {
 															field.onChange(value === "none" ? undefined : parseInt(value));
 														}}

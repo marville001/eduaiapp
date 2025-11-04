@@ -16,11 +16,11 @@ import {
   ChevronDown,
   MessageSquare,
   Upload,
-  BarChart3,
   Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useUserStore } from '@/stores/user.store';
 
 const menuItems = [
   {
@@ -90,6 +90,8 @@ export default function AdminSidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = usePathname();
 
+  const user = useUserStore((state) => state.user);
+
   const toggleExpanded = (title: string) => {
     setExpandedItems(prev => 
       prev.includes(title) 
@@ -127,7 +129,7 @@ export default function AdminSidebar() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center px-6 py-4 border-b border-gray-200">
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
+            <div className="bg-linear-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
               <Brain className="h-6 w-6 text-white" />
             </div>
             <div className="ml-3">
@@ -217,12 +219,12 @@ export default function AdminSidebar() {
           {/* User Info */}
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <Shield className="h-4 w-4 text-white" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">admin@MasomoAI.com</p>
+                <p className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
             </div>
           </div>

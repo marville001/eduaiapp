@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -51,9 +51,10 @@ interface PageFormProps {
 	page?: Page;
 	onSuccess?: () => void;
 	onCancel?: () => void;
+	redirectToViewAll?: boolean;
 }
 
-export default function PageForm({ page, onSuccess, onCancel }: PageFormProps) {
+export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll }: PageFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
 	const [seoTagInput, setSeoTagInput] = useState('');
@@ -107,7 +108,9 @@ export default function PageForm({ page, onSuccess, onCancel }: PageFormProps) {
 			if (onSuccess) {
 				onSuccess();
 			} else {
-				router.push('/admin/pages');
+				if (redirectToViewAll) {
+					router.push('/admin/pages');
+				}
 			}
 		},
 		onError: (error: Error) => {
@@ -162,6 +165,22 @@ export default function PageForm({ page, onSuccess, onCancel }: PageFormProps) {
 			addSeoTag();
 		}
 	};
+
+	const { setValue } = form;
+	useEffect(() => {
+		if (page) {
+			setValue('title', page.title);
+			setValue('slug', page.slug || '');
+			setValue('excerpt', page.excerpt || '');
+			setValue('content', page.content);
+			setValue('featuredImage', page.featuredImage || '');
+			setValue('status', page.status || 'draft');
+			setValue('seoTitle', page.seoTitle || '');
+			setValue('seoDescription', page.seoDescription || '');
+			setValue('seoTags', page.seoTags || []);
+			setValue('seoImage', page.seoImage || '');
+		}
+	}, [setValue, page]);
 
 	return (
 		<div className="space-y-6">
@@ -363,7 +382,7 @@ export default function PageForm({ page, onSuccess, onCancel }: PageFormProps) {
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Status</FormLabel>
-													<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<Select onValueChange={field.onChange} value={field.value}>
 														<FormControl>
 															<SelectTrigger>
 																<SelectValue placeholder="Select status" />
