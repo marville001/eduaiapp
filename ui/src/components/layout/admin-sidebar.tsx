@@ -101,7 +101,7 @@ export default function AdminSidebar() {
   };
 
   const isActive = (href: string) => {
-    return pathname === href || (href !== "/admin" && pathname.startsWith(href));
+    return pathname === href ;// || (href !== "/admin" && pathname.startsWith(href));
   };
 
   const isExpanded = (title: string) => expandedItems.includes(title);

@@ -4,6 +4,7 @@ import Providers from '@/components/providers';
 
 import 'react-toastify/dist/ReactToastify.css';
 import "./globals.css";
+import { cn } from '@/lib/utils';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,8 +66,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans antialiased">
+    <html lang="en" className={cn('light', inter.variable)} suppressContentEditableWarning suppressHydrationWarning>
+      <body
+        suppressContentEditableWarning
+        suppressHydrationWarning
+        className="font-sans antialiased">
         <Providers>
           {children}
         </Providers>

@@ -2,8 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Menu, X, Calculator, Atom, Globe, Palette, Code, Brain, GraduationCap } from "lucide-react";
+import { ChevronDown, Menu, X, Calculator, Atom, Globe, Palette, Code, Brain, GraduationCap, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useUserStore } from '@/stores/user.store';
 
 const subjects = [
   {
@@ -74,6 +85,28 @@ const tools = [
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
+  const user = useUserStore(state => state.user);
+
+  console.log({ user });
+
+
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const firstInitial = user.firstName?.[0] || '';
+    const lastInitial = user.lastName?.[0] || '';
+    return (firstInitial + lastInitial).toUpperCase() || 'U';
+  };
+
+  const getUserName = () => {
+    if (!user) return 'User';
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+  };
+
+  const handleLogout = async () => {
+    await logout(false);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -197,17 +230,55 @@ export default function Navigation() {
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Log in</Link>
-            </Button>
-            <Button asChild className="bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-              <Link href="/upgrade">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Upgrade
-              </Link>
-            </Button>
-          </div>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.avatarUrl || undefined} alt={getUserName()} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{getUserName()}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={user?.isAdminUser ? "/admin" : "/app"} className="flex items-center cursor-pointer">
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" asChild>
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button asChild className="bg-primary hover:bg-primary/90">
+                <Link href="/upgrade">
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Upgrade
+                </Link>
+              </Button>
+            </div>
+          )}
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -244,7 +315,7 @@ export default function Navigation() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="space-y-2 pt-4">
                 <div className="font-medium text-gray-900 px-3 py-2">Tools</div>
                 {tools.map((tool) => (
@@ -267,21 +338,17 @@ export default function Navigation() {
                 >
                   Blog
                 </Link>
-                <Link
-                  href="/login"
-                  className="block px-3 py-2 text-gray-700 hover:text-gray-900"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Log in
-                </Link>
-                <div className="px-3 py-2">
-                  <Button asChild className="w-full bg-linear-to-r from-purple-600 to-blue-600">
-                    <Link href="/upgrade" onClick={() => setIsMobileMenuOpen(false)}>
-                      <GraduationCap className="h-4 w-4 mr-2" />
-                      Upgrade
+                {
+                  user ? null :
+                    <Link
+                      href="/login"
+                      className="block px-3 py-2 text-gray-700 hover:text-gray-900"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Log in
                     </Link>
-                  </Button>
-                </div>
+                }
+
               </div>
             </div>
           </div>

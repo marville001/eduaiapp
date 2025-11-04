@@ -13,7 +13,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 interface AuthContextType {
 	user: User | null;
 	login: (email: string, password: string, redirect?: boolean) => Promise<{ success: boolean; error?: string; }>;
-	logout: () => Promise<void>;
+	logout: (redirect?: boolean) => Promise<void>;
 	loading: boolean;
 	isAuthenticated: boolean;
 }
@@ -56,11 +56,9 @@ function AuthContextProvider({ children }: { children: React.ReactNode; }) {
 
 					const userData = await userApi.getCurrentUser();
 					if (userData.id) setUser(userData);
-					else {
-						logout();
-					}
+					else logout(false);
 				} catch (error: any) {
-					logout();
+					logout(false);
 				} finally {
 					setUserLoading(false);
 				}
@@ -106,11 +104,11 @@ function AuthContextProvider({ children }: { children: React.ReactNode; }) {
 		}
 	};
 
-	const logout = async () => {
+	const logout = async (redirect= true) => {
 		// Clear user store before signing out
 		clearUser();
 		sessionStorage.removeItem('access_token');
-		await signOut({ callbackUrl: '/login' });
+		await signOut({ callbackUrl: '/login', redirect });
 	};
 
 	const value = {

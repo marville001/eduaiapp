@@ -4,32 +4,50 @@ import api from './index';
 export interface Subject {
   id: number;
   subjectId: string;
-  studyLevelId: number;
   name: string;
   slug: string;
-  description: string;
+  description?: string;
   isActive: boolean;
+  parentSubjectId?: number;
+  aiPrompt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoTags?: string[];
+  seoImage?: string;
   createdAt: string;
   updatedAt: string;
+  subSubjects?: Subject[];
+  parentSubject?: Subject;
 }
 
 export interface CreateSubjectDto {
-  studyLevelId: number;
   name: string;
+  slug?: string;
   description?: string;
+  aiPrompt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoTags?: string[];
+  seoImage?: string;
 }
 
 export interface UpdateSubjectDto {
   name?: string;
+  slug?: string;
   description?: string;
   isActive?: boolean;
+  aiPrompt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoTags?: string[];
+  seoImage?: string;
 }
 
 // API endpoints
 export const subjectApi = {
-  // Get all subjects with optional study level filter
-  getAll: async (params?: { studyLevelId?: number }): Promise<Subject[]> => {
-    const response = await api.get('/subjects', { params });
+  // Get all subjects
+  getAll: async (): Promise<Subject[]> => {
+    const response = await api.get('/subjects');
     return response.data?.data;
   },
 
