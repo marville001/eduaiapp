@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function NotFound() {
   return (
     <div className="flex items-center justify-center min-h-full py-12">
-      <div className="max-w-2xl w-full text-center">
+      <div className="max-w-4xl w-full text-center">
         {/* 404 Illustration */}
         <div className="relative mb-8">
           <div className="text-6xl md:text-7xl font-bold text-gray-200 select-none">
@@ -24,10 +24,10 @@ export default function NotFound() {
         {/* Error Message */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            Admin Page Not Found
+             Page Not Found
           </h1>
           <p className="text-gray-600 mb-2">
-            The admin page you&apos;re looking for doesn&apos;t exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
           </p>
           <p className="text-sm text-gray-500">
             This could be due to a broken link, mistyped URL, or insufficient permissions.
@@ -88,75 +88,12 @@ export default function NotFound() {
           </Card>
         </div>
 
-        {/* Common Admin Links */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <h3 className="text-base font-semibold text-gray-900 mb-3">
-            Popular Admin Pages
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <Link 
-              href="/admin"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link 
-              href="/admin/users"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Users
-            </Link>
-            <Link 
-              href="/admin/questions"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Questions
-            </Link>
-            <Link 
-              href="/admin/blog"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Blog Posts
-            </Link>
-            <Link 
-              href="/admin/payments"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Payments
-            </Link>
-            <Link 
-              href="/admin/analytics"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Analytics
-            </Link>
-            <Link 
-              href="/admin/settings"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Settings
-            </Link>
-            <Link 
-              href="/admin/reports"
-              className="text-purple-600 hover:text-purple-700 hover:underline transition-colors"
-            >
-              Reports
-            </Link>
-          </div>
-        </div>
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/admin">
             <Button variant="outline" className="flex items-center">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
-          </Link>
-          <Link href="/admin">
-            <Button className="flex items-center">
-              <Home className="h-4 w-4 mr-2" />
-              Admin Dashboard
+              Go Home
             </Button>
           </Link>
         </div>

@@ -60,7 +60,6 @@ export class SubjectService {
   }
 
   async findAllHierarchical(): Promise<Subject[]> {
-    // Get all main subjects with their children using query builder
     return this.subjectRepository.createQueryBuilder('subject')
       .leftJoinAndSelect('subject.subSubjects', 'subSubjects')
       .leftJoinAndSelect('subSubjects.subSubjects', 'subSubSubjects')

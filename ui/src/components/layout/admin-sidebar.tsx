@@ -70,16 +70,11 @@ const menuItems = [
     href: "/admin/subscriptions",
     icon: CreditCard,
   },
-  {
-    title: "Analytics",
-    href: "/admin/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "AI Settings",
-    href: "/admin/ai",
-    icon: Brain,
-  },
+  // {
+  //   title: "Analytics",
+  //   href: "/admin/analytics",
+  //   icon: BarChart3,
+  // },
   {
     title: "Settings",
     href: "/admin/settings",
