@@ -13,6 +13,8 @@ const api = axios.create({
 // Add request interceptor to include auth token
 api.interceptors.request.use(
   (config) => {
+    if (typeof window === 'undefined') return config;
+    
     // Get token from session storage or wherever you store it
     const token = sessionStorage.getItem('access_token');
     if (token) {

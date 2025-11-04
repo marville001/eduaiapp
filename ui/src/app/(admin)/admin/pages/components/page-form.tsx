@@ -82,9 +82,20 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 	// Create mutation
 	const createMutation = useMutation({
 		mutationFn: (data: CreatePageDto) => pageApi.create(data),
-		onSuccess: () => {
+		onSuccess: async (newPage) => {
 			queryClient.invalidateQueries({ queryKey: ['pages'] });
 			toast.success('Page created successfully');
+			
+			// Trigger revalidation for the new page if it's published
+			if (newPage.status === 'published' && newPage.isActive) {
+				try {
+					await fetch(`/api/revalidate/${newPage.slug}`, { method: 'GET' });
+					console.log(`Revalidated page: /${newPage.slug}`);
+				} catch (error) {
+					console.error('Failed to revalidate page:', error);
+				}
+			}
+			
 			if (onSuccess) {
 				onSuccess();
 			} else {
@@ -101,10 +112,21 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 	const updateMutation = useMutation({
 		mutationFn: ({ id, data }: { id: string; data: UpdatePageDto; }) =>
 			pageApi.update(id, data),
-		onSuccess: () => {
+		onSuccess: async (updatedPage) => {
 			queryClient.invalidateQueries({ queryKey: ['pages'] });
 			queryClient.invalidateQueries({ queryKey: ['page', page?.id] });
 			toast.success('Page updated successfully');
+			
+			// Trigger revalidation for the updated page if it's published
+			if (updatedPage.status === 'published' && updatedPage.isActive) {
+				try {
+					await fetch(`/api/revalidate/${updatedPage.slug}`, { method: 'GET' });
+					console.log(`Revalidated page: /${updatedPage.slug}`);
+				} catch (error) {
+					console.error('Failed to revalidate page:', error);
+				}
+			}
+			
 			if (onSuccess) {
 				onSuccess();
 			} else {

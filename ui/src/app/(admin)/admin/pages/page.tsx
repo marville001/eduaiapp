@@ -39,9 +39,20 @@ export default function PagesPage() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => pageApi.delete(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['pages'] });
       toast.success('Page deleted successfully');
+      
+      // Trigger revalidation for the deleted page if it was published
+      if (deletingPage && deletingPage.status === 'published' && deletingPage.isActive) {
+        try {
+          await fetch(`/api/revalidate/${deletingPage.slug}`, { method: 'GET' });
+          console.log(`Revalidated page after deletion: /${deletingPage.slug}`);
+        } catch (error) {
+          console.error('Failed to revalidate page after deletion:', error);
+        }
+      }
+      
       setDeletingPage(null);
     },
     onError: (error: Error) => {
@@ -53,9 +64,19 @@ export default function PagesPage() {
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       pageApi.update(id, { isActive }),
-    onSuccess: () => {
+    onSuccess: async (updatedPage) => {
       queryClient.invalidateQueries({ queryKey: ['pages'] });
       toast.success('Page status updated successfully');
+      
+      // Trigger revalidation when page status changes
+      if (updatedPage.status === 'published') {
+        try {
+          await fetch(`/api/revalidate/${updatedPage.slug}`, { method: 'GET' });
+          console.log(`Revalidated page after status change: /${updatedPage.slug}`);
+        } catch (error) {
+          console.error('Failed to revalidate page after status change:', error);
+        }
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update page status');

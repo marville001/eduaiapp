@@ -8,48 +8,50 @@ import { UpdatePageDto } from './dto/update-page.dto';
 import { PageService } from './page.service';
 
 @Controller('pages')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class PageController {
-  constructor(private readonly pageService: PageService) {}
+	constructor(private readonly pageService: PageService) { }
 
-  @Post()
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  create(@Body() createPageDto: CreatePageDto) {
-    return this.pageService.create(createPageDto);
-  }
+	@Post()
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+	create(@Body() createPageDto: CreatePageDto) {
+		return this.pageService.create(createPageDto);
+	}
 
-  @Get()
-  findAll(@Query('published') published?: string) {
-    if (published === 'true') {
-      return this.pageService.findPublished();
-    }
-    return this.pageService.findAll();
-  }
+	@Get()
+	findAll(@Query('published') published?: string) {
+		if (published === 'true') {
+			return this.pageService.findPublished();
+		}
+		return this.pageService.findAll();
+	}
 
-  @Get('slug/:slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.pageService.findBySlug(slug);
-  }
+	@Get('slug/:slug')
+	findBySlug(@Param('slug') slug: string) {
+		return this.pageService.findBySlug(slug);
+	}
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.pageService.findOne(id);
-  }
+	@Get(':id')
+	findOne(@Param('id') id: number) {
+		return this.pageService.findOne(id);
+	}
 
-  @Patch(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  update(@Param('id') id: number, @Body() updatePageDto: UpdatePageDto) {
-    return this.pageService.update(id, updatePageDto);
-  }
+	@Patch(':id')
+	@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	update(@Param('id') id: number, @Body() updatePageDto: UpdatePageDto) {
+		return this.pageService.update(id, updatePageDto);
+	}
 
-  @Delete(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: number) {
-    return this.pageService.remove(id);
-  }
+	@Delete(':id')
+	@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	remove(@Param('id') id: number) {
+		return this.pageService.remove(id);
+	}
 
-  @Patch(':id/views')
-  incrementViews(@Param('id') id: number) {
-    return this.pageService.incrementViews(id);
-  }
+	@Patch(':id/views')
+	incrementViews(@Param('id') id: number) {
+		return this.pageService.incrementViews(id);
+	}
 }
