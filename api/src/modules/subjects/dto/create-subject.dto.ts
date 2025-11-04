@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, MaxLength, IsArray, IsNumber } from 'class-validator';
 
 export class CreateSubjectDto {
   @IsString()
@@ -14,6 +14,10 @@ export class CreateSubjectDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsNumber()
+  @IsOptional()
+  parentSubjectId?: number;
 
   @IsString()
   @IsOptional()

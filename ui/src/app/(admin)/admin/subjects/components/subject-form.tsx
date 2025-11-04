@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RefreshCw } from "lucide-react";
@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { subjectApi, Subject, CreateSubjectDto, UpdateSubjectDto } from "@/lib/api/subject.api";
 
@@ -24,6 +31,7 @@ const formSchema = z.object({
   name: z.string().min(1, "Subject name is required").max(255, "Name too long"),
   slug: z.string().optional(),
   description: z.string().optional(),
+  parentSubjectId: z.number().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +46,12 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSlugManual, setIsSlugManual] = useState(false);
   const queryClient = useQueryClient();
+
+  // Get all main subjects for parent selection
+  const { data: mainSubjects = [] } = useQuery({
+    queryKey: ['subjects', 'main'],
+    queryFn: () => subjectApi.getAll(0), // Get only main subjects (parentId = 0)
+  });
 
   // Function to generate slug from name
   const generateSlug = useCallback((name: string): string => {
@@ -55,6 +69,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
       name: subject?.name || "",
       slug: subject?.slug || "",
       description: subject?.description || "",
+      parentSubjectId: subject?.parentSubjectId || undefined,
     },
   });
 
@@ -114,6 +129,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
             name: data.name,
             slug: data.slug || generateSlug(data.name),
             description: data.description,
+            parentSubjectId: data.parentSubjectId,
           },
         });
       } else {
@@ -122,6 +138,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
           name: data.name,
           slug: data.slug || generateSlug(data.name),
           description: data.description || undefined,
+          parentSubjectId: data.parentSubjectId,
         });
       }
     } catch {
@@ -194,6 +211,37 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
               {/* <p className="text-xs text-gray-500 mt-1">
                 Leave empty to auto-generate from subject name
               </p> */}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parentSubjectId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parent Subject</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
+                value={field.value?.toString() || "none"}
+              >
+                <FormControl>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder="Select parent subject (optional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">None (Main Subject)</SelectItem>
+                  {mainSubjects
+                    .filter(s =>  s.id !== subject?.id && !s.parentSubjectId) // Don't allow self-selection
+                    .map((mainSubject) => (
+                      <SelectItem key={mainSubject.id} value={mainSubject.id.toString()}>
+                        {mainSubject.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

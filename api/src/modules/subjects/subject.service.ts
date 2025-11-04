@@ -40,12 +40,35 @@ export class SubjectService {
   }
 
   async findAll(parentId?: number): Promise<Subject[]> {
-    const whereClause = parentId ? { parentSubjectId: parentId } : {};
-    return this.subjectRepository.find({
-      where: whereClause,
-      order: { createdAt: 'ASC' },
-      relations: ['parentSubject']
-    });
+    const queryBuilder = this.subjectRepository.createQueryBuilder('subject')
+      .leftJoinAndSelect('subject.parentSubject', 'parentSubject')
+      .leftJoinAndSelect('subject.subSubjects', 'subSubjects')
+      .orderBy('subject.createdAt', 'ASC')
+      .addOrderBy('subSubjects.createdAt', 'ASC');
+
+    if (parentId !== undefined) {
+      if (parentId === 0) {
+        // Get only main subjects (no parent)
+        queryBuilder.where('subject.parentSubjectId IS NULL');
+      } else {
+        // Get children of specific parent
+        queryBuilder.where('subject.parentSubjectId = :parentId', { parentId });
+      }
+    }
+
+    return queryBuilder.getMany();
+  }
+
+  async findAllHierarchical(): Promise<Subject[]> {
+    // Get all main subjects with their children using query builder
+    return this.subjectRepository.createQueryBuilder('subject')
+      .leftJoinAndSelect('subject.subSubjects', 'subSubjects')
+      .leftJoinAndSelect('subSubjects.subSubjects', 'subSubSubjects')
+      .where('subject.parentSubjectId IS NULL')
+      .orderBy('subject.createdAt', 'ASC')
+      .addOrderBy('subSubjects.createdAt', 'ASC')
+      .addOrderBy('subSubSubjects.createdAt', 'ASC')
+      .getMany();
   }
 
   async findOne(id: number): Promise<Subject> {

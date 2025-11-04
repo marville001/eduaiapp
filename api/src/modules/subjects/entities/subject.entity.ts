@@ -19,7 +19,7 @@ export class Subject extends AbstractEntity<Subject> {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'parent_subject_id' })
   parentSubjectId?: number;
 
   @Column({ type: 'text', nullable: true })

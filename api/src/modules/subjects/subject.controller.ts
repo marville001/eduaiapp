@@ -19,8 +19,13 @@ export class SubjectController {
   }
 
   @Get()
-  findAll(@Query('studyLevelId') studyLevelId?: number) {
-    return this.subjectService.findAll(studyLevelId);
+  findAll(@Query('parentId') parentId?: number) {
+    return this.subjectService.findAll(parentId);
+  }
+
+  @Get('hierarchical')
+  findAllHierarchical() {
+    return this.subjectService.findAllHierarchical();
   }
 
   @Get('slug/:slug')

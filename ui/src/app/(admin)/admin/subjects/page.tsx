@@ -2,18 +2,10 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye, EyeOff, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Plus, Search, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +18,7 @@ import { subjectApi, Subject } from "@/lib/api/subject.api";
 import SubjectForm from "./components/subject-form";
 import DeleteConfirmDialog from "./components/delete-confirm-dialog";
 import ApiStatus, { SubjectsListSkeleton } from "./components/api-status";
+import { HierarchicalSubjectList } from "./components/hierarchical-subject-list";
 
 export default function SubjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,18 +28,31 @@ export default function SubjectsPage() {
   
   const queryClient = useQueryClient();
 
-  // Fetch subjects
+  // Fetch hierarchical subjects
   const { data: subjects = [], isLoading, error } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => subjectApi.getAll(),
+    queryKey: ['subjects', 'hierarchical'],
+    queryFn: () => subjectApi.getHierarchical(),
   });
+
+  // Count total subjects recursively
+  const countSubjects = (subjects: Subject[]): number => {
+    let count = subjects.length;
+    subjects.forEach(subject => {
+      if (subject.subSubjects && subject.subSubjects.length > 0) {
+        count += countSubjects(subject.subSubjects);
+      }
+    });
+    return count;
+  };
+
+  const totalSubjects = countSubjects(subjects);
 
   // Toggle subject status mutation
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       subjectApi.update(id, { isActive }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      queryClient.invalidateQueries({ queryKey: ['subjects', 'hierarchical'] });
       toast.success('Subject status updated successfully');
     },
     onError: (error: Error) => {
@@ -58,7 +64,7 @@ export default function SubjectsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => subjectApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      queryClient.invalidateQueries({ queryKey: ['subjects', 'hierarchical'] });
       toast.success('Subject deleted successfully');
       setDeletingSubject(null);
     },
@@ -67,11 +73,19 @@ export default function SubjectsPage() {
     },
   });
 
-  // Filter subjects based on search query
-  const filteredSubjects = subjects.filter(subject =>
-    subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    subject.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Count active subjects recursively
+  const countActiveSubjects = (subjects: Subject[]): number => {
+    let activeCount = 0;
+    subjects.forEach(subject => {
+      if (subject.isActive) activeCount++;
+      if (subject.subSubjects && subject.subSubjects.length > 0) {
+        activeCount += countActiveSubjects(subject.subSubjects);
+      }
+    });
+    return activeCount;
+  };
+
+  const totalActiveSubjects = countActiveSubjects(subjects);
 
   const handleEdit = (subject: Subject) => {
     setEditingSubject(subject);
@@ -144,7 +158,7 @@ export default function SubjectsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Subjects</p>
-                <p className="text-2xl font-bold text-gray-900">{subjects.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalSubjects}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Eye className="h-6 w-6 text-blue-600" />
@@ -157,9 +171,9 @@ export default function SubjectsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Subjects</p>
+                <p className="text-sm font-medium text-gray-600">Main Subjects</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {subjects.filter(s => s.isActive).length}
+                  {subjects.length}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -173,13 +187,13 @@ export default function SubjectsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Inactive Subjects</p>
-                <p className="text-2xl font-bold text-red-900">
-                  {subjects.filter(s => !s.isActive).length}
+                <p className="text-sm font-medium text-gray-600">Sub Subjects</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {totalSubjects - subjects.length}
                 </p>
               </div>
-              <div className="p-3 bg-red-100 rounded-lg">
-                <EyeOff className="h-6 w-6 text-red-600" />
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <EyeOff className="h-6 w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -189,14 +203,9 @@ export default function SubjectsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">This Month</p>
+                <p className="text-sm font-medium text-gray-600">Active Subjects</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {subjects.filter(s => {
-                    const createdAt = new Date(s.createdAt);
-                    const now = new Date();
-                    return createdAt.getMonth() === now.getMonth() && 
-                           createdAt.getFullYear() === now.getFullYear();
-                  }).length}
+                  {totalActiveSubjects}
                 </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
@@ -227,105 +236,30 @@ export default function SubjectsPage() {
       {/* Subjects List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Subjects ({filteredSubjects.length})</CardTitle>
+          <CardTitle>All Subjects ({totalSubjects})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-6">
               <SubjectsListSkeleton />
             </div>
-          ) : filteredSubjects.length === 0 ? (
+          ) : subjects.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">
-                {searchQuery ? 'No subjects found matching your search.' : 'No subjects available.'}
-              </p>
-              {!searchQuery && (
-                <Button onClick={() => setIsFormOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Subject
-                </Button>
-              )}
+              <p className="text-gray-500 mb-4">No subjects available.</p>
+              <Button onClick={() => setIsFormOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Subject
+              </Button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredSubjects.map((subject) => (
-                <div key={subject.id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
-                          {subject.name}
-                        </h3>
-                        <Badge
-                          variant={subject.isActive ? "default" : "secondary"}
-                          className={subject.isActive ? "bg-green-100 text-green-800" : ""}
-                        >
-                          {subject.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                      {subject.description && (
-                        <p className="text-gray-600 mt-1 line-clamp-2">
-                          {subject.description}
-                        </p>
-                      )}
-                      <div className="flex items-center text-sm text-gray-500 mt-2 space-x-4">
-                        <span>Slug: {subject.slug}</span>
-                        <span>Created: {new Date(subject.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleStatus(subject)}
-                        disabled={toggleStatusMutation.isPending}
-                        className="text-xs"
-                      >
-                        {subject.isActive ? (
-                          <>
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-3 w-3 mr-1" />
-                            Activate
-                          </>
-                        )}
-                      </Button>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/subjects/${subject.id}`}>
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              View Details
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEdit(subject)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Quick Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(subject)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <HierarchicalSubjectList
+              subjects={subjects}
+              searchQuery={searchQuery}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
+              isToggling={toggleStatusMutation.isPending}
+            />
           )}
         </CardContent>
       </Card>

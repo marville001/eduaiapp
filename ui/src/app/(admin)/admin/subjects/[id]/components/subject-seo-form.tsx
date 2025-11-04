@@ -86,23 +86,6 @@ export default function SubjectSEOForm({
     handleFieldChange();
   };
 
-  const generateSEODefaults = () => {
-    const title = `${subject.name} - AI Tutoring Platform`;
-    const description = `Get personalized AI tutoring for ${subject.name}. Ask questions, get step-by-step explanations, and improve your understanding with our intelligent tutoring system.`;
-    const tags = [
-      subject.name.toLowerCase(),
-      'ai tutoring',
-      'education',
-      'learning',
-      'homework help'
-    ];
-
-    form.setValue('seoTitle', title);
-    form.setValue('seoDescription', description);
-    form.setValue('seoTags', tags);
-    handleFieldChange();
-  };
-
   if (!isEditing) {
     return (
       <div className="space-y-6">
@@ -173,24 +156,6 @@ export default function SubjectSEOForm({
 
   return (
     <div className="space-y-6">
-      {/* Quick Setup */}
-      <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center space-x-2">
-          <Globe className="h-5 w-5 text-blue-600" />
-          <span className="text-sm text-blue-800">
-            Need help getting started?
-          </span>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={generateSEODefaults}
-        >
-          Generate SEO Defaults
-        </Button>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

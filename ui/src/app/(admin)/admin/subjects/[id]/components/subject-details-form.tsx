@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RefreshCw } from "lucide-react";
@@ -17,12 +18,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Subject } from "@/lib/api/subject.api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Subject, subjectApi } from "@/lib/api/subject.api";
 
 const formSchema = z.object({
   name: z.string().min(1, "Subject name is required").max(255, "Name too long"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
+  parentSubjectId: z.number().optional(),
   isActive: z.boolean(),
 });
 
@@ -43,12 +52,19 @@ export default function SubjectDetailsForm({
 }: SubjectDetailsFormProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Get all main subjects for parent selection
+  const { data: mainSubjects = [] } = useQuery({
+    queryKey: ['subjects', 'main'],
+    queryFn: () => subjectApi.getAll(0), // Get only main subjects (parentId = 0)
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: subject.name,
       slug: subject.slug,
       description: subject.description || "",
+      parentSubjectId: subject.parentSubjectId || undefined,
       isActive: subject.isActive,
     },
   });
@@ -67,6 +83,7 @@ export default function SubjectDetailsForm({
       name: data.name,
       slug: data.slug,
       description: data.description,
+      parentSubjectId: data.parentSubjectId,
       isActive: data.isActive,
     });
     setHasUnsavedChanges(false);
@@ -99,6 +116,28 @@ export default function SubjectDetailsForm({
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Parent Subject
+            </label>
+            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
+              {subject.parentSubject ? subject.parentSubject.name : "None (Main Subject)"}
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <label className="text-sm font-medium text-gray-700">Status:</label>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              subject.isActive 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {subject.isActive ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Description
@@ -106,17 +145,6 @@ export default function SubjectDetailsForm({
           <p className="text-gray-900 bg-gray-50 p-3 rounded-md min-h-[100px]">
             {subject.description || "No description provided"}
           </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <label className="text-sm font-medium text-gray-700">Status:</label>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            subject.isActive 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {subject.isActive ? 'Active' : 'Inactive'}
-          </span>
         </div>
       </div>
     );
@@ -185,6 +213,40 @@ export default function SubjectDetailsForm({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="parentSubjectId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parent Subject</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value === "none" ? undefined : parseInt(value));
+                  handleFieldChange();
+                }}
+                value={field.value?.toString() || "none"}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select parent subject (optional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">None (Main Subject)</SelectItem>
+                  {mainSubjects
+                    .filter(s => s.id !== subject.id) // Don't allow self-selection
+                    .map((mainSubject) => (
+                      <SelectItem key={mainSubject.id} value={mainSubject.id.toString()}>
+                        {mainSubject.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

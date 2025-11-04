@@ -24,6 +24,7 @@ export interface CreateSubjectDto {
   name: string;
   slug?: string;
   description?: string;
+  parentSubjectId?: number;
   aiPrompt?: string;
   seoTitle?: string;
   seoDescription?: string;
@@ -35,6 +36,7 @@ export interface UpdateSubjectDto {
   name?: string;
   slug?: string;
   description?: string;
+  parentSubjectId?: number;
   isActive?: boolean;
   aiPrompt?: string;
   seoTitle?: string;
@@ -46,8 +48,15 @@ export interface UpdateSubjectDto {
 // API endpoints
 export const subjectApi = {
   // Get all subjects
-  getAll: async (): Promise<Subject[]> => {
-    const response = await api.get('/subjects');
+  getAll: async (parentId?: number): Promise<Subject[]> => {
+    const params = parentId !== undefined ? `?parentId=${parentId}` : '';
+    const response = await api.get(`/subjects${params}`);
+    return response.data?.data;
+  },
+
+  // Get hierarchical subjects (main subjects with children)
+  getHierarchical: async (): Promise<Subject[]> => {
+    const response = await api.get('/subjects/hierarchical');
     return response.data?.data;
   },
 
