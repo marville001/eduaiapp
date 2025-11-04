@@ -66,7 +66,7 @@ export default function SubjectAIPromptForm({
 		} catch {
 			toast.error('Failed to copy');
 		}
-	};	
+	};
 
 	if (!isEditing) {
 		return (
@@ -125,16 +125,14 @@ export default function SubjectAIPromptForm({
 							<FormItem>
 								<FormLabel>AI Tutoring Prompt</FormLabel>
 								<FormControl>
-									<div className="border rounded-md min-h-[120px] w-full overflow-x-auto">
-										<TiptapEditor
-											value={field.value || ""}
-											onChange={(value) => {
-												field.onChange(value.html);
-												handleFieldChange();
-											}}
-											showToolbar
-										/>
-									</div>
+									<TiptapEditor
+										value={field.value || ""}
+										onChange={(value) => {
+											field.onChange(value.html);
+											handleFieldChange();
+										}}
+										showToolbar
+									/>
 								</FormControl>
 								<FormDescription>
 									This prompt will guide the AI when helping students with {subject.name} questions.

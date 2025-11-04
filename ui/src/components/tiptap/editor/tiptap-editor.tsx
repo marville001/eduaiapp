@@ -12,7 +12,7 @@ import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Typography } from "@tiptap/extension-typography";
-import { Selection } from "@tiptap/extensions";
+import { Placeholder, Selection } from "@tiptap/extensions";
 import { StarterKit } from "@tiptap/starter-kit";
 
 // --- UI Primitives ---
@@ -177,7 +177,7 @@ const MobileToolbarContent = ({
 
 interface Props {
   value?: string;
-  onChange?: (value: {html: string, text: string}) => void;
+  onChange?: (value: { html: string, text: string; }) => void;
   showToolbar?: boolean;
   className?: string,
   containerClasses?: string,
@@ -191,9 +191,6 @@ export function TiptapEditor({ value, onChange, showToolbar, className, containe
     "main"
   );
   const toolbarRef = useRef<HTMLDivElement>(null);
-
-  console.log({value});
-  
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -232,14 +229,17 @@ export function TiptapEditor({ value, onChange, showToolbar, className, containe
         upload: handleImageUpload,
         onError: (error) => console.error("Upload failed:", error),
       }),
+      Placeholder.configure({
+        placeholder: "Start typing here...",
+      }),
     ],
     content: `<p>${value || ""}</p> `,
-    
+
     onUpdate({ editor }) {
       const html = editor.getHTML();
-      const text = editor.getText();      
+      const text = editor.getText();
       if (onChange) {
-        onChange({html, text});
+        onChange({ html, text });
       }
     },
   });
@@ -267,44 +267,46 @@ export function TiptapEditor({ value, onChange, showToolbar, className, containe
   }, [isMobile, mobileView]);
 
   return (
-    <div className={cn("simple-editor-wrapper border border-border rounded-lg", containerClasses)}>
-      <EditorContext.Provider value={{ editor }}>
-        {
-          showToolbar ? (
-            <Toolbar
-              ref={toolbarRef}
-              style={{
-                ...(isMobile
-                  ? {
-                    bottom: `calc(100% - ${height - rect.y}px)`,
-                  }
-                  : {}),
-              }}
-              className='justify-start'
-            >
-              {mobileView === "main" ? (
-                <MainToolbarContent
-                  onHighlighterClick={() => setMobileView("highlighter")}
-                  onLinkClick={() => setMobileView("link")}
-                  isMobile={isMobile}
-                />
-              ) : (
-                <MobileToolbarContent
-                  type={mobileView === "highlighter" ? "highlighter" : "link"}
-                  onBack={() => setMobileView("main")}
-                />
-              )}
-            </Toolbar>
-          ) : null
-        }
+    <div className={cn("border rounded-md h-[300px] w-full overflow-x-auto", containerClasses)}>
+      <div className="simple-editor-wrapper border border-border rounded-lg">
+        <EditorContext.Provider value={{ editor }}>
+          {
+            showToolbar ? (
+              <Toolbar
+                ref={toolbarRef}
+                style={{
+                  ...(isMobile
+                    ? {
+                      bottom: `calc(100% - ${height - rect.y}px)`,
+                    }
+                    : {}),
+                }}
+                className='justify-start'
+              >
+                {mobileView === "main" ? (
+                  <MainToolbarContent
+                    onHighlighterClick={() => setMobileView("highlighter")}
+                    onLinkClick={() => setMobileView("link")}
+                    isMobile={isMobile}
+                  />
+                ) : (
+                  <MobileToolbarContent
+                    type={mobileView === "highlighter" ? "highlighter" : "link"}
+                    onBack={() => setMobileView("main")}
+                  />
+                )}
+              </Toolbar>
+            ) : null
+          }
 
 
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className={cn("simple-editor-content p-5", className)}
-        />
-      </EditorContext.Provider>
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className={cn("simple-editor-content p-5", className)}
+          />
+        </EditorContext.Provider>
+      </div>
     </div>
   );
 }

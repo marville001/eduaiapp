@@ -44,11 +44,10 @@ const menuItems = [
     title: "Subjects",
     href: "/admin/subjects",
     icon: BookOpen,
-    children: [
-      { title: "All Subjects", href: "/admin/subjects" },
-      { title: "Add Subject", href: "/admin/subjects/new" },
-      { title: "AI Prompts", href: "/admin/subjects/prompts" },
-    ],
+    // children: [
+    //   { title: "All Subjects", href: "/admin/subjects" },
+    //   { title: "Add Subject", href: "/admin/subjects/new" },
+    // ],
   },
   {
     title: "Blog",
