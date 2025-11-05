@@ -49,13 +49,6 @@ import { PageModule } from './modules/pages/page.module';
 				MAIL_USER: Joi.string().required(),
 				MAIL_PASSWORD: Joi.string().required(),
 				MAIL_FROM: Joi.string().optional(),
-
-				MPESA_BUSINESS_SHORT_CODE: Joi.number().required(),
-				MPESA_CONSUMER_KEY: Joi.string().required(),
-				MPESA_CONSUMER_SECRET: Joi.string().required(),
-				MPESA_PASSKEY: Joi.string().required(),
-				MPESA_ENVIRONMENT: Joi.string().optional(),
-				MPESA_CALLBACK_URL: Joi.string().optional(),
 				
 				FRONTEND_URL: Joi.string().optional(),
 
