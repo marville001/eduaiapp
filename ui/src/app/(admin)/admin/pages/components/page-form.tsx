@@ -86,7 +86,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 		onSuccess: async (newPage) => {
 			queryClient.invalidateQueries({ queryKey: ['pages'] });
 			toast.success('Page created successfully');
-			
+
 			// Trigger revalidation for the new page if it's published
 			if (newPage.status === 'published' && newPage.isActive) {
 				try {
@@ -96,7 +96,9 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 					console.error('Failed to revalidate page:', error);
 				}
 			}
-			
+
+			form.reset();
+			setIsSubmitting(false);
 			if (onSuccess) {
 				onSuccess();
 			} else {
@@ -117,17 +119,15 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			queryClient.invalidateQueries({ queryKey: ['pages'] });
 			queryClient.invalidateQueries({ queryKey: ['page', page?.id] });
 			toast.success('Page updated successfully');
-			
+
 			// Trigger revalidation for the updated page if it's published
-			if (updatedPage.status === 'published' && updatedPage.isActive) {
-				try {
-					await fetch(`/api/revalidate/${updatedPage.slug}`, { method: 'GET' });
-					console.log(`Revalidated page: /${updatedPage.slug}`);
-				} catch (error) {
-					console.error('Failed to revalidate page:', error);
-				}
+			try {
+				await fetch(`/api/revalidate/${updatedPage.slug}`, { method: 'GET' });
+				console.log(`Revalidated page: /${updatedPage.slug}`);
+			} catch (error) {
+				console.error('Failed to revalidate page:', error);
 			}
-			
+			setIsSubmitting(false);
 			if (onSuccess) {
 				onSuccess();
 			} else {
