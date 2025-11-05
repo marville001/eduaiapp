@@ -60,6 +60,8 @@ export class S3Service {
 			this.logger.log(`File uploaded successfully: ${key}`);
 			return { key, url };
 		} catch (error) {
+			console.log(error);
+			
 			this.logger.error(`Failed to upload file: ${error.message}`);
 			throw error;
 		}

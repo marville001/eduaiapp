@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
+import { ImageUpload } from "@/components/forms/image-upload";
 import { pageApi, Page, CreatePageDto, UpdatePageDto } from "@/lib/api/page.api";
 
 const formSchema = z.object({
@@ -352,11 +353,13 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 											name="featuredImage"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Featured Image URL</FormLabel>
 													<FormControl>
-														<Input
-															placeholder="https://example.com/image.jpg"
-															{...field}
+														<ImageUpload
+															value={field.value}
+															onChange={field.onChange}
+															label="Featured Image"
+															description="Main image that appears with your page"
+															placeholder="https://example.com/featured-image.jpg"
 														/>
 													</FormControl>
 													<FormMessage />
@@ -543,16 +546,15 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 										name="seoImage"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>SEO Image URL</FormLabel>
 												<FormControl>
-													<Input
+													<ImageUpload
+														value={field.value}
+														onChange={field.onChange}
+														label="SEO Image"
+														description="Image that appears when shared on social media (1200x630px recommended)"
 														placeholder="https://example.com/seo-image.jpg"
-														{...field}
 													/>
 												</FormControl>
-												<FormDescription>
-													Image that appears when shared on social media
-												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}

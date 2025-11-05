@@ -55,7 +55,6 @@ export class StorageController {
 	}
 
 	@Post("upload")
-	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(FileInterceptor('file'))
 	@ApiConsumes('multipart/form-data')
 	@ApiOperation({ summary: 'Upload a new paper' })
