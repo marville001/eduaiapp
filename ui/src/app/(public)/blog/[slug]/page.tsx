@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Calendar, User, Clock, ArrowLeft, Share2, BookOpen } from "lucide-react";
-import Navigation from "@/components/layout/navigation";
-import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -111,9 +109,6 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
       <main>
         {/* Hero Section */}
         <section className="py-12 bg-gradient-to-br from-gray-50 to-white">
@@ -259,9 +254,6 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
   );
 }
 

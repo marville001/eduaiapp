@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Crown, Zap, ArrowLeft, Star } from "lucide-react";
-import Navigation from "@/components/layout/navigation";
-import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,9 +34,6 @@ export default function UpgradePage() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
       <main>
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
@@ -260,8 +255,5 @@ export default function UpgradePage() {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
   );
 }

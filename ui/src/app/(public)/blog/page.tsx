@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { Calendar, User, ArrowRight, Search, Filter } from "lucide-react";
-import Navigation from "@/components/layout/navigation";
-import Footer from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,9 +114,6 @@ export default function BlogPage() {
   const regularBlogs = blogs.filter(blog => !blog.isPinned);
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navigation />
-      
       <main>
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
@@ -275,8 +270,5 @@ export default function BlogPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
   );
 }
