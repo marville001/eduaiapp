@@ -53,6 +53,7 @@ export default function LoginForm({ onSuccess, isModal=false }: Props) {
 
       if (result.success) {
         toast.success('Login successful! Redirecting...');
+        window.location.reload();
         onSuccess?.();
       } else {
         toast.error(result.error || 'Login failed. Please try again.');

@@ -89,9 +89,9 @@ function AuthContextProvider({ children }: { children: React.ReactNode; }) {
 			}
 
 			if (result?.ok) {
-				if (redirect) {
-					router.push(user?.isAdminUser ? '/admin' : '/app');
-				}
+				// if (redirect) {
+				// 	router.push(user?.isAdminUser ? '/admin' : '/app');
+				// }
 				return { success: true };
 			}
 
