@@ -105,11 +105,7 @@ export const createCheckoutSession = async (priceId: string, userId: string) => 
       throw new Error('Stripe failed to load');
     }
 
-    const { error } = await stripe.redirectToCheckout({ sessionId });
-    
-    if (error) {
-      throw error;
-    }
+   
   } catch (error) {
     console.error('Error creating checkout session:', error);
     throw error;

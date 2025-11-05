@@ -1,4 +1,3 @@
-import { Teacher } from '@/types/teachers';
 import { User } from '@/types/users';
 import api from '.';
 
@@ -27,14 +26,6 @@ interface UpdateUserStatusDto {
   reason?: string;
 }
 
-interface ApproveTeacherDto {
-  notes?: string;
-}
-
-interface RejectTeacherDto {
-  rejectionReason: string;
-}
-
 export interface UserDetails {
   user: User;
   stats: {
@@ -57,11 +48,6 @@ export interface UserDetails {
     timestamp: string;
     metadata?: Record<string, unknown>;
   }>;
-  creditTransactions: Array<Record<string, unknown>>;
-  mpesaTransactions: Array<Record<string, unknown>>;
-  paperPurchases: Array<Record<string, unknown>>;
-  reviews: Array<Record<string, unknown>>;
-  teacherPapers: Array<Record<string, unknown>>;
 }
 
 export const userApi = {
@@ -83,38 +69,10 @@ export const userApi = {
     return response.data?.data;
   },
 
-  // Get pending teachers
-  getPendingTeachers: async (query?: { page?: number; limit?: number; }): Promise<GetUsersResponse> => {
-    const params = new URLSearchParams();
-    if (query?.page) params.append('page', query.page.toString());
-    if (query?.limit) params.append('limit', query.limit.toString());
-
-    const response = await api.get(`/users/pending-teachers?${params.toString()}`);
-    return response.data?.data;
-  },
-
-  // Get teacher details for review
-  getTeacherDetails: async (teacherId: string): Promise<Teacher> => {
-    const response = await api.get(`/users/teacher/${teacherId}/details`);
-    return response.data.data;
-  },
-
   // Update user status (suspend/reactivate)
   updateUserStatus: async (userId: string, updateData: UpdateUserStatusDto): Promise<User> => {
     const response = await api.patch(`/users/${userId}/status`, updateData);
     return response.data.data;
-  },
-
-  // Approve teacher
-  approveTeacher: async (teacherId: string, approveData: ApproveTeacherDto): Promise<{ message: string; data: Teacher; }> => {
-    const response = await api.put(`/teachers/approve/${teacherId}`, approveData);
-    return response.data;
-  },
-
-  // Reject teacher
-  rejectTeacher: async (teacherId: string, rejectData: RejectTeacherDto): Promise<{ message: string; data: Teacher }> => {
-    const response = await api.put(`/teachers/reject/${teacherId}`, rejectData);
-    return response.data;
   },
 
   // Get all admin users

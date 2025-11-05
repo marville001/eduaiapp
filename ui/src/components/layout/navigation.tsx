@@ -88,9 +88,6 @@ export default function Navigation() {
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
 
-  console.log({ user });
-
-
   const getUserInitials = () => {
     if (!user) return 'U';
     const firstInitial = user.firstName?.[0] || '';

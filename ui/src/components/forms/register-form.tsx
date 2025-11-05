@@ -75,9 +75,7 @@ export default function RegisterForm() {
       setIsLoading(false);
     }
   };
-
-  console.log(form.formState.errors);
-
+  
   return (
     <Form {...form}>
       <form className="mt-8 space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
