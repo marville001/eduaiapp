@@ -249,7 +249,7 @@ export default function RegisterForm() {
                         Terms of Service
                       </Link>{' '}
                       and{' '}
-                      <Link href="/privacy" target='_blank' className="text-blue-600 hover:text-blue-500">
+                      <Link href="/privacy-policy" target='_blank' className="text-blue-600 hover:text-blue-500">
                         Privacy Policy
                       </Link>
                     </Label>

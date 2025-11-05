@@ -19,7 +19,7 @@ const footerLinks = {
     { name: "Study Planner", href: "/tools/study-planner" },
   ],
   company: [
-    { name: "About Us", href: "/about" },
+    { name: "About Us", href: "/about-us" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "Pricing", href: "/pricing" },
     { name: "Blog", href: "/blog" },
@@ -27,10 +27,10 @@ const footerLinks = {
   ],
   support: [
     { name: "Help Center", href: "/help" },
-    { name: "Contact Us", href: "/contact" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookies" },
+    { name: "Contact Us", href: "/contact-us" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms of Service", href: "/terms-of-service" },
+    { name: "Cookie Policy", href: "/cookies-policy" },
   ],
 };
 
