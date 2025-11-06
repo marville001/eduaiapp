@@ -48,21 +48,37 @@ export interface UpdateSubjectDto {
 // API endpoints
 export const subjectApi = {
   // Get all subjects
-  getAll: async (parentId?: number): Promise<Subject[]> => {
-    const params = parentId !== undefined ? `?parentId=${parentId}` : '';
-    const response = await api.get(`/subjects${params}`);
+  getAll: async (parentId?: number, onlyActive?: boolean): Promise<Subject[]> => {
+    const params = new URLSearchParams();
+    if (parentId !== undefined) {
+      params.append('parentId', parentId.toString());
+    }
+    if (onlyActive !== undefined) {
+      params.append('onlyActive', onlyActive.toString());
+    }
+    const response = await api.get(`/subjects?${params.toString()}`);
     return response.data?.data;
   },
 
   // Get hierarchical subjects (main subjects with children)
-  getHierarchical: async (): Promise<Subject[]> => {
-    const response = await api.get('/subjects/hierarchical');
+  getHierarchical: async (onlyActive?: boolean): Promise<Subject[]> => {
+    const params = new URLSearchParams();
+    if (onlyActive !== undefined) {
+      params.append('onlyActive', onlyActive.toString());
+    }
+    const response = await api.get(`/subjects/hierarchical?${params.toString()}`);
     return response.data?.data;
   },
 
   // Get subject by ID
   getById: async (id: string): Promise<Subject> => {
     const response = await api.get(`/subjects/${id}`);
+    return response.data?.data;
+  },
+
+  // Get subject by slug
+  getBySlug: async (slug: string): Promise<Subject> => {
+    const response = await api.get(`/subjects/slug/${slug}`);
     return response.data?.data;
   },
 

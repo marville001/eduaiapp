@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Menu, X, Calculator, Atom, Globe, Palette, Code, Brain, GraduationCap, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,64 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUserStore } from '@/stores/user.store';
-
-const subjects = [
-  {
-    name: "Mathematics",
-    slug: "mathematics",
-    icon: Calculator,
-    children: [
-      { name: "Algebra", slug: "algebra" },
-      { name: "Calculus", slug: "calculus" },
-      { name: "Geometry", slug: "geometry" },
-      { name: "Statistics", slug: "statistics" },
-    ]
-  },
-  {
-    name: "Sciences",
-    slug: "sciences",
-    icon: Atom,
-    children: [
-      { name: "Physics", slug: "physics" },
-      { name: "Chemistry", slug: "chemistry" },
-      { name: "Biology", slug: "biology" },
-      { name: "Environmental Science", slug: "environmental-science" },
-    ]
-  },
-  {
-    name: "Languages",
-    slug: "languages",
-    icon: Globe,
-    children: [
-      { name: "English", slug: "english" },
-      { name: "Spanish", slug: "spanish" },
-      { name: "French", slug: "french" },
-      { name: "Literature", slug: "literature" },
-    ]
-  },
-  {
-    name: "Arts & Design",
-    slug: "arts-design",
-    icon: Palette,
-    children: [
-      { name: "Visual Arts", slug: "visual-arts" },
-      { name: "Graphic Design", slug: "graphic-design" },
-      { name: "Music Theory", slug: "music-theory" },
-      { name: "Art History", slug: "art-history" },
-    ]
-  },
-  {
-    name: "Technology",
-    slug: "technology",
-    icon: Code,
-    children: [
-      { name: "Computer Science", slug: "computer-science" },
-      { name: "Programming", slug: "programming" },
-      { name: "Web Development", slug: "web-development" },
-      { name: "Data Science", slug: "data-science" },
-    ]
-  },
-];
+import { Subject, subjectApi } from '@/lib/api/subject.api';
 
 const tools = [
   { name: "AI Essay Writer", href: "/tools/essay-writer" },
@@ -85,6 +28,7 @@ const tools = [
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
 
@@ -104,6 +48,15 @@ export default function Navigation() {
     await logout(false);
     setIsMobileMenuOpen(false);
   };
+
+  useEffect(() => {
+    const getSubjects = async () => {
+      subjectApi.getHierarchical(true).then((data) => {
+        setSubjects(data);
+      });
+    }
+    getSubjects();
+  }, [])
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -133,7 +86,6 @@ export default function Navigation() {
                     <div key={subject.slug} className="relative group/sub">
                       <div className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm cursor-pointer">
                         <div className="flex items-center space-x-2">
-                          <subject.icon className="h-4 w-4" />
                           <span>{subject.name}</span>
                         </div>
                         <ChevronDown className="h-4 w-4 -rotate-90" />
@@ -141,16 +93,16 @@ export default function Navigation() {
                       <div className="absolute left-full top-0 ml-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
                         <div className="p-1">
                           <Link
-                            href={`/subjects/${subject.slug}`}
+                            href={`/${subject.slug}`}
                             className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
                           >
                             All {subject.name}
                           </Link>
                           <div className="border-t border-gray-200 my-1" />
-                          {subject.children.map((child) => (
+                          {subject.subSubjects?.map((child) => (
                             <Link
                               key={child.slug}
-                              href={`/subjects/${child.slug}`}
+                              href={`/${child.slug}`}
                               className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
                             >
                               {child.name}
@@ -302,11 +254,10 @@ export default function Navigation() {
                 {subjects.map((subject) => (
                   <div key={subject.slug} className="pl-4">
                     <Link
-                      href={`/subjects/${subject.slug}`}
+                      href={`/${subject.slug}`}
                       className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-gray-900"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <subject.icon className="h-4 w-4" />
                       <span>{subject.name}</span>
                     </Link>
                   </div>

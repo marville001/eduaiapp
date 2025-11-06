@@ -3,6 +3,7 @@ import { SubjectRepository } from './subject.repository';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { Subject } from './entities/subject.entity';
+import { boolean } from 'joi';
 
 @Injectable()
 export class SubjectService {
@@ -39,14 +40,18 @@ export class SubjectService {
     return this.subjectRepository.save(subject);
   }
 
-  async findAll(parentId?: number): Promise<Subject[]> {
+  async findAll(parentId?: number, onlyActive?: boolean): Promise<Subject[]> {
     const queryBuilder = this.subjectRepository.createQueryBuilder('subject')
       .leftJoinAndSelect('subject.parentSubject', 'parentSubject')
       .leftJoinAndSelect('subject.subSubjects', 'subSubjects')
       .orderBy('subject.createdAt', 'ASC')
       .addOrderBy('subSubjects.createdAt', 'ASC');
 
-    if (parentId !== undefined) {
+    if (onlyActive) {
+      queryBuilder.andWhere('subject.isActive = :isActive', { isActive: true });
+    }
+
+    if (parentId !== undefined && !isNaN(parentId)) {
       if (parentId === 0) {
         // Get only main subjects (no parent)
         queryBuilder.where('subject.parentSubjectId IS NULL');
@@ -59,12 +64,21 @@ export class SubjectService {
     return queryBuilder.getMany();
   }
 
-  async findAllHierarchical(): Promise<Subject[]> {
-    return this.subjectRepository.createQueryBuilder('subject')
+  async findAllHierarchical(onlyActive: boolean): Promise<Subject[]> {
+    const queryBuilder = this.subjectRepository.createQueryBuilder('subject')
       .leftJoinAndSelect('subject.subSubjects', 'subSubjects')
       .leftJoinAndSelect('subSubjects.subSubjects', 'subSubSubjects')
-      .where('subject.parentSubjectId IS NULL')
-      .orderBy('subject.createdAt', 'ASC')
+      .where('subject.parentSubjectId IS NULL');
+
+    if (onlyActive) {
+      queryBuilder.andWhere('subject.isActive = :isActive', { isActive: true });
+      
+      // Also filter subSubjects and subSubSubjects by isActive but return parent subjects even if they have no active children
+      queryBuilder.andWhere('(subSubjects.isActive = :isActive OR subSubjects.id IS NULL)', { isActive: true });
+      queryBuilder.andWhere('(subSubSubjects.isActive = :isActive OR subSubSubjects.id IS NULL)', { isActive: true });
+    }
+
+    return queryBuilder
       .addOrderBy('subSubjects.createdAt', 'ASC')
       .addOrderBy('subSubSubjects.createdAt', 'ASC')
       .getMany();

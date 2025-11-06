@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Upload, Send } from "lucide-react";
@@ -10,19 +10,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { questionSchema, type QuestionFormData } from "@/lib/validations";
+import { Subject, subjectApi } from '@/lib/api/subject.api';
+import { useParams } from 'next/navigation';
 
-const subjects = [
-  { value: "mathematics", label: "Mathematics" },
-  { value: "physics", label: "Physics" },
-  { value: "chemistry", label: "Chemistry" },
-  { value: "biology", label: "Biology" },
-  { value: "english", label: "English" },
-  { value: "history", label: "History" },
-  { value: "computer-science", label: "Computer Science" },
-  { value: "economics", label: "Economics" },
-  { value: "psychology", label: "Psychology" },
-  { value: "other", label: "Other" },
-];
+
 
 interface AiChatFormProps {
   isLoading?: boolean;
@@ -32,6 +23,9 @@ interface AiChatFormProps {
 export default function AiChatForm({ isLoading = false, className = "" }: AiChatFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+
+  const { slug } = useParams<{ slug: string; }>();
 
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -82,6 +76,25 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  useEffect(() => {
+    const getSubjects = async () => {
+      subjectApi.getAll(undefined, true).then((data) => {
+        setSubjects(data);
+      });
+    };
+    getSubjects();
+  }, []);
+
+  const { setValue } = form;
+  useEffect(() => {
+    if (slug && subjects.length > 0) {
+      const matchedSubject = subjects.find(subj => subj.slug === slug);
+      if (matchedSubject) {
+        setValue("subject", matchedSubject.name);
+      }
+    }
+  }, [slug, subjects, setValue]);
+
   return (
     <Card className={`w-full max-w-2xl mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm ${className}`}>
       <CardContent className="p-8">
@@ -102,8 +115,8 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
                     </FormControl>
                     <SelectContent>
                       {subjects.map((subject) => (
-                        <SelectItem key={subject.value} value={subject.value}>
-                          {subject.label}
+                        <SelectItem key={subject.id} value={subject.name}>
+                          {subject.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -137,13 +150,12 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
               <label className="text-sm font-medium text-gray-700">
                 Upload Files (Optional)
               </label>
-              
+
               <div
-                className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                  dragActive
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
+                className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-300 hover:border-gray-400"
+                  }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}

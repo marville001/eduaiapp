@@ -8,24 +8,29 @@ import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { SubjectService } from './subject.service';
 
 @Controller('subjects')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class SubjectController {
-  constructor(private readonly subjectService: SubjectService) {}
+  constructor(private readonly subjectService: SubjectService) { }
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   create(@Body() createSubjectDto: CreateSubjectDto) {
     return this.subjectService.create(createSubjectDto);
   }
 
   @Get()
-  findAll(@Query('parentId') parentId?: number) {
-    return this.subjectService.findAll(parentId);
+  findAll(
+    @Query('parentId') parentId?: number,
+    @Query('onlyActive') onlyActive?: boolean
+  ) {
+    return this.subjectService.findAll(parentId ?? 0, onlyActive);
   }
 
   @Get('hierarchical')
-  findAllHierarchical() {
-    return this.subjectService.findAllHierarchical();
+  findAllHierarchical(
+    @Query('onlyActive') onlyActive?: boolean
+  ) {
+    return this.subjectService.findAllHierarchical(onlyActive);
   }
 
   @Get('slug/:slug')
@@ -40,12 +45,14 @@ export class SubjectController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   update(@Param('id') id: number, @Body() updateSubjectDto: UpdateSubjectDto) {
     return this.subjectService.update(id, updateSubjectDto);
   }
 
   @Delete(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   remove(@Param('id') id: number) {
     return this.subjectService.remove(id);
   }
