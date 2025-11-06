@@ -4,9 +4,6 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import { Page } from '@/lib/api/page.api';
 import { pageApi } from '@/lib/api/page.api';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Eye } from 'lucide-react';
-
 interface PageViewProps {
 	page: Page;
 }
