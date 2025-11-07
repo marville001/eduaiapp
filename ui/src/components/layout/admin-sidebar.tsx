@@ -1,26 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useUserStore } from '@/stores/user.store';
+import {
+  BookOpen,
+  Brain,
+  ChevronDown,
+  FileText,
+  LayoutDashboard,
+  Menu,
+  MessageSquare,
+  Settings,
+  Shield,
+  Upload,
+  Users,
+  X
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
-  FileText, 
-  Settings, 
-  CreditCard, 
-  Brain, 
-  Menu, 
-  X,
-  ChevronDown,
-  MessageSquare,
-  Upload,
-  Shield
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useUserStore } from '@/stores/user.store';
+import { useState } from "react";
 
 const menuItems = [
   {
@@ -68,11 +67,11 @@ const menuItems = [
       { title: "New Page", href: "/admin/pages/new" },
     ],
   },
-  {
-    title: "Subscriptions",
-    href: "/admin/subscriptions",
-    icon: CreditCard,
-  },
+  // {
+  //   title: "Subscriptions",
+  //   href: "/admin/subscriptions",
+  //   icon: CreditCard,
+  // },
   // {
   //   title: "Analytics",
   //   href: "/admin/analytics",
@@ -93,15 +92,15 @@ export default function AdminSidebar() {
   const user = useUserStore((state) => state.user);
 
   const toggleExpanded = (title: string) => {
-    setExpandedItems(prev => 
-      prev.includes(title) 
+    setExpandedItems(prev =>
+      prev.includes(title)
         ? prev.filter(item => item !== title)
         : [...prev, title]
     );
   };
 
   const isActive = (href: string) => {
-    return pathname === href ;// || (href !== "/admin" && pathname.startsWith(href));
+    return pathname === href;// || (href !== "/admin" && pathname.startsWith(href));
   };
 
   const isExpanded = (title: string) => expandedItems.includes(title);
@@ -149,8 +148,8 @@ export default function AdminSidebar() {
                       onClick={() => toggleExpanded(item.title)}
                       className={`
                         w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                        ${isActive(item.href) 
-                          ? 'bg-purple-100 text-purple-700' 
+                        ${isActive(item.href)
+                          ? 'bg-purple-100 text-purple-700'
                           : 'text-gray-700 hover:bg-gray-100'
                         }
                       `}
@@ -159,13 +158,12 @@ export default function AdminSidebar() {
                         <item.icon className="h-5 w-5 mr-3" />
                         <span>{item.title}</span>
                       </div>
-                      <ChevronDown 
-                        className={`h-4 w-4 transition-transform ${
-                          isExpanded(item.title) ? 'rotate-180' : ''
-                        }`} 
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${isExpanded(item.title) ? 'rotate-180' : ''
+                          }`}
                       />
                     </button>
-                    
+
                     {/* Submenu */}
                     {isExpanded(item.title) && (
                       <div className="mt-2 ml-6 space-y-1">
@@ -194,8 +192,8 @@ export default function AdminSidebar() {
                     href={item.href}
                     className={`
                       flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                      ${isActive(item.href) 
-                        ? 'bg-purple-100 text-purple-700' 
+                      ${isActive(item.href)
+                        ? 'bg-purple-100 text-purple-700'
                         : 'text-gray-700 hover:bg-gray-100'
                       }
                     `}
@@ -233,7 +231,7 @@ export default function AdminSidebar() {
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
