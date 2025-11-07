@@ -33,6 +33,14 @@ export enum AuditAction {
 	CREDIT_PACKAGE_UPDATED = 'credit_package_updated',
 	CREDIT_PACKAGE_DELETED = 'credit_package_deleted',
 
+	// AI Model actions
+	AI_MODEL_CREATED = 'ai_model_created',
+	AI_MODEL_UPDATED = 'ai_model_updated',
+	AI_MODEL_DELETED = 'ai_model_deleted',
+	AI_MODEL_DEFAULT_SET = 'ai_model_default_set',
+	AI_MODEL_API_KEY_VIEWED = 'ai_model_api_key_viewed',
+	AI_MODEL_CONNECTION_TESTED = 'ai_model_connection_tested',
+
 	// Admin actions
 	ADMIN_CREATED = 'admin_created',
 	ADMIN_ROLE_ASSIGNED = 'admin_role_assigned',
@@ -50,6 +58,7 @@ export enum AuditTargetType {
 	REPORT = 'report',
 	PAYOUT = 'payout',
 	SETTINGS = 'settings',
+	AI_MODEL = 'ai_model',
 	CREDIT_PACKAGE = 'credit_package',
 	ROLE = 'role',
 	PERMISSION = 'permission',

@@ -10,6 +10,7 @@ import { DataSource } from 'typeorm';
 import { Blog } from '@/modules/blogs/entities/blog.entity';
 import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
 import { Page } from '@/modules/pages/entities/page.entity';
+import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 
 config();
 
@@ -24,7 +25,8 @@ export const entities = [
   Subject,
   Blog,
   BlogCategory,
-  Page
+  Page,
+  AiModelConfiguration
 ];
 
 export default new DataSource({

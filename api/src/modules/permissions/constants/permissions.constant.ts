@@ -49,6 +49,38 @@ export const SYSTEM_PERMISSIONS: PermissionDefinition[] = [
 		description: 'Modify system settings',
 	},
 
+	// AI Models
+	{
+		resource: PermissionResource.AI_MODELS,
+		action: PermissionAction.READ,
+		name: 'View AI Models',
+		description: 'View AI model configurations',
+	},
+	{
+		resource: PermissionResource.AI_MODELS,
+		action: PermissionAction.CREATE,
+		name: 'Create AI Models',
+		description: 'Create new AI model configurations',
+	},
+	{
+		resource: PermissionResource.AI_MODELS,
+		action: PermissionAction.UPDATE,
+		name: 'Update AI Models',
+		description: 'Update AI model configurations',
+	},
+	{
+		resource: PermissionResource.AI_MODELS,
+		action: PermissionAction.DELETE,
+		name: 'Delete AI Models',
+		description: 'Delete AI model configurations',
+	},
+	{
+		resource: PermissionResource.AI_MODELS,
+		action: PermissionAction.VIEW_SENSITIVE,
+		name: 'View AI Model API Keys',
+		description: 'View decrypted API keys for AI models',
+	},
+
 	// Reports
 	{
 		resource: PermissionResource.REPORTS,
@@ -72,6 +104,10 @@ export const SUPER_ADMIN_PERMISSIONS = SYSTEM_PERMISSIONS.map(
 // Default Admin permissions (more restricted)
 export const DEFAULT_ADMIN_PERMISSIONS = [
 	`${PermissionResource.USERS}:${PermissionAction.READ}`,
+	`${PermissionResource.SETTINGS}:${PermissionAction.READ}`,
+	`${PermissionResource.AI_MODELS}:${PermissionAction.READ}`,
+	`${PermissionResource.AI_MODELS}:${PermissionAction.CREATE}`,
+	`${PermissionResource.AI_MODELS}:${PermissionAction.UPDATE}`,
 	`${PermissionResource.REPORTS}:${PermissionAction.READ}`,
 ];
 

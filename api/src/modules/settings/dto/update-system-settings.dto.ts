@@ -1,12 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsEmail, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsEmail, IsInt, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator';
 
 export class UpdateSystemSettingsDto {
   // General Settings
   @ApiPropertyOptional({ description: 'Platform name' })
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   platformName?: string;
 
   @ApiPropertyOptional({ description: 'Support email address' })
@@ -14,38 +15,86 @@ export class UpdateSystemSettingsDto {
   @IsEmail()
   supportEmail?: string;
 
+  // Branding Settings
+  @ApiPropertyOptional({ description: 'App logo URL', maxLength: 500 })
+  @IsOptional()
+  @MaxLength(500)
+  appLogo?: string;
+
+  @ApiPropertyOptional({ description: 'App favicon URL', maxLength: 500 })
+  @IsOptional()
+  @MaxLength(500)
+  appFavicon?: string;
+
+  // Contact Information
+  @ApiPropertyOptional({ description: 'Contact phone number', maxLength: 20 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  contactPhone?: string;
+
+  @ApiPropertyOptional({ description: 'Contact address' })
+  @IsOptional()
+  @IsString()
+  contactAddress?: string;
+
+  // Social Media Links
+  @ApiPropertyOptional({ description: 'Facebook page URL', maxLength: 200 })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(200)
+  socialFacebook?: string;
+
+  @ApiPropertyOptional({ description: 'Twitter profile URL', maxLength: 200 })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(200)
+  socialTwitter?: string;
+
+  @ApiPropertyOptional({ description: 'LinkedIn profile URL', maxLength: 200 })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(200)
+  socialLinkedin?: string;
+
+  @ApiPropertyOptional({ description: 'Instagram profile URL', maxLength: 200 })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(200)
+  socialInstagram?: string;
+
+  // File Upload Settings
+  @ApiPropertyOptional({ description: 'Maximum file upload size in MB', minimum: 1, maximum: 100 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @Type(() => Number)
+  maxFileUploadSize?: number;
+
   @ApiPropertyOptional({ description: 'Allowed file types for upload', type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   allowedFileTypes?: string[];
 
-  // Pricing Settings
-  @ApiPropertyOptional({ description: 'Minimum payout amount in KES', minimum: 0 })
+  // AI Model Settings
+  @ApiPropertyOptional({ description: 'Default AI model ID' })
   @IsOptional()
   @IsInt()
-  @Min(0)
   @Type(() => Number)
-  minimumPayout?: number;
+  defaultAiModelId?: number;
 
-  @ApiPropertyOptional({ description: 'Platform commission percentage', minimum: 0, maximum: 100 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  @Type(() => Number)
-  platformCommission?: number;
-
-  @ApiPropertyOptional({ description: 'Credits per KES for custom credit buying', minimum: 0.01 })
-  @IsOptional()
-  @Min(0.01)
-  @Type(() => Number)
-  creditPerShilling?: number;
-
-  @ApiPropertyOptional({ description: 'Enable credit purchase' })
+  // User Settings
+  @ApiPropertyOptional({ description: 'Allow user signup' })
   @IsOptional()
   @IsBoolean()
-  allowCreditPurchase?: boolean;
+  allowSignup?: boolean;
+
+  @ApiPropertyOptional({ description: 'Require email verification for new users' })
+  @IsOptional()
+  @IsBoolean()
+  requireVerification?: boolean;
 
   // Notification Settings
   @ApiPropertyOptional({ description: 'Enable email notifications' })
@@ -62,49 +111,4 @@ export class UpdateSystemSettingsDto {
   @IsOptional()
   @IsBoolean()
   adminAlerts?: boolean;
-
-  // Content Settings
-  @ApiPropertyOptional({ description: 'Auto-approve papers without manual review' })
-  @IsOptional()
-  @IsBoolean()
-  autoApproval?: boolean;
-
-  @ApiPropertyOptional({ description: 'Require teacher verification before uploading' })
-  @IsOptional()
-  @IsBoolean()
-  requireVerification?: boolean;
-
-  @ApiPropertyOptional({ description: 'Maximum paper size in MB', minimum: 1, maximum: 50 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(50)
-  @Type(() => Number)
-  maxPaperSize?: number;
-
-  // Teacher Registration Settings
-  @ApiPropertyOptional({ description: 'Teacher registration verification tips text' })
-  @IsOptional()
-  @IsString()
-  teacherRegVerificationTips?: string;
-
-  @ApiPropertyOptional({ description: 'Teacher registration document requirements text' })
-  @IsOptional()
-  @IsString()
-  teacherRegDocumentRequirements?: string;
-
-  @ApiPropertyOptional({ description: 'Teacher registration verification process text' })
-  @IsOptional()
-  @IsString()
-  teacherRegVerificationProcess?: string;
-
-  @ApiPropertyOptional({ description: 'Teacher registration what happens next text' })
-  @IsOptional()
-  @IsString()
-  teacherRegWhatHappensNext?: string;
-
-  @ApiPropertyOptional({ description: 'Teacher registration important notes text' })
-  @IsOptional()
-  @IsString()
-  teacherRegImportantNotes?: string;
 }

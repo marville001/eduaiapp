@@ -10,20 +10,20 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { DatabaseModule } from './database/database.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BlogModule } from './modules/blogs/blog.module';
 import { LoggingModule } from './modules/logging/logging.module';
 import { MailModule } from './modules/mail/mail.module';
+import { PageModule } from './modules/pages/page.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { StorageModule } from './modules/storage/storage.module';
-import { UsersModule } from './modules/users/users.module';
 import { SubjectModule } from './modules/subjects/subject.module';
-import { BlogModule } from './modules/blogs/blog.module';
-import { PageModule } from './modules/pages/page.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
-			isGlobal: true, 
+			isGlobal: true,
 			validationSchema: Joi.object({
 				PORT: Joi.number().required(),
 				API_PREFIX: Joi.string(),
@@ -34,7 +34,10 @@ import { PageModule } from './modules/pages/page.module';
 				DATABASE_PASSWORD: Joi.string().required(),
 				DATABASE_NAME: Joi.string().required(),
 
-				JWT_SECRET: Joi.string().min(32).required(),
+				ENCRYPTION_KEY: Joi.string().required(),
+
+				JWT_SECRET: Joi.string().required(),
+
 				JWT_EXPIRES_IN: Joi.string().required(),
 				JWT_REFRESH_SECRET: Joi.string().required(),
 				JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
@@ -49,7 +52,7 @@ import { PageModule } from './modules/pages/page.module';
 				MAIL_USER: Joi.string().required(),
 				MAIL_PASSWORD: Joi.string().required(),
 				MAIL_FROM: Joi.string().optional(),
-				
+
 				FRONTEND_URL: Joi.string().optional(),
 
 				THROTTLE_TTL: Joi.number().required(),
@@ -57,7 +60,7 @@ import { PageModule } from './modules/pages/page.module';
 
 			})
 		}),
-		
+
 		// Rate limiting
 		ThrottlerModule.forRootAsync({
 			imports: [ConfigModule],

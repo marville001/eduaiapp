@@ -5,6 +5,7 @@ import { Role } from './role.entity';
 export enum PermissionResource {
 	USERS = 'users',
 	SETTINGS = 'settings',
+	AI_MODELS = 'ai_models',
 	REPORTS = 'reports',
 }
 
@@ -15,6 +16,7 @@ export enum PermissionAction {
 	DELETE = 'delete',
 	SUSPEND = 'suspend',
 	EXPORT = 'export',
+	VIEW_SENSITIVE = 'view_sensitive',
 }
 
 @Entity('permissions')
