@@ -27,6 +27,7 @@ export const useUserStore = create<UserState>()(
 			{
 				name: 'user-storage',
 				partialize: (state) => ({ user: state.user }),
+				migrate: (persistedState) => persistedState
 			}
 		),
 		{
