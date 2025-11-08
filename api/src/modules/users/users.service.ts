@@ -41,7 +41,7 @@ export class UsersService {
 		return this.usersRepository.create(userData);
 	}
 
-	async findAll(page: number = 1, limit: number = 10, role?: UserRole, status?: string): Promise<{
+	async findAll({ page = 1, limit = 10, role, status, search }: { page: number, limit: number, role?: UserRole, status?: string, search?: string; }): Promise<{
 		data: User[];
 		pagination: {
 			page: number;
@@ -51,21 +51,26 @@ export class UsersService {
 		};
 	}> {
 		const skip = (page - 1) * limit;
-		const where: FindOptionsWhere<User> = {
+		let where: FindOptionsWhere<User> = {
 			userRole: {
 				name: role ? role : Not(In([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 			}
 		};
 
 		if (status) {
-			where.status = status as UserStatus;
+			where.status = status.toUpperCase() as UserStatus;
+		}
+
+		if (search) {
+			// where.firstName = ILike(`%${search}%`);
+			// where.lastName = ILike(`%${search}%`);
+			where.email = ILike(`%${search}%`);
 		}
 
 		const [users, total] = await this.usersRepository['repository'].findAndCount({
 			where,
 			skip,
 			take: limit,
-			relations: ['teacherProfile'],
 			order: { createdAt: 'DESC' },
 		});
 
@@ -262,7 +267,7 @@ export class UsersService {
 
 		const role = await this.permissionsService.getRoleById(createAdminDto.roleId);
 		if (!role) {
-			throw new BadRequestException('Teacher role not found. Please contact support.');
+			throw new BadRequestException('Role not found. Please contact support.');
 		}
 
 		if (!role.isAdminRole) {

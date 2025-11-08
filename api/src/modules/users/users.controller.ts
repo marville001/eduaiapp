@@ -16,11 +16,9 @@ import {
 import { ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Permission, RequirePermissions } from '../../common/decorators/permissions.decorator';
-import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -48,9 +46,10 @@ export class UsersController {
 		@Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
 		@Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
 		@Query('role') role?: UserRole,
-		@Query('status') status?: string
+		@Query('status') status?: string,
+		@Query('search') search?: string
 	) {
-		return await this.usersService.findAll(page, limit, role, status);
+		return await this.usersService.findAll({ page, limit, role, status, search });
 	}
 
 	@Get('admins')

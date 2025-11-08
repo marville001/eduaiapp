@@ -1,4 +1,4 @@
-import { User } from '@/types/users';
+import { User } from '@/types/users.d';
 import api from '.';
 
 interface PaginationInfo {
@@ -8,7 +8,7 @@ interface PaginationInfo {
   totalPages: number;
 }
 
-interface GetUsersResponse {
+export interface GetUsersResponse {
   data: User[];
   pagination: PaginationInfo;
 }

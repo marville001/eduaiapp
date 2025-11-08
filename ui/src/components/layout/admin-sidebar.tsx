@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from '@/stores/user.store';
 import {
@@ -31,13 +30,11 @@ const menuItems = [
     title: "Users",
     href: "/admin/users",
     icon: Users,
-    badge: "124",
   },
   {
     title: "Questions",
     href: "/admin/questions",
     icon: MessageSquare,
-    badge: "45",
   },
   {
     title: "Subjects",
@@ -203,11 +200,6 @@ export default function AdminSidebar() {
                       <item.icon className="h-5 w-5 mr-3" />
                       <span>{item.title}</span>
                     </div>
-                    {item.badge && (
-                      <Badge variant="secondary" className="text-xs">
-                        {item.badge}
-                      </Badge>
-                    )}
                   </Link>
                 )}
               </div>

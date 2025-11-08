@@ -1,4 +1,11 @@
 
+import { Role } from './permissions';
+
+export interface Teacher {
+	id: number;
+	// Add other teacher properties as needed
+}
+
 export interface User {
 	id: number;
 	createdAt: string;
@@ -11,7 +18,6 @@ export interface User {
 	firstName: string;
 	lastName: string;
 	phone: null;
-	avatarUrl: null;
 	role: string;
 	status: string;
 	isAdminUser: boolean;
