@@ -1,4 +1,5 @@
 import { AbstractEntity } from '@/database/abstract.entity';
+import { Question } from '@/modules/ai/entities/question.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('subjects')
@@ -50,4 +51,7 @@ export class Subject extends AbstractEntity<Subject> {
   @ManyToOne(() => Subject, (subject) => subject.subSubjects)
   @JoinColumn({ name: 'parent_subject_id', referencedColumnName: 'id' })
   parentSubject?: Subject;
+
+  @OneToMany(() => Question, (question) => question.subject)
+  questions: Question[];
 }

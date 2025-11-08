@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Upload, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { questionSchema, type QuestionFormData } from "@/lib/validations";
+import { Textarea } from "@/components/ui/textarea";
+import aiChatApi from '@/lib/api/ai-chat.api';
 import { Subject, subjectApi } from '@/lib/api/subject.api';
-import { useParams } from 'next/navigation';
+import { questionSchema, type QuestionFormData } from "@/lib/validations";
+import { useUserStore } from '@/stores/user.store';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Send, Upload } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 
 
@@ -24,24 +27,52 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const currentUser = useUserStore(state => state.user);
+  const router = useRouter();
   const { slug } = useParams<{ slug: string; }>();
 
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      subject: "",
+      subject: 0,
       question: "",
       files: [],
     },
   });
 
-  const handleSubmit = (data: QuestionFormData) => {
-    const formData = {
-      ...data,
-      files: uploadedFiles,
-    };
-    console.log(formData);
+  const handleSubmit = async (data: QuestionFormData) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // TODO: Upload files if any and get file URLs
+      const fileAttachments: string[] = [];
+
+      // Prepare the question data
+      const questionData = {
+        subject: data.subject,
+        question: data.question,
+        fileAttachments: fileAttachments.length > 0 ? fileAttachments : undefined,
+        userId: currentUser?.id
+      };
+
+      // Submit the question
+      const question = await aiChatApi.askQuestion(questionData);
+
+      // Show success message
+      toast.success("Question submitted successfully! Redirecting to answer page...");
+
+      // Redirect to the answer page
+      router.push(`/answer/${question.questionId}`);
+    } catch (error) {
+      console.error('Error submitting question:', error);
+      toast.error("Failed to submit question. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -90,7 +121,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
     if (slug && subjects.length > 0) {
       const matchedSubject = subjects.find(subj => subj.slug === slug);
       if (matchedSubject) {
-        setValue("subject", matchedSubject.name);
+        setValue("subject", matchedSubject.id);
       }
     }
   }, [slug, subjects, setValue]);
@@ -107,7 +138,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">Subject</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value + ""}>
                     <FormControl>
                       <SelectTrigger className="h-14! text-lg w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500">
                         <SelectValue placeholder="Select a subject" />
@@ -115,7 +146,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
                     </FormControl>
                     <SelectContent>
                       {subjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.name}>
+                        <SelectItem key={subject.id} value={subject.id + ""}>
                           {subject.name}
                         </SelectItem>
                       ))}
@@ -214,10 +245,10 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
               className="w-full h-12 bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
             >
-              {isLoading ? (
+              {isLoading || isSubmitting ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Processing...</span>

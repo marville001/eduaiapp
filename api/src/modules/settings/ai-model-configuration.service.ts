@@ -267,30 +267,13 @@ export class AiModelConfigurationService {
     return isConnected;
   }
 
-  async getDecryptedApiKey(
-    id: number,
-    adminId: number,
-    adminName: string,
-    ipAddress?: string,
-  ): Promise<string | null> {
+  async getDecryptedApiKey(id: number): Promise<string | null> {
     const model = await this.getModelById(id);
-    const apiKey = await this.aiModelRepository.getDecryptedApiKey(id);
+    if (!model.hasApiKey()) {
+      throw new BadRequestException('API key not configured for this model');
+    }
 
-    // Log sensitive data access
-    await this.auditService.createLog({
-      performedBy: adminId,
-      performerName: adminName,
-      action: AuditAction.AI_MODEL_API_KEY_VIEWED,
-      targetType: AuditTargetType.AI_MODEL,
-      targetId: id.toString(),
-      details: `API key accessed for model: ${model.displayName}`,
-      ipAddress,
-      metadata: {
-        modelId: id,
-        provider: model.provider,
-        hasApiKey: !!apiKey
-      },
-    });
+    const apiKey = await this.aiModelRepository.getDecryptedApiKey(id);
 
     return apiKey;
   }

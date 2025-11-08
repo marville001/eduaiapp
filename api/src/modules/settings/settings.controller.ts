@@ -8,11 +8,11 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, ParseIn
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { PermissionAction, PermissionResource } from '../permissions/entities/permission.entity';
 import { UsersService } from '../users/users.service';
-import { UpdateSystemSettingsDto } from './dto/update-system-settings.dto';
+import { AiModelConfigurationService } from './ai-model-configuration.service';
 import { CreateAiModelDto } from './dto/create-ai-model.dto';
 import { UpdateAiModelDto } from './dto/update-ai-model.dto';
+import { UpdateSystemSettingsDto } from './dto/update-system-settings.dto';
 import { SettingsService } from './settings.service';
-import { AiModelConfigurationService } from './ai-model-configuration.service';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -198,8 +198,7 @@ export class SettingsController {
     @CurrentUser() user: JwtPayload,
     @Ip() ipAddress: string,
   ) {
-    const admin = await this.usersService.findOne(user.sub);
-    const apiKey = await this.aiModelService.getDecryptedApiKey(id, user.sub, admin.fullName, ipAddress);
+    const apiKey = await this.aiModelService.getDecryptedApiKey(id);
     return { apiKey };
   }
 }

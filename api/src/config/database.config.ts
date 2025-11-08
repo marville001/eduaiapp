@@ -1,16 +1,18 @@
+import { ChatMessage } from '@/modules/ai/entities/chat-message.entity';
+import { Question } from '@/modules/ai/entities/question.entity';
 import { AuditLog } from '@/modules/audit/entities/audit-log.entity';
+import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
+import { Blog } from '@/modules/blogs/entities/blog.entity';
+import { Page } from '@/modules/pages/entities/page.entity';
 import { Permission } from '@/modules/permissions/entities/permission.entity';
 import { Role } from '@/modules/permissions/entities/role.entity';
+import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 import { SystemSetting } from '@/modules/settings/entities/system-setting.entity';
-import { User } from '@/modules/users/entities/user.entity';
 import { Subject } from '@/modules/subjects/entities/subject.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
-import { Blog } from '@/modules/blogs/entities/blog.entity';
-import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
-import { Page } from '@/modules/pages/entities/page.entity';
-import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 
 config();
 
@@ -26,7 +28,9 @@ export const entities = [
   Blog,
   BlogCategory,
   Page,
-  AiModelConfiguration
+  AiModelConfiguration,
+  Question,
+  ChatMessage
 ];
 
 export default new DataSource({

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Question submission validation
 export const questionSchema = z.object({
-  subject: z.string().min(1, "Please select a subject"),
+  subject: z.number(),
   question: z.string().min(10, "Question must be at least 10 characters long"),
   files: z.array(z.instanceof(File)).optional(),
 });
@@ -11,7 +11,7 @@ export type QuestionFormData = z.infer<typeof questionSchema>;
 
 // AI Chat validation
 export const chatSchema = z.object({
-  subject: z.string().min(1, "Please select a subject"),
+  subject: z.number(),
   message: z.string().min(1, "Message cannot be empty"),
 });
 

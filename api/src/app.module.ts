@@ -8,6 +8,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { DatabaseModule } from './database/database.module';
+import { AiModule } from './modules/ai/ai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blogs/blog.module';
@@ -83,6 +84,7 @@ import { UsersModule } from './modules/users/users.module';
 		SubjectModule,
 		BlogModule,
 		PageModule,
+		AiModule,
 	],
 	providers: [
 		// Global guards

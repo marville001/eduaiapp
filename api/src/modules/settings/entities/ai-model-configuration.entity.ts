@@ -1,5 +1,7 @@
 import { AbstractEntity } from '@/database/abstract.entity';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { ChatMessage } from '@/modules/ai/entities/chat-message.entity';
+import { Question } from '@/modules/ai/entities/question.entity';
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum AiProvider {
   OPENAI = 'openai',
@@ -52,6 +54,13 @@ export class AiModelConfiguration extends AbstractEntity<AiModelConfiguration> {
 
   @Column({ name: 'presence_penalty', type: 'decimal', precision: 3, scale: 2, default: 0.0 })
   presencePenalty: number;
+
+  // Relations
+  @OneToMany(() => Question, (question) => question.aiModel)
+  questions: Question[];
+
+  @OneToMany(() => ChatMessage, (message) => message.aiModel)
+  chatMessages: ChatMessage[];
 
   // Helper method to get provider display name
   getProviderDisplayName(): string {

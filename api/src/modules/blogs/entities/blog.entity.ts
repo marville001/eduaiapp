@@ -1,5 +1,6 @@
 import { AbstractEntity } from '@/database/abstract.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BlogCategory } from './blog-category.entity';
 
 export enum BlogStatus {
   DRAFT = 'draft',
@@ -72,7 +73,7 @@ export class Blog extends AbstractEntity<Blog> {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne('BlogCategory', 'blogs', { nullable: true })
+  @ManyToOne(() => BlogCategory, (category) => category.blogs, { nullable: true })
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
-  category?: any;
+  category?: BlogCategory;
 }
