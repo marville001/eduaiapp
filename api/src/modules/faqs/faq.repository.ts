@@ -38,7 +38,7 @@ export class FaqRepository extends AbstractRepository<Faq> {
 
 		if (search) {
 			queryBuilder.andWhere(
-				'(faq.question LIKE :search OR faq.answer LIKE :search OR faq.tags LIKE :search)',
+				'(faq.question LIKE :search OR faq.answer LIKE :search)',
 				{ search: `%${search}%` }
 			);
 		}
