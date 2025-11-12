@@ -22,6 +22,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SubjectModule } from './modules/subjects/subject.module';
+import { TestimonialModule } from './modules/testimonials/testimonial.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -90,6 +91,7 @@ import { UsersModule } from './modules/users/users.module';
 		PageModule,
 		NavbarMenuModule,
 		FooterMenuModule,
+		TestimonialModule,
 		AiModule,
 		OpenAiModule
 	],

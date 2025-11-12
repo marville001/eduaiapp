@@ -12,6 +12,7 @@ import { Role } from '@/modules/permissions/entities/role.entity';
 import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 import { SystemSetting } from '@/modules/settings/entities/system-setting.entity';
 import { Subject } from '@/modules/subjects/entities/subject.entity';
+import { Testimonial } from '@/modules/testimonials/entities/testimonial.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
@@ -36,7 +37,8 @@ export const entities = [
   ChatMessage,
   NavbarMenu,
   FooterColumn,
-  FooterItem
+  FooterItem,
+  Testimonial
 ];
 
 export default new DataSource({
