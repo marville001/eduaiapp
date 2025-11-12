@@ -3,14 +3,8 @@ import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class GetTestimonialsDto {
 	@IsOptional()
-	@Type(() => Boolean)
-	@Transform(({ value }) => {
-		if (value === 'true') return true;
-		if (value === 'false') return false;
-		return value;
-	})
-	@IsBoolean()
-	activeOnly?: boolean = true;
+	@IsString()
+	activeOnly?: string = "false";
 
 	@IsOptional()
 	@Type(() => Boolean)

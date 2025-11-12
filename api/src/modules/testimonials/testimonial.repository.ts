@@ -16,7 +16,7 @@ export class TestimonialRepository extends AbstractRepository<Testimonial> {
 
 	async findAllWithFilters(query: GetTestimonialsDto): Promise<{ data: Testimonial[]; total: number; }> {
 		const {
-			activeOnly = true,
+			activeOnly = "false",
 			featuredOnly,
 			category,
 			page,
@@ -26,7 +26,7 @@ export class TestimonialRepository extends AbstractRepository<Testimonial> {
 
 		const queryBuilder = this.testimonialRepository.createQueryBuilder('testimonial');
 
-		if (activeOnly) {
+		if (activeOnly === 'true') {
 			queryBuilder.andWhere('testimonial.isActive = :isActive', { isActive: true });
 		}
 

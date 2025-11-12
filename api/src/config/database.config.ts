@@ -3,6 +3,7 @@ import { Question } from '@/modules/ai/entities/question.entity';
 import { AuditLog } from '@/modules/audit/entities/audit-log.entity';
 import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
 import { Blog } from '@/modules/blogs/entities/blog.entity';
+import { Faq } from '@/modules/faqs/entities/faq.entity';
 import { FooterColumn } from '@/modules/footer-menus/entities/footer-column.entity';
 import { FooterItem } from '@/modules/footer-menus/entities/footer-item.entity';
 import { NavbarMenu } from '@/modules/navbar-menus/entities/navbar-menu.entity';
@@ -38,7 +39,8 @@ export const entities = [
   NavbarMenu,
   FooterColumn,
   FooterItem,
-  Testimonial
+  Testimonial,
+  Faq
 ];
 
 export default new DataSource({
