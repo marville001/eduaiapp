@@ -15,6 +15,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blogs/blog.module';
 import { LoggingModule } from './modules/logging/logging.module';
 import { MailModule } from './modules/mail/mail.module';
+import { NavbarMenuModule } from './modules/navbar-menus/navbar-menu.module';
 import { PageModule } from './modules/pages/page.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { SettingsModule } from './modules/settings/settings.module';
@@ -86,6 +87,7 @@ import { UsersModule } from './modules/users/users.module';
 		SubjectModule,
 		BlogModule,
 		PageModule,
+		NavbarMenuModule,
 		AiModule,
 		OpenAiModule
 	],

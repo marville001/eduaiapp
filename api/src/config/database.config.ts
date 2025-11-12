@@ -3,6 +3,7 @@ import { Question } from '@/modules/ai/entities/question.entity';
 import { AuditLog } from '@/modules/audit/entities/audit-log.entity';
 import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
 import { Blog } from '@/modules/blogs/entities/blog.entity';
+import { NavbarMenu } from '@/modules/navbar-menus/entities/navbar-menu.entity';
 import { Page } from '@/modules/pages/entities/page.entity';
 import { Permission } from '@/modules/permissions/entities/permission.entity';
 import { Role } from '@/modules/permissions/entities/role.entity';
@@ -30,7 +31,8 @@ export const entities = [
   Page,
   AiModelConfiguration,
   Question,
-  ChatMessage
+  ChatMessage,
+  NavbarMenu
 ];
 
 export default new DataSource({

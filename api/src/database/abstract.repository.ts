@@ -13,7 +13,7 @@ export abstract class AbstractRepository<T> {
   }
 
   async findAll(options?: FindManyOptions<T>): Promise<T[]> {
-      return this.repository.find(options as FindManyOptions<T>);
+    return this.repository.find(options as FindManyOptions<T>);
   }
 
   async findAndCount(where?: FindManyOptions<T>): Promise<[T[], number]> {
@@ -21,7 +21,7 @@ export abstract class AbstractRepository<T> {
     return this.repository.findAndCount(where as FindManyOptions<T>);
   }
 
-  async findById(id: string | number): Promise<T | null> {
+  async findById(id: number): Promise<T | null> {
     return this.repository.findOne({ where: { id } as unknown as FindOptionsWhere<T> });
   }
 
@@ -31,8 +31,12 @@ export abstract class AbstractRepository<T> {
     return this.findOne({ where: criteria });
   }
 
-  async delete(id: string | number): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async deleteByCriteria(criteria: FindOptionsWhere<T>): Promise<void> {
+    await this.repository.delete(criteria);
   }
 
   async save(entity: T): Promise<T> {
