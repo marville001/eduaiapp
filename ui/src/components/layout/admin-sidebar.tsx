@@ -52,7 +52,6 @@ const menuItems = [
     children: [
       { title: "Navbar Menus", href: "/admin/content/navbar-menus" },
       { title: "Footer Menus", href: "/admin/content/footer-menus" },
-      { title: "Banners", href: "/admin/content/banners" },
       { title: "Testimonials", href: "/admin/content/testimonials" },
       { title: "FAQs", href: "/admin/content/faqs" },
     ],

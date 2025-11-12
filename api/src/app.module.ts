@@ -13,6 +13,7 @@ import { OpenAiModule } from './modules/ai/openai/openai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blogs/blog.module';
+import { FooterMenuModule } from './modules/footer-menus/footer-menu.module';
 import { LoggingModule } from './modules/logging/logging.module';
 import { MailModule } from './modules/mail/mail.module';
 import { NavbarMenuModule } from './modules/navbar-menus/navbar-menu.module';
@@ -88,6 +89,7 @@ import { UsersModule } from './modules/users/users.module';
 		BlogModule,
 		PageModule,
 		NavbarMenuModule,
+		FooterMenuModule,
 		AiModule,
 		OpenAiModule
 	],
