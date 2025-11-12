@@ -17,7 +17,7 @@ import {
   X
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const menuItems = [
@@ -97,6 +97,7 @@ export default function AdminSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = usePathname();
+  const router = useRouter();
 
   const user = useUserStore((state) => state.user);
 
@@ -151,10 +152,12 @@ export default function AdminSidebar() {
             {menuItems.map((item) => (
               <div key={item.title}>
                 {item.children ? (
-                  // Menu item with children
                   <div>
                     <button
-                      onClick={() => toggleExpanded(item.title)}
+                      onClick={() => {
+                        toggleExpanded(item.title);
+                        router.push(item.href);
+                      }}
                       className={`
                         w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors
                         ${isActive(item.href)
@@ -168,7 +171,12 @@ export default function AdminSidebar() {
                         <span>{item.title}</span>
                       </div>
                       <ChevronDown
-                        className={`h-4 w-4 transition-transform ${isExpanded(item.title) ? 'rotate-180' : ''
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleExpanded(item.title);
+                        }}
+                        className={`h-4 w-4 shrink-0 transition-transform ${isExpanded(item.title) ? 'rotate-180' : ''
                           }`}
                       />
                     </button>
