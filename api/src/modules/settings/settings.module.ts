@@ -1,15 +1,15 @@
+import { EncryptionService } from '@/common/services/encryption.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '../audit/audit.module';
 import { UsersModule } from '../users/users.module';
-import { EncryptionService } from '@/common/services/encryption.service';
-import { SystemSetting } from './entities/system-setting.entity';
-import { AiModelConfiguration } from './entities/ai-model-configuration.entity';
-import { SystemSettingsRepository } from './system-settings.repository';
 import { AiModelConfigurationRepository } from './ai-model-configuration.repository';
+import { AiModelConfigurationService } from './ai-model-configuration.service';
+import { AiModelConfiguration } from './entities/ai-model-configuration.entity';
+import { SystemSetting } from './entities/system-setting.entity';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
-import { AiModelConfigurationService } from './ai-model-configuration.service';
+import { SystemSettingsRepository } from './system-settings.repository';
 
 @Module({
   imports: [
@@ -27,4 +27,4 @@ import { AiModelConfigurationService } from './ai-model-configuration.service';
   ],
   exports: [SettingsService, AiModelConfigurationService],
 })
-export class SettingsModule {}
+export class SettingsModule { }

@@ -9,6 +9,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { DatabaseModule } from './database/database.module';
 import { AiModule } from './modules/ai/ai.module';
+import { OpenAiModule } from './modules/ai/openai/openai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blogs/blog.module';
@@ -54,7 +55,8 @@ import { UsersModule } from './modules/users/users.module';
 				MAIL_PASSWORD: Joi.string().required(),
 				MAIL_FROM: Joi.string().optional(),
 
-				FRONTEND_URL: Joi.string().optional(),
+				FRONTEND_URL: Joi.string().required(),
+				BACKEND_URL: Joi.string().required(),
 
 				THROTTLE_TTL: Joi.number().required(),
 				THROTTLE_LIMIT: Joi.number().required(),
@@ -85,6 +87,7 @@ import { UsersModule } from './modules/users/users.module';
 		BlogModule,
 		PageModule,
 		AiModule,
+		OpenAiModule
 	],
 	providers: [
 		// Global guards

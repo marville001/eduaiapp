@@ -124,6 +124,19 @@ export default function AiModelCard({
                   {getStatusIcon()}
                   <span className="ml-1">{getStatusText()}</span>
                 </Badge>
+
+                <div className="flex items-center gap-1">
+                  {(model.lastConnectionSuccessful && model.lastConnectionAt) && (
+                    <Badge variant="default">
+                      Last connected: {formatDate(model.lastConnectionAt)}
+                    </Badge>
+                  )}
+                  {model.lastConnectionError && (
+                    <Badge variant="destructive">
+                      Error: {model.lastConnectionError}
+                    </Badge>
+                  )}
+                </div>
               </div>
               <p className="text-sm text-gray-600 mb-2">
                 {providerInfo.name} • {model.modelName}
@@ -220,7 +233,7 @@ export default function AiModelCard({
               <code className="text-sm font-mono break-all">{apiKey}</code>
             ) : (
               <span className="text-sm text-gray-500">
-                {apiKey === null ? 'Not configured' : '••••••••••••••••'}
+                {'••••••••••••••••'}
               </span>
             )}
           </div>
@@ -238,14 +251,6 @@ export default function AiModelCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onTestConnection(model.id)}
-            >
-              <TestTube className="h-4 w-4 mr-2" />
-              Test
-            </Button>
 
             {!isDefault && (
               <Button
@@ -257,6 +262,14 @@ export default function AiModelCard({
                 Set Default
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onTestConnection(model.id)}
+            >
+              <TestTube className="h-4 w-4 mr-2" />
+              Test Connection
+            </Button>
           </div>
         </div>
       </CardContent>

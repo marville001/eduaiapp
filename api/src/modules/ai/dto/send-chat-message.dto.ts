@@ -7,8 +7,8 @@ export class SendChatMessageDto {
 	@MinLength(1)
 	message: string;
 
-	@ApiPropertyOptional({ description: 'Specific AI model ID to use for this message' })
+	@ApiPropertyOptional({ description: 'User ID of the question asker' })
 	@IsOptional()
 	@IsNumber()
-	aiModelId?: number;
+	userId?: number;
 }

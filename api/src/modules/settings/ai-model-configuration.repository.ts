@@ -81,6 +81,14 @@ export class AiModelConfigurationRepository extends AbstractRepository<AiModelCo
     }
   }
 
+  async updateConnectionStatus(id: number, successful: boolean, errorMessage?: string): Promise<void> {
+    await this.repository.update({ id }, {
+      lastConnectionAt: new Date(),
+      lastConnectionSuccessful: successful,
+      lastConnectionError: successful ? null : errorMessage,
+    });
+  }
+
   async deleteModel(id: number): Promise<void> {
     const model = await this.findById(id);
     if (!model) {

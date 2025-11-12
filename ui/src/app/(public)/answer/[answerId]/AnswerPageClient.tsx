@@ -3,11 +3,22 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useSettings } from '@/hooks/useSettings';
 import aiChatApi from "@/lib/api/ai-chat.api";
+import { getFileUrl } from '@/lib/utils';
+import { useUserStore } from '@/stores/user.store';
 import { ChatMessage, Question } from "@/types/ai-chat";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Bot, CheckCircle, Clock, MessageSquare, Send, User, XCircle } from "lucide-react";
+import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -25,26 +36,9 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	const router = useRouter();
+	const currentUser = useUserStore(state => state.user);
 
-	const loadQuestion = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			const questionData = await aiChatApi.getQuestionWithMessages(answerId);
-			setQuestion(questionData);
-			setChatMessages(questionData.chatMessages || []);
-		} catch (err) {
-			setError("Failed to load question. Please try again.");
-			console.error("Error loading question:", err);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [answerId]);
-
-	useEffect(() => {
-		loadQuestion();
-	}, [loadQuestion]);
+	const { data: settings } = useSettings();
 
 	const sendMessage = async () => {
 		if (!newMessage.trim() || isSending || !question) return;
@@ -54,7 +48,10 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 		setNewMessage("");
 
 		try {
-			await aiChatApi.sendChatMessage(answerId, { message });
+			await aiChatApi.sendChatMessage(answerId, {
+				message,
+				userId: currentUser?.id,
+			});
 
 			// Reload the question to get all messages including the AI response
 			await loadQuestion();
@@ -113,6 +110,40 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 		}
 	};
 
+	const loadQuestion = useCallback(async (silently = false) => {
+		try {
+			setIsLoading(silently ? false : true);
+			setError(null);
+
+			const questionData = await aiChatApi.getQuestionWithMessages(answerId);
+			setQuestion(questionData);
+			setChatMessages(questionData.chatMessages || []);
+		} catch (err) {
+			setError("Failed to load question. Please try again.");
+			console.error("Error loading question:", err);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [answerId]);
+
+	useEffect(() => {
+		loadQuestion();
+	}, [loadQuestion]);
+
+	useEffect(() => {
+		if (!question?.status) return;
+
+		let interval: NodeJS.Timeout;
+		if (question?.status === "pending") {
+			interval = setInterval(() => {
+				loadQuestion(true);
+			}, 5000); // Poll every 5 seconds
+		}
+		return () => {
+			if (interval) clearInterval(interval);
+		};
+	}, [loadQuestion, question?.status]);
+
 	if (isLoading) {
 		return (
 			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -144,19 +175,14 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 
 	const statusInfo = getStatusInfo(question.status);
 
+	console.log(question);
+
+
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-4xl mx-auto p-6">
+			<div className="max-w-4xl max-h-[calc(100vh-100px)] overflow-y-auto mx-auto p-6">
 				{/* Header */}
-				<div className="mb-6">
-					<Button
-						variant="ghost"
-						onClick={() => router.back()}
-						className="mb-4 text-gray-600 hover:text-gray-900"
-					>
-						<ArrowLeft className="h-4 w-4 mr-2" />
-						Back
-					</Button>
+				{/* <div className="mb-6">
 
 					<div className="flex items-center justify-between">
 						<h1 className="text-2xl font-bold text-gray-900">Question Answer</h1>
@@ -165,14 +191,14 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 							<span className="ml-1">{statusInfo.text}</span>
 						</Badge>
 					</div>
-				</div>
+				</div> */}
 
 				{/* Question Card */}
-				<Card className="mb-6">
+				<Card className="mb-6 bg-white">
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-lg">Your Question</CardTitle>
-							<Badge variant="outline">{question.subject}</Badge>
+							<Badge variant="outline">{question.subject?.name}</Badge>
 						</div>
 					</CardHeader>
 					<CardContent>
@@ -182,7 +208,9 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 								<p className="text-sm text-gray-600 mb-2">Attachments:</p>
 								<div className="flex flex-wrap gap-2">
 									{question.fileAttachments.map((file, index) => (
-										<Badge key={index} variant="secondary">{file}</Badge>
+										<Link key={index} href={`${getFileUrl(file.accessKey)}`} target="_blank" className="flex flex-wrap gap-2">
+											<Badge variant="secondary">{file.name}</Badge>
+										</Link>
 									))}
 								</div>
 							</div>
@@ -236,81 +264,85 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 
 				{/* Chat Section - Only show if question is answered */}
 				{question.status === "answered" && (
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-lg">Continue Conversation</CardTitle>
-							<p className="text-sm text-gray-600">
-								Ask follow-up questions to deepen your understanding
-							</p>
-						</CardHeader>
-						<CardContent>
-							{/* Chat Messages */}
-							{chatMessages.length > 0 && (
-								<div className="mb-6">
-									<hr className="mb-4 border-gray-200" />
-									<div className="max-h-96 overflow-y-auto border rounded-lg p-4 bg-gray-50">
-										<div className="space-y-4">
-											{chatMessages.map((message) => (
-												<div
-													key={message.messageId}
-													className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-												>
-													<div
-														className={`max-w-[80%] rounded-lg p-3 ${message.role === "user"
-																? "bg-blue-600 text-white"
-																: "bg-white text-gray-900 border border-gray-200"
-															}`}
-													>
-														<div className="flex items-center mb-1">
-															{message.role === "user" ? (
-																<User className="h-4 w-4 mr-2" />
-															) : (
-																<Bot className="h-4 w-4 mr-2" />
-															)}
-															<span className="text-sm font-medium">
-																{message.role === "user" ? "You" : "AI Assistant"}
-															</span>
-														</div>
-														<p className="whitespace-pre-wrap">{message.content}</p>
-														<div className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"
-															}`}>
-															{formatTimestamp(message.createdAt)}
-														</div>
-													</div>
-												</div>
-											))}
+					<>
+						{/* Chat Messages */}
+						{chatMessages.length > 0 && (
+							<div className="space-y-4">
+								{chatMessages.map((message) => (
+									<div
+										key={message.messageId}
+										className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+									>
+										<div
+											className={`max-w-[80%] rounded-lg p-3 ${message.role === "user"
+												? "bg-blue-600 text-white"
+												: "bg-white text-gray-900 border border-gray-200"
+												}`}
+										>
+											<div className="flex items-center mb-1">
+												{message.role === "user" ? (
+													<User className="h-5 w-5 mr-2" />
+												) : (
+													<Bot className="h-5 w-5 mr-2 text-primary" />
+												)}
+												<span className="text-sm font-medium">
+													{message.role === "user" ? "You" : "AI"}
+												</span>
+											</div>
+											<p className="whitespace-pre-wrap">{message.content}</p>
+											<div className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"
+												}`}>
+												{formatTimestamp(message.createdAt)}
+											</div>
 										</div>
 									</div>
-									<hr className="my-4 border-gray-200" />
-								</div>
-							)}
-
-							{/* Message Input */}
-							<div className="flex gap-2">
-								<Textarea
-									value={newMessage}
-									onChange={(e) => setNewMessage(e.target.value)}
-									onKeyPress={handleKeyPress}
-									placeholder="Ask a follow-up question..."
-									className="flex-1 resize-none min-h-[60px]"
-									disabled={isSending}
-								/>
-								<Button
-									onClick={sendMessage}
-									disabled={!newMessage.trim() || isSending}
-									className="self-end h-[60px] w-[60px]"
-								>
-									{isSending ? (
-										<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-									) : (
-										<Send className="h-4 w-4" />
-									)}
-								</Button>
+								))}
 							</div>
-						</CardContent>
-					</Card>
+						)}
+
+						{/* Message Input */}
+						<div className="flex gap-2 bg-white z-10 mt-3">
+							<Textarea
+								value={newMessage}
+								onChange={(e) => setNewMessage(e.target.value)}
+								onKeyPress={handleKeyPress}
+								placeholder="Ask a follow-up question..."
+								className="flex-1 resize-none min-h-[60px]"
+								disabled={isSending}
+							/>
+							<Button
+								onClick={sendMessage}
+								disabled={!newMessage.trim() || isSending}
+								className="self-end h-[60px] w-[60px]"
+							>
+								{isSending ? (
+									<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+								) : (
+									<Send className="h-4 w-4" />
+								)}
+							</Button>
+						</div>
+					</>
 				)}
 			</div>
+
+			<Dialog open={question.status === "pending"}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle />
+						<DialogDescription />
+					</DialogHeader>
+					<div className=" py-5 bg-gray-50 flex items-center justify-center">
+						<div className="text-center">
+							<div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+							<p className="text-gray-600">
+								Your question is being processed. Please wait...
+							</p>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
+
 		</div>
 	);
 }

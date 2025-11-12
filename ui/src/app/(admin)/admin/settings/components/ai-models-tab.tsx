@@ -70,9 +70,11 @@ export default function AiModelsTab() {
       } else {
         toast.error('Connection test failed');
       }
+      queryClient.invalidateQueries({ queryKey: ['ai-models'] });
     },
     onError: (error) => {
       toast.error(parseError(error, 'Connection test failed'));
+      queryClient.invalidateQueries({ queryKey: ['ai-models'] });
     },
   });
 
@@ -100,6 +102,7 @@ export default function AiModelsTab() {
   };
 
   const handleEditSuccess = () => {
+    handleTestConnection(editingModel!.id);
     setEditingModel(null);
     queryClient.invalidateQueries({ queryKey: ['ai-models'] });
   };

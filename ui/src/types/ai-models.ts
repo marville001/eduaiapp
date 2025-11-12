@@ -22,6 +22,9 @@ export interface AiModelConfiguration {
   presencePenalty: number;
   createdAt: string;
   updatedAt: string;
+  lastConnectionAt?: string;
+  lastConnectionSuccessful?: boolean;
+  lastConnectionError?: string;
 }
 
 export interface CreateAiModelDto {

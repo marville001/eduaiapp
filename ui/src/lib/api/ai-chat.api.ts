@@ -1,9 +1,8 @@
 import type {
-	AskQuestionRequest,
 	ChatMessage,
 	Question,
 	QuestionStats,
-	SendChatMessageRequest,
+	SendChatMessageRequest
 } from '@/types/ai-chat';
 import apiClient from '.';
 
@@ -14,8 +13,12 @@ export interface ApiResponse<T> {
 }
 
 // AI Chat API Functions
-export const askQuestion = async (data: AskQuestionRequest): Promise<Question> => {
-	const response = await apiClient.post<ApiResponse<Question>>('/ai/ask', data);
+export const askQuestion = async (data: FormData): Promise<Question> => {
+	const response = await apiClient.post<ApiResponse<Question>>('/ai/ask', data, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	});
 	return response.data.data;
 };
 

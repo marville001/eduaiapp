@@ -1,3 +1,4 @@
+import { DocumentMeta } from '@/common/class/document-meta';
 import { AbstractRepository } from '@/database/abstract.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,14 +19,14 @@ export class AiRepository extends AbstractRepository<Question> {
 	}
 
 	// Question methods
-	async createQuestion(data: AskQuestionDto, aiModelId: number): Promise<Question> {
+	async createQuestion(data: AskQuestionDto, aiModelId: number, attachments: DocumentMeta[] = []): Promise<Question> {
 		const question = this.questionRepository.create({
 			subjectId: data.subject,
 			question: data.question,
 			userId: data.userId,
-			fileAttachments: data.fileAttachments,
 			aiModelId,
 			status: QuestionStatus.PENDING,
+			fileAttachments: attachments,
 		});
 
 		return await this.questionRepository.save(question);
@@ -57,7 +58,7 @@ export class AiRepository extends AbstractRepository<Question> {
 	async findQuestionById(questionId: string): Promise<Question | null> {
 		return await this.questionRepository.findOne({
 			where: { questionId },
-			relations: ['user'],
+			relations: ['user', 'subject'],
 		});
 	}
 
@@ -65,14 +66,14 @@ export class AiRepository extends AbstractRepository<Question> {
 		return await this.questionRepository.find({
 			where: { userId },
 			order: { createdAt: 'DESC' },
-			relations: ['user'],
+			relations: ['user', 'subject'],
 		});
 	}
 
 	async findQuestionWithMessages(questionId: string): Promise<Question | null> {
 		const question = await this.questionRepository.findOne({
 			where: { questionId },
-			relations: ['user'],
+			relations: ['user', 'subject'],
 		});
 
 		if (question) {
@@ -87,7 +88,7 @@ export class AiRepository extends AbstractRepository<Question> {
 	// Chat message methods
 	async createChatMessage(data: {
 		questionId: number;
-		userId: number;
+		userId?: number;
 		role: MessageRole;
 		content: string;
 		aiModelId?: number;

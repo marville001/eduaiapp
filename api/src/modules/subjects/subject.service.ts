@@ -1,9 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { SubjectRepository } from './subject.repository';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { Subject } from './entities/subject.entity';
-import { boolean } from 'joi';
+import { SubjectRepository } from './subject.repository';
 
 @Injectable()
 export class SubjectService {
@@ -52,11 +51,7 @@ export class SubjectService {
     }
 
     if (parentId !== undefined && !isNaN(parentId)) {
-      if (parentId === 0) {
-        // Get only main subjects (no parent)
-        queryBuilder.where('subject.parentSubjectId IS NULL');
-      } else {
-        // Get children of specific parent
+      if (parentId !== 0) {
         queryBuilder.where('subject.parentSubjectId = :parentId', { parentId });
       }
     }
@@ -72,7 +67,7 @@ export class SubjectService {
 
     if (onlyActive) {
       queryBuilder.andWhere('subject.isActive = :isActive', { isActive: true });
-      
+
       // Also filter subSubjects and subSubSubjects by isActive but return parent subjects even if they have no active children
       queryBuilder.andWhere('(subSubjects.isActive = :isActive OR subSubjects.id IS NULL)', { isActive: true });
       queryBuilder.andWhere('(subSubSubjects.isActive = :isActive OR subSubSubjects.id IS NULL)', { isActive: true });

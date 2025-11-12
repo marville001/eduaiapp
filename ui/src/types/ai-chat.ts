@@ -1,7 +1,21 @@
 // AI Chat Types
+
+import { Subject } from '@/lib/api/subject.api';
+
+interface DocumentMeta {
+	name: string;
+	fileType: string;
+	size: number;
+	mimeType: string;
+	uploadedAt: string;
+	accessKey: string;
+	url: string;
+}
 export interface Question {
+	id: number;
 	questionId: string;
-	subject: string;
+	subjectId: number;
+	subject: Subject;
 	question: string;
 	answer?: string;
 	status: 'pending' | 'answered' | 'failed';
@@ -9,7 +23,7 @@ export interface Question {
 	aiModelId?: string;
 	processingTimeMs?: number;
 	tokenUsage?: number;
-	fileAttachments?: string[];
+	fileAttachments?: DocumentMeta[];
 	errorMessage?: string;
 	createdAt: string;
 	updatedAt: string;
@@ -58,7 +72,7 @@ export interface AskQuestionRequest {
 
 export interface SendChatMessageRequest {
 	message: string;
-	userId?: string;
+	userId?: number;
 }
 
 // UI State types

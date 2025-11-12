@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import OpenAI from 'openai';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction, AuditTargetType } from '../audit/entities/audit-log.entity';
 import { AiModelConfigurationRepository } from './ai-model-configuration.repository';
@@ -10,7 +11,7 @@ import { AiModelConfiguration, AiProvider } from './entities/ai-model-configurat
 export class AiModelConfigurationService {
   constructor(
     private readonly aiModelRepository: AiModelConfigurationRepository,
-    private readonly auditService: AuditService,
+    @Inject(forwardRef(() => AuditService)) private readonly auditService: AuditService,
   ) { }
 
   async getAllModels(): Promise<AiModelConfiguration[]> {
@@ -264,6 +265,13 @@ export class AiModelConfigurationService {
       },
     });
 
+    if (!isConnected) {
+      await this.aiModelRepository.updateConnectionStatus(id, false, "Connection test failed");
+    }
+    else {
+      await this.aiModelRepository.updateConnectionStatus(id, true, null);
+    }
+
     return isConnected;
   }
 
@@ -306,9 +314,17 @@ export class AiModelConfigurationService {
   }
 
   private async testOpenAIConnection(apiKey: string): Promise<boolean> {
-    // Implement OpenAI API test call
-    // This is a placeholder - implement actual API call
-    return true;
+    try {
+      const openai = new OpenAI({
+        apiKey: apiKey,
+      });
+      // Make a simple request to verify the API key
+      await openai.models.list();
+      return true;
+    } catch (error) {
+      console.error('Failed to validate OpenAI API key', error);
+      return false;
+    }
   }
 
   private async testAnthropicConnection(apiKey: string): Promise<boolean> {

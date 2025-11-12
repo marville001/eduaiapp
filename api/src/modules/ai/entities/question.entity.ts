@@ -1,3 +1,4 @@
+import { DocumentMeta } from '@/common/class/document-meta';
 import { AbstractEntity } from '@/database/abstract.entity';
 import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 import { Subject } from '@/modules/subjects/entities/subject.entity';
@@ -42,7 +43,7 @@ export class Question extends AbstractEntity<Question> {
 	tokenUsage?: number;
 
 	@Column({ name: 'file_attachments', type: 'json', nullable: true })
-	fileAttachments?: string[];
+	fileAttachments?: DocumentMeta[];
 
 	@Column({ name: 'error_message', type: 'text', nullable: true })
 	errorMessage?: string;

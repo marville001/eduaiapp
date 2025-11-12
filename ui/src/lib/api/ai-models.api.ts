@@ -58,13 +58,13 @@ export const toggleAiModelStatus = async (id: number): Promise<AiModelConfigurat
 };
 
 export const testAiModelConnection = async (id: number): Promise<boolean> => {
-  const response = await apiClient.post<TestConnectionResponse>(`/settings/ai-models/${id}/test-connection`);
-  return response.data.success;
+  const response = await apiClient.post<{ data: TestConnectionResponse; }>(`/settings/ai-models/${id}/test-connection`);
+  return response.data?.data?.success;
 };
 
 export const getAiModelApiKey = async (id: number): Promise<string | null> => {
-  const response = await apiClient.get<ApiKeyResponse>(`/settings/ai-models/${id}/api-key`);
-  return response.data.apiKey;
+  const response = await apiClient.get<{ data: ApiKeyResponse; }>(`/settings/ai-models/${id}/api-key`);
+  return response.data?.data?.apiKey;
 };
 
 const aiModelsApi = {

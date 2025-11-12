@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useSettings } from '@/hooks/useSettings';
 import aiChatApi from '@/lib/api/ai-chat.api';
 import { Subject, subjectApi } from '@/lib/api/subject.api';
 import { questionSchema, type QuestionFormData } from "@/lib/validations";
@@ -14,8 +15,7 @@ import { Send, Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
+import { toast } from 'react-toastify';
 
 
 interface AiChatFormProps {
@@ -33,6 +33,8 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
   const router = useRouter();
   const { slug } = useParams<{ slug: string; }>();
 
+  const { data: settings } = useSettings();
+
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
@@ -48,22 +50,21 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
     setIsSubmitting(true);
 
     try {
-      // TODO: Upload files if any and get file URLs
-      const fileAttachments: string[] = [];
-
-      // Prepare the question data
-      const questionData = {
-        subject: data.subject,
-        question: data.question,
-        fileAttachments: fileAttachments.length > 0 ? fileAttachments : undefined,
-        userId: currentUser?.id
-      };
+      const formData = new FormData();
+      formData.append('subject', data.subject.toString());
+      formData.append('question', data.question);
+      if (currentUser?.id) {
+        formData.append('userId', currentUser.id.toString());
+      }
+      uploadedFiles.forEach((file) => {
+        formData.append('files', file);
+      });
 
       // Submit the question
-      const question = await aiChatApi.askQuestion(questionData);
+      const question = await aiChatApi.askQuestion(formData);
 
       // Show success message
-      toast.success("Question submitted successfully! Redirecting to answer page...");
+      // toast.success("Question submitted successfully! Redirecting to answer page...");
 
       // Redirect to the answer page
       router.push(`/answer/${question.questionId}`);
@@ -99,6 +100,28 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
+
+      if (settings?.maxFileUploadSize) {
+        const maxSizeInBytes = settings.maxFileUploadSize * 1024 * 1024; // Convert MB to Bytes
+        const oversizedFiles = files.filter(file => file.size > maxSizeInBytes);
+        if (oversizedFiles.length > 0) {
+          toast.error(`Some files exceed the maximum size of ${settings.maxFileUploadSize}MB and were not added.`);
+          // Remove oversized files from the list
+          files.splice(0, files.length, ...files.filter(file => file.size <= maxSizeInBytes));
+        }
+      }
+
+      if (settings?.allowedFileTypes && settings.allowedFileTypes.length > 0) {
+        const invalidFiles = files.filter(file => !settings.allowedFileTypes?.some(t => file.type.endsWith(t)));
+        if (invalidFiles.length > 0) {
+          toast.error(`Some files have invalid types and were not added.`);
+          // Remove invalid type files from the list
+          files.splice(0, files.length, ...files.filter(file => settings.allowedFileTypes?.some(t => file.type.endsWith(t))));
+        }
+      }
+
+      if (files.length === 0) return;
+
       setUploadedFiles(prev => [...prev, ...files]);
     }
   };
@@ -269,4 +292,4 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
       </CardContent>
     </Card>
   );
-}
+};

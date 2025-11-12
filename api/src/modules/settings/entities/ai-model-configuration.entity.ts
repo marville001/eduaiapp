@@ -55,6 +55,16 @@ export class AiModelConfiguration extends AbstractEntity<AiModelConfiguration> {
   @Column({ name: 'presence_penalty', type: 'decimal', precision: 3, scale: 2, default: 0.0 })
   presencePenalty: number;
 
+  // Connection status columns
+  @Column({ name: 'last_connection_at', type: 'timestamp', nullable: true })
+  lastConnectionAt?: Date;
+
+  @Column({ name: 'last_connection_successful', type: 'boolean', nullable: true })
+  lastConnectionSuccessful?: boolean;
+
+  @Column({ name: 'last_connection_error', type: 'text', nullable: true })
+  lastConnectionError?: string;
+
   // Relations
   @OneToMany(() => Question, (question) => question.aiModel)
   questions: Question[];

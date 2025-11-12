@@ -1,10 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ChevronDown, Menu, X, Calculator, Atom, Globe, Palette, Code, Brain, GraduationCap, Home, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from "@/components/ui/button";
-import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,9 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUserStore } from '@/stores/user.store';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/hooks/useSettings';
 import { Subject, subjectApi } from '@/lib/api/subject.api';
+import { useUserStore } from '@/stores/user.store';
+import { ChevronDown, GraduationCap, Home, LogOut, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const tools = [
   { name: "AI Essay Writer", href: "/tools/essay-writer" },
@@ -31,6 +33,8 @@ export default function Navigation() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
+
+  const { data: settings } = useSettings();
 
   const getUserInitials = () => {
     if (!user) return 'U';
@@ -54,9 +58,9 @@ export default function Navigation() {
       subjectApi.getHierarchical(true).then((data) => {
         setSubjects(data);
       });
-    }
+    };
     getSubjects();
-  }, [])
+  }, []);
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -65,10 +69,13 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="bg-primary p-2 rounded-lg">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">MasomoAI</span>
+              {/* <div className="bg-primary p-2 rounded-lg"> */}
+              <img src={settings?.appLogo} alt="" className='h-10 ' />
+              {/* <Brain className="h-6 w-6 text-white" /> */}
+              {/* </div> */}
+              <span className="text-xl font-bold text-gray-900">
+                {settings?.platformName}
+              </span>
             </Link>
           </div>
 

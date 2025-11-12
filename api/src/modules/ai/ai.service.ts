@@ -1,3 +1,5 @@
+import { DocumentMeta } from '@/common/class/document-meta';
+import { buildFileAccessUrl } from '@/utils/files';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { AiModelConfigurationService } from '../settings/ai-model-configuration.service';
 import { AiModelConfiguration, AiProvider } from '../settings/entities/ai-model-configuration.entity';
@@ -7,6 +9,7 @@ import { AskQuestionDto } from './dto/ask-question.dto';
 import { SendChatMessageDto } from './dto/send-chat-message.dto';
 import { ChatMessage, MessageRole } from './entities/chat-message.entity';
 import { Question, QuestionStatus } from './entities/question.entity';
+import { OpenAiService } from './openai/openai.service';
 
 @Injectable()
 export class AiService {
@@ -16,12 +19,14 @@ export class AiService {
 		private readonly aiRepository: AiRepository,
 		private readonly aiModelService: AiModelConfigurationService,
 		private readonly subjectService: SubjectService,
+		private readonly openAiService: OpenAiService,
+
 	) { }
 
-	async askQuestion(data: AskQuestionDto): Promise<Question> {
+	async askQuestion(data: AskQuestionDto, attachedDocuments: DocumentMeta[]): Promise<Question> {
 		const aiModel = await this.aiModelService.getDefaultModel();
 		// Create the question record
-		const question = await this.aiRepository.createQuestion(data, aiModel.id);
+		const question = await this.aiRepository.createQuestion(data, aiModel.id, attachedDocuments);
 
 		// Process the question asynchronously
 		this.processQuestion(question).catch(error => {
@@ -61,24 +66,25 @@ export class AiService {
 		return question;
 	}
 
-	async sendChatMessage(questionId: string, data: SendChatMessageDto, userId: number): Promise<ChatMessage> {
+	async sendChatMessage(questionId: string, data: SendChatMessageDto): Promise<ChatMessage> {
 		// Verify the question exists and user has access
-		const question = await this.getQuestion(questionId, userId);
+		const question = await this.getQuestion(questionId);
 
 		if (!question.isAnswered()) {
-			throw new BadRequestException('Cannot send messages to unanswered questions');
+			// throw new BadRequestException('Cannot send messages to unanswered questions');
+			throw new BadRequestException('Failed. Question processing is not yet complete.');
 		}
 
 		// Create user message
 		const userMessage = await this.aiRepository.createChatMessage({
 			questionId: question.id,
-			userId,
+			userId: data.userId,
 			role: MessageRole.USER,
 			content: data.message,
 		});
 
 		// Process the AI response asynchronously
-		this.processChatMessage(question, data.message, data.aiModelId).catch(error => {
+		await this.processChatMessage(question, data.message).catch(error => {
 			this.logger.error(`Failed to process chat message for question ${questionId}:`, error);
 		});
 
@@ -146,19 +152,20 @@ export class AiService {
 				QuestionStatus.FAILED,
 				processingTime,
 				null,
-				error.message,
+				"Failed to process the question. Please try again later.",
+				// error.message,
 			);
 
 			this.logger.error(`Question ${question.questionId} processing failed:`, error);
 		}
 	}
 
-	private async processChatMessage(question: Question, message: string, aiModelId?: number): Promise<void> {
+	private async processChatMessage(question: Question, message: string): Promise<void> {
 		const startTime = Date.now();
 
 		try {
 			// Get AI model to use
-			const aiModel = await this.getAiModelForMessage(question, aiModelId);
+			const aiModel = await this.getAiModelForMessage(question);
 
 			if (!aiModel) {
 				throw new Error('No AI model available');
@@ -210,15 +217,7 @@ export class AiService {
 		return await this.aiModelService.getDefaultModel();
 	}
 
-	private async getAiModelForMessage(question: Question, aiModelId?: number): Promise<AiModelConfiguration | null> {
-		if (aiModelId) {
-			try {
-				return await this.aiModelService.getModelById(aiModelId);
-			} catch (error) {
-				this.logger.warn(`Specified AI model ${aiModelId} not found, using default`);
-			}
-		}
-
+	private async getAiModelForMessage(question: Question): Promise<AiModelConfiguration | null> {
 		return await this.getAiModelForQuestion(question);
 	}
 
@@ -236,7 +235,18 @@ export class AiService {
 		// Make API call based on provider
 		return await this.callAiProvider(aiModel, [
 			{ role: 'system', content: systemPrompt },
-			{ role: 'user', content: userPrompt },
+			{
+				role: 'user',
+				content: (question?.fileAttachments && question?.fileAttachments.length > 0) ?
+					[
+						{ type: 'input_text', text: userPrompt },
+						...(question.fileAttachments.map(file => ({
+							type: file.mimeType.startsWith('image/') ? 'input_image' : 'input_file',
+							[file.mimeType.startsWith('image/') ? "image_url" : "file_url"]: buildFileAccessUrl(file.accessKey)
+						})))
+					]
+					: [{ type: 'input_text', text: userPrompt }],
+			},
 		]);
 	}
 
@@ -273,11 +283,11 @@ export class AiService {
 			;
 	}
 
-	private buildUserPrompt(question: string, fileAttachments?: string[]): string {
+	private buildUserPrompt(question: string, fileAttachments?: DocumentMeta[]): string {
 		let prompt = `Question: ${question}`;
 
 		if (fileAttachments && fileAttachments.length > 0) {
-			prompt += `\n\nAttached files: ${fileAttachments.join(', ')}`;
+			prompt += `\n\nAttached files: ${fileAttachments.map(f => buildFileAccessUrl(f.accessKey)).join(', ')}`;
 			prompt += '\nPlease consider the attached files in your response if relevant.';
 		}
 
@@ -285,16 +295,23 @@ export class AiService {
 	}
 
 	private buildChatSystemPrompt(question: Question): string {
-		return `You are continuing a conversation with a student about their ${question.subject} question. 
+		let prompt = `You are continuing a conversation with a student about their ${question.subject} question. 
 				Original question: "${question.question}"
 				Your previous answer: "${question.answer}"
 
 				Continue to help the student understand the topic. Be conversational and supportive.`;
+
+		if (question.fileAttachments && question.fileAttachments.length > 0) {
+			prompt += `\n\nAttached files: ${question.fileAttachments.map(f => buildFileAccessUrl(f.accessKey)).join(', ')}`;
+			prompt += '\nPlease consider the attached files in your response if relevant.';
+		}
+
+		return prompt;
 	}
 
 	private async callAiProvider(
 		aiModel: AiModelConfiguration,
-		messages: { role: string; content: string; }[],
+		messages: any[],
 	): Promise<{ content: string; tokenUsage?: number; }> {
 		const apiKey = await this.aiModelService.getDecryptedApiKey(aiModel.id);
 
@@ -304,30 +321,23 @@ export class AiService {
 
 		switch (aiModel.provider) {
 			case AiProvider.OPENAI:
-				return await this.callOpenAI(aiModel, messages, apiKey);
-			case AiProvider.ANTHROPIC:
-				return await this.callAnthropic(aiModel, messages, apiKey);
-			case AiProvider.GOOGLE:
-				return await this.callGoogleAI(aiModel, messages, apiKey);
-			case AiProvider.CUSTOM:
-				return await this.callCustomProvider(aiModel, messages, apiKey);
+				return await this.callOpenAI(messages);
+			// case AiProvider.ANTHROPIC:
+			// 	return await this.callAnthropic(aiModel, messages, apiKey);
+			// case AiProvider.GOOGLE:
+			// 	return await this.callGoogleAI(aiModel, messages, apiKey);
+			// case AiProvider.CUSTOM:
+			// 	return await this.callCustomProvider(aiModel, messages, apiKey);
 			default:
 				throw new Error(`Unsupported AI provider: ${aiModel.provider}`);
 		}
 	}
 
-	private async callOpenAI(
-		aiModel: AiModelConfiguration,
-		messages: { role: string; content: string; }[],
-		apiKey: string,
-	): Promise<{ content: string; tokenUsage?: number; }> {
-		// Placeholder implementation - would use OpenAI SDK
-		this.logger.log(`Calling OpenAI with model ${aiModel.modelName}`);
-
-		// Mock response for now
+	private async callOpenAI(messages: any[]) {
+		const response = await this.openAiService.chat(messages as any);
 		return {
-			content: 'This is a mock response from OpenAI. The actual implementation would use the OpenAI API.',
-			tokenUsage: 150,
+			content: response.output_text,
+			tokenUsage: response.usage.total_tokens,
 		};
 	}
 
