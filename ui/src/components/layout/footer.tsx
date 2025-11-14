@@ -1,38 +1,11 @@
 "use client";
 
+import { useSettings } from '@/hooks/useSettings';
+import { footerColumnApi } from '@/lib/api/footer-menu.api';
+import { FooterColumn } from '@/types/footer-menu';
+import { Brain, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
-import { Brain, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } from "lucide-react";
-
-const footerLinks = {
-  subjects: [
-    { name: "Mathematics", href: "/subjects/mathematics" },
-    { name: "Sciences", href: "/subjects/sciences" },
-    { name: "Languages", href: "/subjects/languages" },
-    { name: "Computer Science", href: "/subjects/computer-science" },
-    { name: "Business", href: "/subjects/business" },
-  ],
-  tools: [
-    { name: "AI Essay Writer", href: "/tools/essay-writer" },
-    { name: "Citation Generator", href: "/tools/citation-generator" },
-    { name: "Grammar Checker", href: "/tools/grammar-checker" },
-    { name: "Math Solver", href: "/tools/math-solver" },
-    { name: "Study Planner", href: "/tools/study-planner" },
-  ],
-  company: [
-    { name: "About Us", href: "/about-us" },
-    { name: "How It Works", href: "/how-it-works" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "Blog", href: "/blog" },
-    { name: "Careers", href: "/careers" },
-  ],
-  support: [
-    { name: "Help Center", href: "/help" },
-    { name: "Contact Us", href: "/contact-us" },
-    { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms of Service", href: "/terms-of-service" },
-    { name: "Cookie Policy", href: "/cookies-policy" },
-  ],
-};
+import { useEffect, useState } from 'react';
 
 const socialLinks = [
   { name: "Facebook", icon: Facebook, href: "https://facebook.com/MasomoAI" },
@@ -43,6 +16,25 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const [columns, setColumns] = useState<FooterColumn[]>([]);
+
+  const { data: settings } = useSettings();
+  console.log({ settings, columns });
+
+
+  useEffect(() => {
+    const fetchColumns = () => {
+      footerColumnApi.getAll({ includeItems: true }).then((response) => {
+        const columns = Array.isArray(response) ? response : response.data;
+        setColumns(columns);
+      }).catch(() => {
+        setColumns([]);
+      });
+
+    };
+    fetchColumns();
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-white">
       {/* Main Footer */}
@@ -57,10 +49,10 @@ export default function Footer() {
               <span className="text-xl font-bold">MasomoAI</span>
             </Link>
             <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
-              Empowering students worldwide with AI-powered homework assistance. 
+              Empowering students worldwide with AI-powered homework assistance.
               Get instant, accurate solutions across all subjects with step-by-step explanations.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
@@ -79,72 +71,26 @@ export default function Footer() {
           </div>
 
           {/* Subjects */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Subjects</h3>
-            <ul className="space-y-3">
-              {footerLinks.subjects.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Tools */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">AI Tools</h3>
-            <ul className="space-y-3">
-              {footerLinks.tools.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Company</h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Support</h3>
-            <ul className="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link.name}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {
+            columns.map((column) => (
+              <div key={column.columnId}>
+                <h3 className="text-lg font-semibold mb-6">{column.title}</h3>
+                <ul className="space-y-3">
+                  {column.items?.map((item) => (
+                    <li key={item.itemId}>
+                      <Link
+                        href={`/${item.url}`}
+                        target={item.target || '_self'}
+                        className="text-gray-400 hover:text-white transition-colors duration-200"
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
         </div>
 
         {/* Newsletter Signup */}
@@ -191,19 +137,6 @@ export default function Footer() {
                   <social.icon className="h-5 w-5" />
                 </a>
               ))}
-            </div>
-
-            {/* Legal Links */}
-            <div className="flex items-center space-x-6 text-sm">
-              <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Privacy
-              </Link>
-              <Link href="/terms-of-service" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Terms
-              </Link>
-              <Link href="/cookies-policy" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Cookies
-              </Link>
             </div>
           </div>
         </div>

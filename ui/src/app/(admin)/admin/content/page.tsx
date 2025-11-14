@@ -23,21 +23,21 @@ const contentAreas = [
 		description: "Configure footer navigation links",
 		icon: MessageSquare,
 		href: "/admin/content/footer-menus",
-		status: "coming-soon",
+		status: "active",
 	},
 	{
 		title: "Testimonials",
 		description: "Customer testimonials and reviews",
 		icon: Star,
 		href: "/admin/content/testimonials",
-		status: "coming-soon",
+		status: "active",
 	},
 	{
 		title: "FAQs",
 		description: "Frequently asked questions management",
 		icon: HelpCircle,
 		href: "/admin/content/faqs",
-		status: "coming-soon",
+		status: "active",
 	},
 ];
 
@@ -75,7 +75,7 @@ export default function ContentPage() {
 									asChild={area.status === 'active'}
 									disabled={area.status === 'coming-soon'}
 									className="w-full"
-									variant={area.status === 'active' ? 'default' : 'secondary'}
+									variant={'outline'}
 								>
 									{area.status === 'active' ? (
 										<Link href={area.href}>

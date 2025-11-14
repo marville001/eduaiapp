@@ -1,6 +1,7 @@
-import { ArrowRight, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import AiChatForm from "@/components/forms/ai-chat-form";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import { Suspense } from 'react';
 
 const features = [
   "Instant AI-powered solutions",
@@ -26,8 +27,8 @@ export default function HeroSection() {
               </h1>
 
               <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
-                Get instant help with your homework across all subjects. Our AI-powered platform 
-                provides step-by-step solutions, explanations, and expert guidance to help you 
+                Get instant help with your homework across all subjects. Our AI-powered platform
+                provides step-by-step solutions, explanations, and expert guidance to help you
                 succeed academically.
               </p>
             </div>
@@ -44,15 +45,15 @@ export default function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-primary text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="lg"
                 className="border-2 px-8 py-4 rounded-lg font-semibold"
               >
@@ -63,8 +64,10 @@ export default function HeroSection() {
 
           {/* Right Column - AI Chat Form */}
           <div className="lg:pl-8">
-            <AiChatForm />
-            
+            <Suspense fallback={<div>Loading...</div>}>
+              <AiChatForm />
+            </Suspense>
+
             {/* Trust Indicators */}
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-500 mb-4">Trusted by students from</p>

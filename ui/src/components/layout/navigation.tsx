@@ -13,8 +13,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/hooks/useSettings';
+import { navbarMenuApi } from '@/lib/api/navbar-menu.api';
 import { Subject, subjectApi } from '@/lib/api/subject.api';
 import { useUserStore } from '@/stores/user.store';
+import { NavbarMenu } from '@/types/navbar-menu';
 import { ChevronDown, GraduationCap, Home, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -31,6 +33,7 @@ const tools = [
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [menus, setMenus] = useState<NavbarMenu[]>([]);
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
 
@@ -57,10 +60,25 @@ export default function Navigation() {
     const getSubjects = async () => {
       subjectApi.getHierarchical(true).then((data) => {
         setSubjects(data);
+      }).catch(() => {
+        setSubjects([]);
       });
     };
     getSubjects();
   }, []);
+
+
+  useEffect(() => {
+    const fetchMenus = () => {
+      navbarMenuApi.getHierarchical(false).then((data) => {
+        setMenus(data);
+      }).catch(() => {
+        setMenus([]);
+      });
+    };
+    fetchMenus();
+  }, []);
+
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -82,107 +100,70 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {/* Subjects Dropdown */}
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center space-x-1">
-                <span>Subjects</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-1">
-                  {subjects.map((subject) => (
-                    <div key={subject.slug} className="relative group/sub">
-                      <div className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm cursor-pointer">
-                        <div className="flex items-center space-x-2">
-                          <span>{subject.name}</span>
-                        </div>
-                        <ChevronDown className="h-4 w-4 -rotate-90" />
-                      </div>
-                      <div className="absolute left-full top-0 ml-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
-                        <div className="p-1">
-                          <Link
-                            href={`/${subject.slug}`}
-                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                          >
-                            All {subject.name}
-                          </Link>
-                          <div className="border-t border-gray-200 my-1" />
-                          {subject.subSubjects?.map((child) => (
-                            <Link
-                              key={child.slug}
-                              href={`/${child.slug}`}
-                              className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                            >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Tools Dropdown */}
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center space-x-1">
-                <span>Tools</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-1">
-                  {tools.map((tool) => (
-                    <Link
-                      key={tool.href}
-                      href={tool.href}
-                      className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                    >
-                      {tool.name}
+            {
+              menus.length > 0 ?
+                menus.map(menu => (
+                  <div key={menu.id} className="relative group">
+                    <Link href={`/${menu.url}`} target={menu.target || '_self'} className="flex items-center space-x-1">
+                      <span>{menu.title}</span>
+                      {
+                        (menu.children && menu.children.length > 0) && (
+                          <ChevronDown className="h-4 w-4" />
+                        )
+                      }
                     </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
+                    {
+                      (menu.children && menu.children.length > 0) ? (
+                        <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                          <div className="p-1">
+                            {menu.children.map((subMenu) => (
+                              <div key={subMenu.slug} className="relative group/sub">
+                                <Link
+                                  href={`/${subMenu.url}`}
+                                  target={subMenu.target || '_self'}
+                                >
+                                  <div className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm cursor-pointer">
+                                    <div className="flex items-center space-x-2">
+                                      <span>{subMenu.title}</span>
+                                    </div>
+                                    {
+                                      (subMenu.children && subMenu.children.length > 0) && (
+                                        <ChevronDown className="h-4 w-4 -rotate-90" />
+                                      )
+                                    }
+                                  </div>
+                                </Link>
+                                {
+                                  (subMenu.children && subMenu.children.length > 0) ? (
+                                    <div className="absolute left-full top-0 ml-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
+                                      <div className="p-1">
+                                        <div className="border-t border-gray-200 my-1" />
+                                        {subMenu.children?.map((child) => (
+                                          <Link
+                                            key={child.slug}
+                                            href={`/${child.slug}`}
+                                            target={child.target || '_self'}
+                                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
+                                          >
+                                            {child.title}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ) : null
+                                }
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                        : null
+                    }
+                  </div>
+                ))
+                : null
+            }
 
-            {/* Explore Dropdown */}
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center space-x-1">
-                <span>Explore</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-1">
-                  <Link
-                    href="/how-it-works"
-                    className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                  >
-                    How It Works
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                  >
-                    Pricing
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                  >
-                    About Us
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                  >
-                    Contact
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            <Link href="/blog" className="text-gray-700 hover:text-gray-900">
-              Blog
-            </Link>
           </div>
 
           {/* Auth Buttons */}
