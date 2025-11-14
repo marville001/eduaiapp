@@ -1,4 +1,7 @@
 import type {
+	AdminQuestion,
+	AdminQuestionsParams,
+	AdminQuestionsResponse,
 	ChatMessage,
 	Question,
 	QuestionStats,
@@ -58,6 +61,28 @@ export const getQuestionStats = async (): Promise<QuestionStats> => {
 	return response.data.data;
 };
 
+// Admin API Functions
+export const getAllQuestions = async (params?: AdminQuestionsParams): Promise<AdminQuestionsResponse> => {
+	const searchParams = new URLSearchParams();
+
+	if (params?.page) searchParams.set('page', params.page.toString());
+	if (params?.limit) searchParams.set('limit', params.limit.toString());
+	if (params?.status) searchParams.set('status', params.status);
+	if (params?.userId) searchParams.set('userId', params.userId.toString());
+	if (params?.subjectId) searchParams.set('subjectId', params.subjectId.toString());
+	if (params?.search) searchParams.set('search', params.search);
+
+	const response = await apiClient.get<{ data: AdminQuestionsResponse; }>(
+		`/ai/admin/questions?${searchParams.toString()}`
+	);
+	return response.data.data;
+};
+
+export const getQuestionForAdmin = async (questionId: string): Promise<AdminQuestion> => {
+	const response = await apiClient.get<{ data: AdminQuestion; }>(`/ai/admin/question/${questionId}`);
+	return response.data?.data;
+};
+
 const aiChatApi = {
 	askQuestion,
 	getQuestion,
@@ -66,6 +91,9 @@ const aiChatApi = {
 	getUserQuestions,
 	getChatHistory,
 	getQuestionStats,
+	// Admin functions
+	getAllQuestions,
+	getQuestionForAdmin,
 };
 
 export default aiChatApi;

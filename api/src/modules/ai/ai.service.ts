@@ -113,6 +113,28 @@ export class AiService {
 		return await this.aiRepository.getQuestionStats(userId);
 	}
 
+	// Admin methods
+	async getAllQuestions(params?: {
+		page?: number;
+		limit?: number;
+		status?: QuestionStatus;
+		userId?: number;
+		subjectId?: number;
+		search?: string;
+	}): Promise<{ questions: Question[]; total: number; }> {
+		return await this.aiRepository.findAllQuestions(params);
+	}
+
+	async getQuestionForAdmin(questionId: string): Promise<Question> {
+		const question = await this.aiRepository.findQuestionByIdForAdmin(questionId);
+
+		if (!question) {
+			throw new NotFoundException('Question not found');
+		}
+
+		return question;
+	}
+
 	// Private methods for AI processing
 
 	private async processQuestion(question: Question): Promise<void> {

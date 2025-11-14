@@ -6,6 +6,7 @@ export enum PermissionResource {
 	USERS = 'users',
 	SETTINGS = 'settings',
 	AI_MODELS = 'ai_models',
+	QUESTIONS = 'questions',
 	REPORTS = 'reports',
 }
 

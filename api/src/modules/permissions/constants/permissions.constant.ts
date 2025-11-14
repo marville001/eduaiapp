@@ -81,6 +81,26 @@ export const SYSTEM_PERMISSIONS: PermissionDefinition[] = [
 		description: 'View decrypted API keys for AI models',
 	},
 
+	// Questions
+	{
+		resource: PermissionResource.QUESTIONS,
+		action: PermissionAction.READ,
+		name: 'View Questions',
+		description: 'View all user questions',
+	},
+	{
+		resource: PermissionResource.QUESTIONS,
+		action: PermissionAction.UPDATE,
+		name: 'Update Questions',
+		description: 'Update question status and responses',
+	},
+	{
+		resource: PermissionResource.QUESTIONS,
+		action: PermissionAction.DELETE,
+		name: 'Delete Questions',
+		description: 'Delete user questions',
+	},
+
 	// Reports
 	{
 		resource: PermissionResource.REPORTS,
@@ -108,6 +128,7 @@ export const DEFAULT_ADMIN_PERMISSIONS = [
 	`${PermissionResource.AI_MODELS}:${PermissionAction.READ}`,
 	`${PermissionResource.AI_MODELS}:${PermissionAction.CREATE}`,
 	`${PermissionResource.AI_MODELS}:${PermissionAction.UPDATE}`,
+	`${PermissionResource.QUESTIONS}:${PermissionAction.READ}`,
 	`${PermissionResource.REPORTS}:${PermissionAction.READ}`,
 ];
 

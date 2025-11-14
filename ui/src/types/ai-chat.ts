@@ -61,6 +61,36 @@ export interface QuestionStats {
 	failed: number;
 }
 
+// Admin types
+export interface AdminQuestion extends Question {
+	user: {
+		id: string;
+		name: string;
+		email: string;
+		role?: string;
+	};
+	aiModel?: {
+		id: number;
+		modelName: string;
+		displayName: string;
+		provider: string;
+	};
+}
+
+export interface AdminQuestionsResponse {
+	questions: AdminQuestion[];
+	total: number;
+}
+
+export interface AdminQuestionsParams {
+	page?: number;
+	limit?: number;
+	status?: QuestionStatus;
+	userId?: number;
+	subjectId?: number;
+	search?: string;
+}
+
 // Request types
 export interface AskQuestionRequest {
 	subject: number;

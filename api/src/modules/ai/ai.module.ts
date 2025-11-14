@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PermissionsModule } from '../permissions/permissions.module';
 import { SettingsModule } from '../settings/settings.module';
 import { StorageModule } from '../storage/storage.module';
 import { SubjectModule } from '../subjects/subject.module';
@@ -16,6 +17,7 @@ import { OpenAiModule } from './openai/openai.module';
 		forwardRef(() => SettingsModule),
 		forwardRef(() => SubjectModule),
 		forwardRef(() => OpenAiModule),
+		forwardRef(() => PermissionsModule),
 		StorageModule
 	],
 	controllers: [AiController],

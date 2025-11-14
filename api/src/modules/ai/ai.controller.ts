@@ -1,4 +1,7 @@
 import { DocumentMeta } from '@/common/class/document-meta';
+import { Permission, RequirePermissions } from '@/common/decorators/permissions.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@/common/guards/permissions.guard';
 import { FileValidationPipe } from '@/common/pipes/file-validation.pipe';
 import {
 	BadRequestException,
@@ -7,19 +10,24 @@ import {
 	Get,
 	HttpStatus,
 	Param,
+	ParseIntPipe,
 	ParseUUIDPipe,
 	Post,
+	Query,
 	Request,
 	UploadedFiles,
+	UseGuards,
 	UseInterceptors
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { PermissionAction, PermissionResource } from '../permissions/entities/permission.entity';
 import { S3Service } from '../storage/s3.service';
 import { AiService } from './ai.service';
 import { AskQuestionDto } from './dto/ask-question.dto';
 import { SendChatMessageDto } from './dto/send-chat-message.dto';
+import { QuestionStatus } from './entities/question.entity';
 
 @ApiTags('AI Chat')
 @ApiBearerAuth()
@@ -116,5 +124,55 @@ export class AiController {
 	@ApiResponse({ status: HttpStatus.OK, description: 'Statistics retrieved' })
 	async getQuestionStats(@Request() req: any) {
 		return await this.aiService.getQuestionStats(req.user.id);
+	}
+
+	// Admin Endpoints
+	@Get('admin/questions')
+	@ApiTags('AI Admin')
+	@ApiSecurity('bearer')
+	@ApiBearerAuth('JWT')
+	@UseGuards(JwtAuthGuard, PermissionsGuard)
+	@RequirePermissions(Permission(PermissionResource.QUESTIONS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get all questions (Admin only)' })
+	@ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+	@ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
+	@ApiQuery({ name: 'status', required: false, enum: QuestionStatus, description: 'Filter by status' })
+	@ApiQuery({ name: 'userId', required: false, type: Number, description: 'Filter by user ID' })
+	@ApiQuery({ name: 'subjectId', required: false, type: Number, description: 'Filter by subject ID' })
+	@ApiQuery({ name: 'search', required: false, type: String, description: 'Search in question text, user email, or subject name' })
+	@ApiResponse({ status: HttpStatus.OK, description: 'Questions retrieved successfully' })
+	@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - insufficient permissions' })
+	async getAllQuestions(
+		@Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+		@Query('limit', new ParseIntPipe({ optional: true })) limit: number = 20,
+		@Query('status') status?: QuestionStatus,
+		@Query('userId', new ParseIntPipe({ optional: true })) userId?: number,
+		@Query('subjectId', new ParseIntPipe({ optional: true })) subjectId?: number,
+		@Query('search') search?: string,
+	) {
+		return await this.aiService.getAllQuestions({
+			page,
+			limit,
+			status,
+			userId,
+			subjectId,
+			search,
+		});
+	}
+
+	@Get('admin/question/:questionId')
+	@ApiTags('AI Admin')
+	@ApiSecurity('bearer')
+	@ApiBearerAuth('JWT')
+	@UseGuards(JwtAuthGuard, PermissionsGuard)
+	@RequirePermissions(Permission(PermissionResource.QUESTIONS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get question details with full data (Admin only)' })
+	@ApiResponse({ status: HttpStatus.OK, description: 'Question details retrieved' })
+	@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Question not found' })
+	@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - insufficient permissions' })
+	async getQuestionForAdmin(
+		@Param('questionId', ParseUUIDPipe) questionId: string,
+	) {
+		return await this.aiService.getQuestionForAdmin(questionId);
 	}
 }

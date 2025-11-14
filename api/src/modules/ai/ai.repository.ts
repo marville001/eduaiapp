@@ -148,4 +148,59 @@ export class AiRepository extends AbstractRepository<Question> {
 
 		return { total, answered, pending, failed };
 	}
+
+	// Admin methods
+	async findAllQuestions(params?: {
+		page?: number;
+		limit?: number;
+		status?: QuestionStatus;
+		userId?: number;
+		subjectId?: number;
+		search?: string;
+	}): Promise<{ questions: Question[]; total: number; }> {
+		const query = this.questionRepository
+			.createQueryBuilder('question')
+			.leftJoinAndSelect('question.user', 'user')
+			.leftJoinAndSelect('question.subject', 'subject')
+			.leftJoinAndSelect('question.aiModel', 'aiModel')
+			.orderBy('question.createdAt', 'DESC');
+
+		// Apply filters
+		if (params?.status) {
+			query.andWhere('question.status = :status', { status: params.status });
+		}
+
+		if (params?.userId) {
+			query.andWhere('question.userId = :userId', { userId: params.userId });
+		}
+
+		if (params?.subjectId) {
+			query.andWhere('question.subjectId = :subjectId', { subjectId: params.subjectId });
+		}
+
+		if (params?.search) {
+			query.andWhere('(question.question LIKE :search OR user.email LIKE :search OR subject.name LIKE :search)',
+				{ search: `%${params.search}%` });
+		}
+
+		// Get total count
+		const total = await query.getCount();
+
+		// Apply pagination
+		if (params?.page && params?.limit) {
+			const skip = (params.page - 1) * params.limit;
+			query.skip(skip).take(params.limit);
+		}
+
+		const questions = await query.getMany();
+
+		return { questions, total };
+	}
+
+	async findQuestionByIdForAdmin(questionId: string): Promise<Question | null> {
+		return await this.questionRepository.findOne({
+			where: { questionId },
+			relations: ['user', 'subject', 'aiModel', 'chatMessages', 'chatMessages.user'],
+		});
+	}
 }
