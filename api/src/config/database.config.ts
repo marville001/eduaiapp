@@ -11,6 +11,8 @@ import { Page } from '@/modules/pages/entities/page.entity';
 import { Permission } from '@/modules/permissions/entities/permission.entity';
 import { Role } from '@/modules/permissions/entities/role.entity';
 import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
+import { StripeSetting } from '@/modules/settings/entities/stripe-setting.entity';
+import { SubscriptionPackage } from '@/modules/settings/entities/subscription-package.entity';
 import { SystemSetting } from '@/modules/settings/entities/system-setting.entity';
 import { Subject } from '@/modules/subjects/entities/subject.entity';
 import { Testimonial } from '@/modules/testimonials/entities/testimonial.entity';
@@ -40,7 +42,9 @@ export const entities = [
   FooterColumn,
   FooterItem,
   Testimonial,
-  Faq
+  Faq,
+  StripeSetting,
+  SubscriptionPackage
 ];
 
 export default new DataSource({
@@ -52,7 +56,7 @@ export default new DataSource({
   password: configService.getOrThrow('DATABASE_PASSWORD'),
   migrations: ['src/database/migrations/**'],
   synchronize: false,
-  logging: false, // process.env.ENV !== 'production',
+  logging: false,
   migrationsRun: true,
   ssl: process.env.NODE_ENV === 'production',
   extra: {

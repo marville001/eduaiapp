@@ -50,6 +50,20 @@ export enum AuditAction {
 	ROLE_CREATED = 'role_created',
 	ROLE_UPDATED = 'role_updated',
 	ROLE_DELETED = 'role_deleted',
+
+	// Subscription package actions
+	SUBSCRIPTION_PACKAGE_CREATED = 'subscription_package_created',
+	SUBSCRIPTION_PACKAGE_UPDATED = 'subscription_package_updated',
+	SUBSCRIPTION_PACKAGE_DELETED = 'subscription_package_deleted',
+
+	// Stripe settings actions
+	STRIPE_SETTINGS_UPDATED = 'stripe_settings_updated',
+	STRIPE_CONNECTION_TESTED = 'stripe_connection_tested',
+
+	// Generic CRUD actions
+	CREATED = 'created',
+	UPDATED = 'updated',
+	DELETED = 'deleted',
 }
 
 export enum AuditTargetType {
@@ -63,6 +77,8 @@ export enum AuditTargetType {
 	ROLE = 'role',
 	PERMISSION = 'permission',
 	ADMIN = 'admin',
+	SUBSCRIPTION_PACKAGE = 'subscription_package',
+	STRIPE_SETTINGS = 'stripe_settings',
 }
 
 @Entity('audit_logs')

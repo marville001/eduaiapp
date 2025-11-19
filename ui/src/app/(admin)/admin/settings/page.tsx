@@ -5,7 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Bell,
   Bot,
+  CreditCard,
   Database,
+  Package,
   Settings,
   Upload,
   Users
@@ -14,6 +16,8 @@ import { useState } from "react";
 import AiModelsTab from "./components/ai-models-tab";
 import GeneralSettingsTab from "./components/general-settings-tab";
 import NotificationSettingsTab from "./components/notification-settings-tab";
+import { PackagesTab } from "./components/packages-tab";
+import StripeSettingsTab from "./components/stripe-settings-tab";
 import UploadSettingsTab from "./components/upload-settings-tab";
 import UserSettingsTab from "./components/user-settings-tab";
 
@@ -32,6 +36,18 @@ export default function AdminSettingsPage() {
       label: "AI Models",
       icon: Bot,
       description: "Configure AI model providers and settings",
+    },
+    {
+      id: "stripe",
+      label: "Stripe & Billing",
+      icon: CreditCard,
+      description: "Payment gateway and subscription settings",
+    },
+    {
+      id: "packages",
+      label: "Packages",
+      icon: Package,
+      description: "Manage subscription packages and pricing",
     },
     {
       id: "upload",
@@ -80,7 +96,7 @@ export default function AdminSettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 h-auto p-1">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-2 h-auto p-1">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
@@ -135,6 +151,14 @@ export default function AdminSettingsPage() {
 
           <TabsContent value="ai-models" className="space-y-6">
             <AiModelsTab />
+          </TabsContent>
+
+          <TabsContent value="stripe" className="space-y-6">
+            <StripeSettingsTab />
+          </TabsContent>
+
+          <TabsContent value="packages" className="space-y-6">
+            <PackagesTab />
           </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
