@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import aiChatApi from "@/lib/api/ai-chat.api";
 import { AdminQuestion, AdminQuestionsParams, QuestionStatus } from "@/types/ai-chat";
+import { User } from '@/types/users';
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight, Clock, Eye, Filter, MessageSquare, Search } from "lucide-react";
@@ -76,6 +77,14 @@ export default function AdminQuestionsPage() {
 			status: status && status !== "all" ? status as QuestionStatus : undefined,
 			page: 1
 		});
+	};
+
+	const getUserName = (user?: User | null) => {
+		if (!user) return 'Anonymous';
+
+		if (user?.firstName || user?.lastName) return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+		if (user?.email) return user.email;
+		return 'Anonymous';
 	};
 
 	const handlePageChange = (page: number) => {
@@ -237,10 +246,10 @@ export default function AdminQuestionsPage() {
 											<TableCell>
 												<div className="flex items-center gap-2">
 													<div className="w-8 h-8 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
-														{question.user?.name?.charAt(0) || question.user?.email?.charAt(0) || '?'}
+														{getUserName(question.user)?.charAt(0) || question.user?.email?.charAt(0) || '?'}
 													</div>
 													<div>
-														<p className="text-sm font-medium">{question.user?.name || 'Anonymous'}</p>
+														<p className="text-sm font-medium">{getUserName(question.user)}</p>
 														<p className="text-xs text-muted-foreground">{question.user?.email}</p>
 													</div>
 												</div>

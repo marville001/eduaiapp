@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminQuestion } from "@/types/ai-chat";
+import { User as UserType } from '@/types/users';
 import { format } from "date-fns";
 import {
 	Brain,
@@ -45,7 +46,13 @@ export default function QuestionDetailsModal({
 	isOpen,
 	onClose,
 }: QuestionDetailsModalProps) {
-	console.log(question);
+	const getUserName = (user?: UserType | null) => {
+		if (!user) return 'Anonymous';
+
+		if (user?.firstName || user?.lastName) return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+		if (user?.email) return user.email;
+		return 'Anonymous';
+	};
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -92,10 +99,10 @@ export default function QuestionDetailsModal({
 									<div className="bg-gray-50 p-3 rounded-lg">
 										<div className="flex items-center gap-3">
 											<div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
-												{question.user?.name?.charAt(0) || question.user?.email?.charAt(0) || '?'}
+												{getUserName(question.user)?.charAt(0) || '?'}
 											</div>
 											<div>
-												<p className="font-medium">{question.user?.name || 'Anonymous'}</p>
+												<p className="font-medium">{getUserName(question.user)}</p>
 												<p className="text-sm text-muted-foreground">{question.user?.email}</p>
 												{question.user?.role && (
 													<Badge variant="outline" className="text-xs">

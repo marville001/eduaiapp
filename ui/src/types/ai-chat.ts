@@ -1,6 +1,7 @@
 // AI Chat Types
 
 import { Subject } from '@/lib/api/subject.api';
+import { User } from './users';
 
 interface DocumentMeta {
 	name: string;
@@ -27,11 +28,7 @@ export interface Question {
 	errorMessage?: string;
 	createdAt: string;
 	updatedAt: string;
-	user?: {
-		id: string;
-		name: string;
-		email: string;
-	};
+	user?: User | null;
 	chatMessages?: ChatMessage[];
 }
 
@@ -63,12 +60,7 @@ export interface QuestionStats {
 
 // Admin types
 export interface AdminQuestion extends Question {
-	user: {
-		id: string;
-		name: string;
-		email: string;
-		role?: string;
-	};
+	user: User | null;
 	aiModel?: {
 		id: number;
 		modelName: string;
