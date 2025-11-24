@@ -1,13 +1,20 @@
 "use client";
 
-import { Eye, Clock } from "lucide-react";
 import AdminSidebar from "@/components/layout/admin-sidebar";
 import { Button } from "@/components/ui/button";
-import { PropsWithChildren } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Eye, LogOut } from "lucide-react";
 import Link from 'next/link';
+import { PropsWithChildren } from 'react';
 
 
 export default function AdminLayout({ children }: PropsWithChildren) {
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar />
@@ -26,6 +33,10 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                   <Eye className="h-4 w-4 mr-2" />
                   View Site
                 </Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>

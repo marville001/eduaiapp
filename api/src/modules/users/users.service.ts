@@ -323,4 +323,48 @@ export class UsersService {
 			{ lastLoginAt: new Date() }
 		);
 	}
+
+	async updateProfile(userId: number, updateData: { firstName?: string; lastName?: string; email?: string; phone?: string; }): Promise<User> {
+		const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+
+		// Check if email is being changed and if it's already taken
+		if (updateData.email && updateData.email !== user.email) {
+			const existingUser = await this.usersRepository.findOne({ where: { email: updateData.email } });
+			if (existingUser) {
+				throw new ConflictException('Email is already in use');
+			}
+		}
+
+		await this.usersRepository.update(
+			{ id: userId },
+			updateData
+		);
+
+		return this.usersRepository.findOne({ where: { id: userId } });
+	}
+
+	async changePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+		const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+
+		// Verify current password
+		const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+		if (!isPasswordValid) {
+			throw new BadRequestException('Current password is incorrect');
+		}
+
+		// Hash and update new password
+		const hashedPassword = await bcrypt.hash(newPassword, authConfig.bcryptRounds);
+		await this.usersRepository.update(
+			{ id: userId, userId: user.userId },
+			{ password: hashedPassword }
+		);
+	}
 }

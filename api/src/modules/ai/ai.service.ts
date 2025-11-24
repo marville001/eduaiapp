@@ -109,7 +109,7 @@ export class AiService {
 		return await this.aiRepository.findChatMessagesByQuestionId(question.id);
 	}
 
-	async getQuestionStats(userId?: string) {
+	async getQuestionStats(userId?: number) {
 		return await this.aiRepository.getQuestionStats(userId);
 	}
 

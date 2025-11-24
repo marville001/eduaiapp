@@ -1,9 +1,6 @@
 "use client";
 
 import UserSidebar from "@/components/layout/user-sidebar";
-import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
-import Link from 'next/link';
 import { PropsWithChildren } from 'react';
 
 export default function AppLayout({ children }: PropsWithChildren) {
@@ -13,7 +10,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
 			<div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
 				{/* Header */}
-				<header className="bg-white border-b border-gray-200 px-6 py-4">
+				{/* <header className="bg-white border-b border-gray-200 px-6 py-4">
 					<div className="flex items-center justify-between">
 						<div>
 							<h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -28,7 +25,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 							</Button>
 						</div>
 					</div>
-				</header>
+				</header> */}
 
 				{/* Main Content */}
 				<main className="flex-1 overflow-y-auto p-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/contexts/AuthContext';
 import { useUserStore } from '@/stores/user.store';
 import {
   BookOpen,
@@ -8,6 +9,7 @@ import {
   ChevronDown,
   FileText,
   LayoutDashboard,
+  LogOut,
   Menu,
   MessageSquare,
   Settings,
@@ -97,8 +99,13 @@ export default function AdminSidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = usePathname();
   const router = useRouter();
+  const { logout } = useAuth();
 
   const user = useUserStore((state) => state.user);
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   const toggleExpanded = (title: string) => {
     setExpandedItems(prev =>
@@ -227,14 +234,25 @@ export default function AdminSidebar() {
 
           {/* User Info */}
           <div className="px-4 py-4 border-t border-gray-200">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <Shield className="h-4 w-4 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-white" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">{user?.firstName} {user?.lastName}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-red-600 hover:bg-red-50"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>

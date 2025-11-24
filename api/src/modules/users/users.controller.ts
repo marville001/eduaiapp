@@ -20,8 +20,10 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UsersService } from './users.service';
 
@@ -107,6 +109,37 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	getProfile(@CurrentUser() user: JwtPayload) {
 		return this.usersService.findOne(user.sub);
+	}
+
+	@Patch('profile')
+	@UseGuards(JwtAuthGuard)
+	async updateProfile(
+		@CurrentUser() user: JwtPayload,
+		@Body() updateProfileDto: UpdateProfileDto
+	) {
+		const updatedUser = await this.usersService.updateProfile(user.sub, updateProfileDto);
+		return {
+			success: true,
+			data: updatedUser,
+			message: 'Profile updated successfully'
+		};
+	}
+
+	@Post('change-password')
+	@UseGuards(JwtAuthGuard)
+	async changePassword(
+		@CurrentUser() user: JwtPayload,
+		@Body() changePasswordDto: ChangePasswordDto
+	) {
+		await this.usersService.changePassword(
+			user.sub,
+			changePasswordDto.currentPassword,
+			changePasswordDto.newPassword
+		);
+		return {
+			success: true,
+			message: 'Password changed successfully'
+		};
 	}
 
 }

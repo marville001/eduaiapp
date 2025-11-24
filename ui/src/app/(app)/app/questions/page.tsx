@@ -85,7 +85,7 @@ export default function QuestionsHistoryPage() {
 	if (error) {
 		return (
 			<div className="flex items-center justify-center h-96">
-				<Card className="max-w-md">
+				<Card className="max-w-md w-full">
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-red-600">
 							<AlertCircle className="h-5 w-5" />
@@ -228,7 +228,7 @@ export default function QuestionsHistoryPage() {
 									You haven&apos;t asked any questions yet. Start your learning journey by asking AI a question!
 								</p>
 								<Button asChild>
-									<Link href="/app/chat">
+									<Link href="/ai-tutor">
 										<MessageSquare className="h-4 w-4 mr-2" />
 										Ask Your First Question
 									</Link>

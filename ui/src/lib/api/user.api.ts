@@ -103,4 +103,16 @@ export const userApi = {
     const response = await api.get(`/users/${userId}`);
     return response.data.data;
   },
+
+  // Update user profile
+  updateProfile: async (profileData: { firstName?: string; lastName?: string; email?: string; phone?: string; }): Promise<User> => {
+    const response = await api.patch('/users/profile', profileData);
+    return response.data.data;
+  },
+
+  // Change password
+  changePassword: async (passwordData: { currentPassword: string; newPassword: string; }): Promise<{ success: boolean; message: string; }> => {
+    const response = await api.post('/users/change-password', passwordData);
+    return response.data;
+  },
 };

@@ -7,12 +7,10 @@ import { useUserStore } from '@/stores/user.store';
 import {
 	BookOpen,
 	Brain,
-	HelpCircle,
 	LayoutDashboard,
 	LogOut,
 	Menu,
 	MessageSquare,
-	Settings,
 	User,
 	X
 } from "lucide-react";
@@ -29,7 +27,7 @@ const menuItems = [
 	},
 	{
 		title: "AI Chat",
-		href: "/app/chat",
+		href: "/ai-tutor",
 		icon: Brain,
 		description: "Ask new questions",
 		badge: "New"
@@ -52,18 +50,18 @@ const menuItems = [
 		icon: User,
 		description: "Manage your account"
 	},
-	{
-		title: "Settings",
-		href: "/app/settings",
-		icon: Settings,
-		description: "App preferences"
-	},
-	{
-		title: "Help",
-		href: "/app/help",
-		icon: HelpCircle,
-		description: "Get help and support"
-	},
+	// {
+	// 	title: "Settings",
+	// 	href: "/app/settings",
+	// 	icon: Settings,
+	// 	description: "App preferences"
+	// },
+	// {
+	// 	title: "Help",
+	// 	href: "/app/help",
+	// 	icon: HelpCircle,
+	// 	description: "Get help and support"
+	// },
 ];
 
 export default function UserSidebar() {
@@ -137,17 +135,7 @@ export default function UserSidebar() {
 					</div>
 
 					{/* User Info */}
-					<div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-						<div className="flex items-center">
-							<div className="w-10 h-10 bg-linear-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-medium">
-								{getUserInitials()}
-							</div>
-							<div className="ml-3 flex-1">
-								<p className="text-sm font-medium text-gray-900 truncate">{getUserName()}</p>
-								<p className="text-xs text-gray-500 truncate">{user?.email}</p>
-							</div>
-						</div>
-					</div>
+
 
 					{/* Navigation */}
 					<nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -193,6 +181,18 @@ export default function UserSidebar() {
 							<LogOut className="h-4 w-4 mr-2" />
 							Sign Out
 						</Button>
+					</div>
+
+					<div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+						<div className="flex items-center">
+							<div className="w-10 h-10 shrink-0 bg-linear-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-medium">
+								{getUserInitials()}
+							</div>
+							<div className="ml-3 flex-1">
+								<p className="text-sm font-medium text-gray-900 truncate">{getUserName()}</p>
+								<p className="text-xs text-gray-500 truncate line-clamp-1">{user?.email}</p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

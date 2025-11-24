@@ -1,7 +1,9 @@
 import { DocumentMeta } from '@/common/class/document-meta';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Permission, RequirePermissions } from '@/common/decorators/permissions.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { JwtPayload } from '@/common/interfaces/jwt-payload.interface';
 import { FileValidationPipe } from '@/common/pipes/file-validation.pipe';
 import {
 	BadRequestException,
@@ -102,28 +104,33 @@ export class AiController {
 	}
 
 	@Get('questions')
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: 'Get user questions' })
 	@ApiResponse({ status: HttpStatus.OK, description: 'User questions retrieved' })
-	async getUserQuestions(@Request() req: any) {
-		return await this.aiService.getUserQuestions(req.user.id);
+	async getUserQuestions(
+		@CurrentUser() user: JwtPayload,
+	) {
+		return await this.aiService.getUserQuestions(user.sub);
 	}
 
 	@Get('question/:questionId/messages')
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: 'Get chat history for a question' })
 	@ApiResponse({ status: HttpStatus.OK, description: 'Chat history retrieved' })
 	@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Question not found' })
 	async getChatHistory(
 		@Param('questionId', ParseUUIDPipe) questionId: string,
-		@Request() req: any,
+		@CurrentUser() user: JwtPayload,
 	) {
-		return await this.aiService.getChatHistory(questionId, req.user.id);
+		return await this.aiService.getChatHistory(questionId, user.sub);
 	}
 
 	@Get('stats')
+	@UseGuards(JwtAuthGuard)
 	@ApiOperation({ summary: 'Get question statistics' })
 	@ApiResponse({ status: HttpStatus.OK, description: 'Statistics retrieved' })
-	async getQuestionStats(@Request() req: any) {
-		return await this.aiService.getQuestionStats(req.user.id);
+	async getQuestionStats(@CurrentUser() user: JwtPayload,) {
+		return await this.aiService.getQuestionStats(user.sub);
 	}
 
 	// Admin Endpoints

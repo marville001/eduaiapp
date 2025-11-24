@@ -122,7 +122,7 @@ export class AiRepository extends AbstractRepository<Question> {
 	}
 
 	// Statistics methods
-	async getQuestionStats(userId?: string): Promise<{
+	async getQuestionStats(userId?: number): Promise<{
 		total: number;
 		answered: number;
 		pending: number;
