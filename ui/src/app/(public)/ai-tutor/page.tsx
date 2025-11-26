@@ -4,7 +4,6 @@ import { Suspense } from 'react';
 export default function HomePage() {
   return (
     <main className='py-8'>
-
       <Suspense fallback={<div>Loading...</div>}>
         <AiChatForm />
       </Suspense>

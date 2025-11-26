@@ -1,11 +1,5 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -24,8 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { CreateSubjectDto, Subject, subjectApi, UpdateSubjectDto } from "@/lib/api/subject.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { subjectApi, Subject, CreateSubjectDto, UpdateSubjectDto } from "@/lib/api/subject.api";
+import * as z from "zod";
 
 const formSchema = z.object({
   name: z.string().min(1, "Subject name is required").max(255, "Name too long"),
@@ -105,7 +105,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateSubjectDto }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateSubjectDto; }) =>
       subjectApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
@@ -119,7 +119,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    
+
     try {
       if (subject) {
         // Update existing subject
@@ -132,6 +132,12 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
             parentSubjectId: data.parentSubjectId,
           },
         });
+        try {
+          await fetch(`/api/revalidate/ai-tutor/${subject.slug}`, { method: 'GET' });
+          console.log(`Revalidated page: /ai-tutor/${subject.slug}`);
+        } catch (error) {
+          console.error('Failed to revalidate page:', error);
+        }
       } else {
         // Create new subject
         await createMutation.mutateAsync({
@@ -234,7 +240,7 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
                 <SelectContent>
                   <SelectItem value="none">None (Main Subject)</SelectItem>
                   {mainSubjects
-                    .filter(s =>  s.id !== subject?.id && !s.parentSubjectId) // Don't allow self-selection
+                    .filter(s => s.id !== subject?.id && !s.parentSubjectId) // Don't allow self-selection
                     .map((mainSubject) => (
                       <SelectItem key={mainSubject.id} value={mainSubject.id.toString()}>
                         {mainSubject.name}
@@ -273,8 +279,8 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
             type="submit"
             disabled={isSubmitting || createMutation.isPending || updateMutation.isPending}
           >
-            {isSubmitting 
-              ? (subject ? 'Updating...' : 'Creating...') 
+            {isSubmitting
+              ? (subject ? 'Updating...' : 'Creating...')
               : (subject ? 'Update Subject' : 'Create Subject')
             }
           </Button>
