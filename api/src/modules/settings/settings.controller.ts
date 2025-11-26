@@ -362,7 +362,7 @@ export class SettingsController {
   }
 
   @Get('packages/:id')
-  @RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
+  // @RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
   @ApiOperation({ summary: 'Get subscription package by ID' })
   @ApiResponse({ status: 200, description: 'Package retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Package not found' })

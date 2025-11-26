@@ -1,4 +1,4 @@
-import { pageApi } from '@/lib/api/page.api';
+import { subjectApi } from '@/lib/api/subject.api';
 import type { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
 
@@ -9,12 +9,13 @@ interface PageProps {
 // Generate static params for all published pages and subjects
 export async function generateStaticParams() {
   try {
-    const pages = await pageApi.getAll('true'); // Get only published pages
-    const pageParams = pages.map((page) => ({
-      slug: page.slug,
+    const subjects = await subjectApi.getAll(undefined, true);
+
+    const subjectParams = subjects.map((subject) => ({
+      slug: subject.slug,
     }));
 
-    return [...pageParams];
+    return subjectParams;
   } catch (error) {
     console.error('Failed to generate static params:', error);
     return [];
@@ -26,40 +27,36 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const { slug } = await params;
 
-    let page;
+    // Try to fetch as page first, then as subject
+    let subject;
     try {
-      page = await pageApi.getBySlug(slug);
-      if (!page || page.status !== 'published' || !page.isActive) {
-        page = null;
-      }
+      subject = await subjectApi.getBySlug(slug);
     } catch {
-      // Page not found
+      // Subject not found either
     }
 
-    if (!page) {
+    if (!subject) {
       return {
-        title: 'Page Not Found',
-        description: 'The page you are looking for does not exist.',
+        title: 'Content Not Found',
+        description: 'The content you are looking for does not exist.',
       };
     }
 
-    const title = page.seoTitle || page.title;
-    const description = page.seoDescription || page.excerpt || `Read ${page.title} on MasomoAI`;
-    const imageUrl = page.seoImage || page.featuredImage;
+    const title = subject.seoTitle || subject.name;
+    const description = subject.seoDescription || `Learn ${subject.name} with MasomoAI's comprehensive course materials and resources.`;
+    const imageUrl = subject.seoImage;
 
     return {
       title,
       description,
-      keywords: page.seoTags?.join(', '),
+      keywords: subject.seoTags?.join(', '),
       authors: [{ name: 'MasomoAI' }],
       creator: 'MasomoAI',
       publisher: 'MasomoAI',
       openGraph: {
         title,
         description,
-        type: 'article',
-        publishedTime: page.publishedAt,
-        modifiedTime: page.updatedAt,
+        type: 'website',
         images: imageUrl ? [
           {
             url: imageUrl,
@@ -92,11 +89,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         },
       },
     };
+
   } catch (error) {
     console.error('Failed to generate metadata:', error);
     return {
-      title: 'Page Not Found',
-      description: 'The page you are looking for does not exist.',
+      title: 'Subject Not Found',
+      description: 'The subject you are looking for does not exist.',
     };
   }
 }

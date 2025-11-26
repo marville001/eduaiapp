@@ -15,6 +15,7 @@ import { StripeSetting } from '@/modules/settings/entities/stripe-setting.entity
 import { SubscriptionPackage } from '@/modules/settings/entities/subscription-package.entity';
 import { SystemSetting } from '@/modules/settings/entities/system-setting.entity';
 import { Subject } from '@/modules/subjects/entities/subject.entity';
+import { UserSubscription } from '@/modules/subscriptions/entities/user-subscription.entity';
 import { Testimonial } from '@/modules/testimonials/entities/testimonial.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
@@ -44,7 +45,8 @@ export const entities = [
   Testimonial,
   Faq,
   StripeSetting,
-  SubscriptionPackage
+  SubscriptionPackage,
+  UserSubscription
 ];
 
 export default new DataSource({

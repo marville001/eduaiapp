@@ -14,30 +14,21 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/hooks/useSettings';
 import { navbarMenuApi } from '@/lib/api/navbar-menu.api';
-import { Subject, subjectApi } from '@/lib/api/subject.api';
 import { useUserStore } from '@/stores/user.store';
 import { NavbarMenu } from '@/types/navbar-menu';
 import { ChevronDown, GraduationCap, Home, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const tools = [
-  { name: "AI Essay Writer", href: "/tools/essay-writer" },
-  { name: "Citation Generator", href: "/tools/citation-generator" },
-  { name: "Grammar Checker", href: "/tools/grammar-checker" },
-  { name: "Plagiarism Checker", href: "/tools/plagiarism-checker" },
-  { name: "Math Solver", href: "/tools/math-solver" },
-  { name: "Study Planner", href: "/tools/study-planner" },
-];
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [menus, setMenus] = useState<NavbarMenu[]>([]);
+  const [loadingMenus, setLoadingMenus] = useState(false);
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
 
-  const { data: settings } = useSettings();
+  const { data: settings, isLoading: loadingSettings } = useSettings();
 
   const getUserInitials = () => {
     if (!user) return 'U';
@@ -57,28 +48,18 @@ export default function Navigation() {
   };
 
   useEffect(() => {
-    const getSubjects = async () => {
-      subjectApi.getHierarchical(true).then((data) => {
-        setSubjects(data);
-      }).catch(() => {
-        setSubjects([]);
-      });
-    };
-    getSubjects();
-  }, []);
-
-
-  useEffect(() => {
     const fetchMenus = () => {
+      setLoadingMenus(true);
       navbarMenuApi.getHierarchical(false).then((data) => {
         setMenus(data);
       }).catch(() => {
         setMenus([]);
+      }).finally(() => {
+        setLoadingMenus(false);
       });
     };
     fetchMenus();
   }, []);
-
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -86,82 +67,95 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              {/* <div className="bg-primary p-2 rounded-lg"> */}
-              <img src={settings?.appLogo} alt="" className='h-10 ' />
-              {/* <Brain className="h-6 w-6 text-white" /> */}
-              {/* </div> */}
-              <span className="text-xl font-bold text-gray-900">
-                {settings?.platformName}
-              </span>
-            </Link>
+            {
+              loadingSettings ? (
+                <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+              ) : (
+                <Link href="/" className="flex items-center space-x-2">
+                  {/* <div className="bg-primary p-2 rounded-lg"> */}
+                  <img src={settings?.appLogo} alt="" className='h-10 ' />
+                  {/* <Brain className="h-6 w-6 text-white" /> */}
+                  {/* </div> */}
+                  <span className="text-xl font-bold text-gray-900">
+                    {settings?.platformName}
+                  </span>
+                </Link>
+              )
+            }
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {/* Subjects Dropdown */}
             {
-              menus.length > 0 ?
-                menus.map(menu => (
-                  <div key={menu.id} className="relative group">
-                    <Link href={`/${menu.url}`} target={menu.target || '_self'} className="flex items-center space-x-1">
-                      <span>{menu.title}</span>
+              loadingMenus ? (
+                <div className='flex gap-2 items-center'>
+                  <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+                  <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+                  <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+                </div>
+              ) :
+                menus.length > 0 ?
+                  menus.map(menu => (
+                    <div key={menu.id} className="relative group">
+                      <Link href={`/${menu.url}`} target={menu.target || '_self'} className="flex items-center space-x-1">
+                        <span>{menu.title}</span>
+                        {
+                          (menu.children && menu.children.length > 0) && (
+                            <ChevronDown className="h-4 w-4" />
+                          )
+                        }
+                      </Link>
                       {
-                        (menu.children && menu.children.length > 0) && (
-                          <ChevronDown className="h-4 w-4" />
-                        )
-                      }
-                    </Link>
-                    {
-                      (menu.children && menu.children.length > 0) ? (
-                        <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                          <div className="p-1">
-                            {menu.children.map((subMenu) => (
-                              <div key={subMenu.slug} className="relative group/sub">
-                                <Link
-                                  href={`/${subMenu.url}`}
-                                  target={subMenu.target || '_self'}
-                                >
-                                  <div className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm cursor-pointer">
-                                    <div className="flex items-center space-x-2">
-                                      <span>{subMenu.title}</span>
-                                    </div>
-                                    {
-                                      (subMenu.children && subMenu.children.length > 0) && (
-                                        <ChevronDown className="h-4 w-4 -rotate-90" />
-                                      )
-                                    }
-                                  </div>
-                                </Link>
-                                {
-                                  (subMenu.children && subMenu.children.length > 0) ? (
-                                    <div className="absolute left-full top-0 ml-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
-                                      <div className="p-1">
-                                        <div className="border-t border-gray-200 my-1" />
-                                        {subMenu.children?.map((child) => (
-                                          <Link
-                                            key={child.slug}
-                                            href={`/${child.slug}`}
-                                            target={child.target || '_self'}
-                                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
-                                          >
-                                            {child.title}
-                                          </Link>
-                                        ))}
+                        (menu.children && menu.children.length > 0) ? (
+                          <div className="absolute left-0 top-full mt-1 w-56 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div className="p-1">
+                              {menu.children.map((subMenu) => (
+                                <div key={subMenu.slug} className="relative group/sub">
+                                  <Link
+                                    href={`/${subMenu.url}`}
+                                    target={subMenu.target || '_self'}
+                                  >
+                                    <div className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm cursor-pointer">
+                                      <div className="flex items-center space-x-2">
+                                        <span>{subMenu.title}</span>
                                       </div>
+                                      {
+                                        (subMenu.children && subMenu.children.length > 0) && (
+                                          <ChevronDown className="h-4 w-4 -rotate-90" />
+                                        )
+                                      }
                                     </div>
-                                  ) : null
-                                }
-                              </div>
-                            ))}
+                                  </Link>
+                                  {
+                                    (subMenu.children && subMenu.children.length > 0) ? (
+                                      <div className="absolute left-full top-0 ml-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50">
+                                        <div className="p-1">
+                                          <div className="border-t border-gray-200 my-1" />
+                                          {subMenu.children?.map((child) => (
+                                            <Link
+                                              key={child.slug}
+                                              href={`/${child.slug}`}
+                                              target={child.target || '_self'}
+                                              className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-sm"
+                                            >
+                                              {child.title}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : null
+                                  }
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )
-                        : null
-                    }
-                  </div>
-                ))
-                : null
+                        )
+                          : null
+                      }
+                    </div>
+                  ))
+                  : null
             }
 
           </div>
@@ -237,55 +231,56 @@ export default function Navigation() {
         {isMobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-              <div className="space-y-2">
-                <div className="font-medium text-gray-900 px-3 py-2">Subjects</div>
-                {subjects.map((subject) => (
-                  <div key={subject.slug} className="pl-4">
+              {menus.length > 0 ?
+                menus.map(menu => (
+                  <div key={menu.id} className="border-b border-gray-200">
                     <Link
-                      href={`/${subject.slug}`}
-                      className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-gray-900"
+                      href={`/${menu.url}`}
+                      target={menu.target || '_self'}
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <span>{subject.name}</span>
+                      {menu.title}
                     </Link>
+                    {
+                      (menu.children && menu.children.length > 0) && (
+                        <div className="pl-4">
+                          {menu.children.map(subMenu => (
+                            <div key={subMenu.slug} className="border-b border-gray-100">
+                              <Link
+                                href={`/${subMenu.url}`}
+                                target={subMenu.target || '_self'}
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {subMenu.title}
+                              </Link>
+                              {
+                                (subMenu.children && subMenu.children.length > 0) && (
+                                  <div className="pl-4">
+                                    {subMenu.children.map(child => (
+                                      <Link
+                                        key={child.slug}
+                                        href={`/${child.url}`}
+                                        target={child.target || '_self'}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:bg-gray-100"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                      >
+                                        {child.title}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )
+                              }
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }
                   </div>
-                ))}
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <div className="font-medium text-gray-900 px-3 py-2">Tools</div>
-                {tools.map((tool) => (
-                  <Link
-                    key={tool.href}
-                    href={tool.href}
-                    className="block px-6 py-2 text-gray-700 hover:text-gray-900"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {tool.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <Link
-                  href="/blog"
-                  className="block px-3 py-2 text-gray-700 hover:text-gray-900"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Blog
-                </Link>
-                {
-                  user ? null :
-                    <Link
-                      href="/login"
-                      className="block px-3 py-2 text-gray-700 hover:text-gray-900"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Log in
-                    </Link>
-                }
-
-              </div>
+                ))
+                : null
+              }
             </div>
           </div>
         )}

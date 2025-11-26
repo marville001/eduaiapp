@@ -7,6 +7,8 @@ import { useUserStore } from '@/stores/user.store';
 import {
 	BookOpen,
 	Brain,
+	CreditCard,
+	Crown,
 	LayoutDashboard,
 	LogOut,
 	Menu,
@@ -43,6 +45,18 @@ const menuItems = [
 		href: "/app/subjects",
 		icon: BookOpen,
 		description: "Explore available subjects"
+	},
+	{
+		title: "Pricing",
+		href: "/app/pricing",
+		icon: Crown,
+		description: "View subscription plans"
+	},
+	{
+		title: "Subscription",
+		href: "/app/subscription",
+		icon: CreditCard,
+		description: "Manage your subscription"
 	},
 	{
 		title: "Profile",

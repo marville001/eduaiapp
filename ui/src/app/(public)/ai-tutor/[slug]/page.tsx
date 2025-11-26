@@ -1,6 +1,6 @@
-import { pageApi } from '@/lib/api/page.api';
+import { subjectApi } from '@/lib/api/subject.api';
 import { notFound } from 'next/navigation';
-import { PageView } from './components/page-view';
+import SubjectView from './components/subject-view';
 
 interface PageProps {
   params: Promise<{ slug: string; }>;
@@ -9,22 +9,20 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
 
-  let page;
+  // Try to fetch as page first, then as subject
+  let subject;
   try {
-    page = await pageApi.getBySlug(slug);
-    // Check if page exists and is published
-    if (!page || page.status !== 'published' || !page.isActive) {
-      page = null;
-    }
+    subject = await subjectApi.getBySlug(slug);
   } catch {
-    // Page not found, will try subject
+    // Subject not found either
   }
 
-  if (!page) {
+  // If neither page nor subject found, show 404
+  if (!subject) {
     notFound();
   }
 
-  return <PageView page={page} />;
+  return <SubjectView subject={subject} />;
 }
 
 // Enable ISR with revalidation

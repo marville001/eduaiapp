@@ -23,6 +23,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SubjectModule } from './modules/subjects/subject.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { TestimonialModule } from './modules/testimonials/testimonial.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -88,6 +89,7 @@ import { UsersModule } from './modules/users/users.module';
 		AuthModule,
 		SettingsModule,
 		SubjectModule,
+		SubscriptionsModule,
 		BlogModule,
 		PageModule,
 		NavbarMenuModule,

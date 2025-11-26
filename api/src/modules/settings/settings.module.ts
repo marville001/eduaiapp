@@ -45,6 +45,7 @@ import { SystemSettingsRepository } from './system-settings.repository';
     AiModelConfigurationService,
     StripeSettingsService,
     SubscriptionPackageService,
+    SubscriptionPackageRepository,
   ],
 })
 export class SettingsModule { }
