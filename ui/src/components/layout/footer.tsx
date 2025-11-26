@@ -57,7 +57,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Subjects */}
           {
             columns.map((column) => (
               <div key={column.columnId}>

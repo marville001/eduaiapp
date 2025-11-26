@@ -12,41 +12,41 @@ import { AdminStatsService } from './admin-stats.service';
 @ApiBearerAuth('JWT')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class AdminController {
-  constructor(private readonly adminStatsService: AdminStatsService) {}
+	constructor(private readonly adminStatsService: AdminStatsService) { }
 
-  @Get('stats')
-  @RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
-  @ApiOperation({ summary: 'Get admin dashboard statistics' })
-  @ApiResponse({ status: 200, description: 'Dashboard statistics retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async getDashboardStats() {
-    return await this.adminStatsService.getDashboardData();
-  }
+	@Get('stats')
+	@RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get admin dashboard statistics' })
+	@ApiResponse({ status: 200, description: 'Dashboard statistics retrieved successfully' })
+	@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+	async getDashboardStats() {
+		return await this.adminStatsService.getDashboardData();
+	}
 
-  @Get('stats/overview')
-  @RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
-  @ApiOperation({ summary: 'Get admin stats overview only' })
-  @ApiResponse({ status: 200, description: 'Stats overview retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async getStatsOverview() {
-    return await this.adminStatsService.getAdminStats();
-  }
+	@Get('stats/overview')
+	@RequirePermissions(Permission(PermissionResource.SETTINGS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get admin stats overview only' })
+	@ApiResponse({ status: 200, description: 'Stats overview retrieved successfully' })
+	@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+	async getStatsOverview() {
+		return await this.adminStatsService.getAdminStats();
+	}
 
-  @Get('stats/recent-questions')
-  @RequirePermissions(Permission(PermissionResource.QUESTIONS, PermissionAction.READ))
-  @ApiOperation({ summary: 'Get recent questions' })
-  @ApiResponse({ status: 200, description: 'Recent questions retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async getRecentQuestions() {
-    return await this.adminStatsService.getRecentQuestions();
-  }
+	@Get('stats/recent-questions')
+	@RequirePermissions(Permission(PermissionResource.QUESTIONS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get recent questions' })
+	@ApiResponse({ status: 200, description: 'Recent questions retrieved successfully' })
+	@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+	async getRecentQuestions() {
+		return await this.adminStatsService.getRecentQuestions();
+	}
 
-  @Get('stats/recent-users')
-  @RequirePermissions(Permission(PermissionResource.USERS, PermissionAction.READ))
-  @ApiOperation({ summary: 'Get recent users' })
-  @ApiResponse({ status: 200, description: 'Recent users retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async getRecentUsers() {
-    return await this.adminStatsService.getRecentUsers();
-  }
+	@Get('stats/recent-users')
+	@RequirePermissions(Permission(PermissionResource.USERS, PermissionAction.READ))
+	@ApiOperation({ summary: 'Get recent users' })
+	@ApiResponse({ status: 200, description: 'Recent users retrieved successfully' })
+	@ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+	async getRecentUsers() {
+		return await this.adminStatsService.getRecentUsers();
+	}
 }
