@@ -1,11 +1,9 @@
 "use client";
 
-import { useSettings } from '@/hooks/useSettings';
 import { footerColumnApi } from '@/lib/api/footer-menu.api';
-import { FooterColumn } from '@/types/footer-menu';
+import { useQuery } from '@tanstack/react-query';
 import { Brain, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from 'react';
 
 const socialLinks = [
   { name: "Facebook", icon: Facebook, href: "https://facebook.com/MasomoAI" },
@@ -16,24 +14,13 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const [columns, setColumns] = useState<FooterColumn[]>([]);
-
-  const { data: settings } = useSettings();
-  console.log({ settings, columns });
-
-
-  useEffect(() => {
-    const fetchColumns = () => {
-      footerColumnApi.getAll({ includeItems: true }).then((response) => {
-        const columns = Array.isArray(response) ? response : response.data;
-        setColumns(columns);
-      }).catch(() => {
-        setColumns([]);
-      });
-
-    };
-    fetchColumns();
-  }, []);
+  const { data: columnsData } = useQuery({
+    queryKey: ["nav-menus"],
+    queryFn: async () => footerColumnApi.getAll({ includeItems: true }),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+  const columns = (Array.isArray(columnsData) ? columnsData : columnsData?.data) || [];
 
   return (
     <footer className="bg-gray-900 text-white">

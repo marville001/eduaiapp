@@ -15,16 +15,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/hooks/useSettings';
 import { navbarMenuApi } from '@/lib/api/navbar-menu.api';
 import { useUserStore } from '@/stores/user.store';
-import { NavbarMenu } from '@/types/navbar-menu';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, GraduationCap, Home, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [menus, setMenus] = useState<NavbarMenu[]>([]);
-  const [loadingMenus, setLoadingMenus] = useState(false);
   const { logout } = useAuth();
   const user = useUserStore(state => state.user);
 
@@ -47,19 +45,13 @@ export default function Navigation() {
     setIsMobileMenuOpen(false);
   };
 
-  useEffect(() => {
-    const fetchMenus = () => {
-      setLoadingMenus(true);
-      navbarMenuApi.getHierarchical(false).then((data) => {
-        setMenus(data);
-      }).catch(() => {
-        setMenus([]);
-      }).finally(() => {
-        setLoadingMenus(false);
-      });
-    };
-    fetchMenus();
-  }, []);
+  const { data: menusData, isLoading: loadingMenus } = useQuery({
+    queryKey: ["nav-menus"],
+    queryFn: async () => navbarMenuApi.getHierarchical(false),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+  const menus = menusData || [];
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
