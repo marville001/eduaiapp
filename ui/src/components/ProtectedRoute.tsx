@@ -1,32 +1,33 @@
-'use client'
+'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
-  allowedRoles?: string[]
+  children: React.ReactNode;
+  allowedRoles?: string[];
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { user, loading, isAuthenticated } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login')
-      return
+      router.push('/login');
+      return;
     }
 
     if (!loading && isAuthenticated && allowedRoles && user?.role) {
       if (!allowedRoles.includes(user.role)) {
         // Redirect to unauthorized page or dashboard home
-        router.push(user?.isAdminUser?'/admin': '/app')
-        return
+        router.push(user?.isAdminUser ? '/admin' : '/app');
+        return;
       }
     }
-  }, [loading, isAuthenticated, user, allowedRoles, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, isAuthenticated, user, allowedRoles]);
 
   if (loading) {
     return (
@@ -36,11 +37,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
@@ -51,8 +52,8 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           <p className="text-muted-foreground mt-2">You don&apos;t have permission to access this page.</p>
         </div>
       </div>
-    )
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
