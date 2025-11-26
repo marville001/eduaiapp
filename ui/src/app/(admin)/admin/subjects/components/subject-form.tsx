@@ -134,9 +134,9 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
         });
         try {
           await fetch(`/api/revalidate/ai-tutor/${subject.slug}`, { method: 'GET' });
-          console.log(`Revalidated page: /ai-tutor/${subject.slug}`);
+          console.log(`Revalidated subject: /ai-tutor/${subject.slug}`);
         } catch (error) {
-          console.error('Failed to revalidate page:', error);
+          console.error('Failed to revalidate subject:', error);
         }
       } else {
         // Create new subject
@@ -146,6 +146,12 @@ export default function SubjectForm({ subject, onSuccess, onCancel }: SubjectFor
           description: data.description || undefined,
           parentSubjectId: data.parentSubjectId,
         });
+        try {
+          await fetch(`/api/revalidate/ai-tutor/${data.slug}`, { method: 'GET' });
+          console.log(`Revalidated subject: /ai-tutor/${data.slug}`);
+        } catch (error) {
+          console.error('Failed to revalidate subject:', error);
+        }
       }
     } catch {
       // Error is handled by mutation onError
