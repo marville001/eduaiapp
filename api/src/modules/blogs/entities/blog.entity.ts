@@ -67,6 +67,9 @@ export class Blog extends AbstractEntity<Blog> {
   @Column({ type: 'varchar', length: 500, nullable: true })
   seoImage?: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  canonicalUrl?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

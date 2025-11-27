@@ -39,6 +39,9 @@ export class Subject extends AbstractEntity<Subject> {
   @Column({ type: 'varchar', length: 500, nullable: true })
   seoImage?: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  canonicalUrl?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

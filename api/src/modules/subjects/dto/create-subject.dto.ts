@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsArray, IsNumber } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateSubjectDto {
   @IsString()
@@ -41,4 +41,9 @@ export class CreateSubjectDto {
   @IsOptional()
   @MaxLength(500)
   seoImage?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  canonicalUrl?: string;
 }

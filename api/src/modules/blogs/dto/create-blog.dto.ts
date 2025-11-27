@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsEnum, IsNumber, IsDateString, IsArray, IsBoolean } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 import { BlogStatus } from '../entities/blog.entity';
 
 export class CreateBlogDto {
@@ -59,4 +59,9 @@ export class CreateBlogDto {
   @IsOptional()
   @MaxLength(500)
   seoImage?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  canonicalUrl?: string;
 }

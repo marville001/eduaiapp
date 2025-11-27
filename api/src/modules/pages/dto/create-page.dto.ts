@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsEnum, IsNumber, IsArray } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 import { PageStatus } from '../entities/page.entity';
 
 export class CreatePageDto {
@@ -51,4 +51,9 @@ export class CreatePageDto {
   @IsOptional()
   @MaxLength(500)
   seoImage?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  canonicalUrl?: string;
 }
