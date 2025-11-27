@@ -65,7 +65,7 @@ export default async function Footer() {
                   {column.items?.map((item) => (
                     <li key={item.itemId}>
                       <Link
-                        href={`/ai-tutor/${item.url}`}
+                        href={`/${item.url}`}
                         target={item.target || '_self'}
                         className="text-gray-400 hover:text-white transition-colors duration-200"
                       >
