@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from 'react';
+import { Page, pageApi } from '@/lib/api/page.api';
 import Image from 'next/image';
-import { Page } from '@/lib/api/page.api';
-import { pageApi } from '@/lib/api/page.api';
+import { useEffect } from 'react';
+import { PageSections } from './section-renderer';
+
 interface PageViewProps {
 	page: Page;
 }
@@ -30,10 +31,13 @@ export function PageView({ page }: PageViewProps) {
 		});
 	};
 
+	const hasSections = page.sections && page.sections.length > 0;
+
 	return (
-		<div className="min-h-screen bg-gray-50">
-			{/* Hero Section */}
-			<div className="container mx-auto px-4 py-16">
+		<div className="min-h-screen bg-gray-50 py-16">
+			{/* Hero Section - Only show if no sections or as header */}
+
+			<div className="container mx-auto px-4 py-8 pt-0">
 				<div className="max-w-4xl mx-auto text-center text-black">
 					<h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
 						{page.title}
@@ -44,15 +48,14 @@ export function PageView({ page }: PageViewProps) {
 							{page.excerpt}
 						</p>
 					)}
-
 				</div>
 			</div>
 
 			{/* Featured Image */}
 			{page.featuredImage && (
-				<div className="container mx-auto px-4 -mt-16 relative z-10">
+				<div className="container mx-auto px-4 mt-16 relative z-10">
 					<div className="max-w-4xl mx-auto">
-						<div className="aspect-video rounded-lg overflow-hidden shadow-2xl">
+						<div className="aspect-video rounded-lg overflow-hidden shadow-2xl relative">
 							<Image
 								src={page.featuredImage}
 								alt={page.title}
@@ -65,26 +68,15 @@ export function PageView({ page }: PageViewProps) {
 				</div>
 			)}
 
-			{/* Main Content */}
-			<div className="container mx-auto px-4 py-16">
-				<div className="max-w-4xl mx-auto">
-					<article
-						className="prose prose-lg max-w-none
-                prose-headings:text-gray-900 prose-headings:font-bold
-                prose-p:text-gray-700 prose-p:leading-relaxed
-                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-gray-900
-                prose-ul:text-gray-700 prose-ol:text-gray-700
-                prose-li:text-gray-700
-                prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:p-4
-                prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:rounded
-                prose-pre:bg-gray-900 prose-pre:text-gray-100
-                prose-img:rounded-lg prose-img:shadow-lg"
-						dangerouslySetInnerHTML={{ __html: page.content }}
-					/>
+			{/* Render Sections */}
+			{hasSections && (
+				<PageSections sections={page.sections!} />
+			)}
 
-					{/* Page Footer */}
-					<div className="mt-12 p-6 bg-white rounded-lg shadow-lg">
+			{/* Page Footer */}
+			{/* <div className="container mx-auto px-4 py-8">
+				<div className="max-w-4xl mx-auto">
+					<div className="p-6 bg-white rounded-lg shadow-lg">
 						<div className="flex flex-wrap items-center justify-between gap-4">
 							<div className="flex items-center gap-4">
 								<span className="text-sm font-medium text-gray-500">
@@ -94,7 +86,7 @@ export function PageView({ page }: PageViewProps) {
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> */}
 
 			{/* Structured Data for SEO */}
 			<script

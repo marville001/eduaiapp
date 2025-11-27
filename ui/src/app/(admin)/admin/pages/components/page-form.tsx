@@ -1,7 +1,6 @@
 "use client";
 
 import { ImageUpload } from "@/components/forms/image-upload";
-import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,21 +22,23 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CreatePageDto, Page, pageApi, UpdatePageDto } from "@/lib/api/page.api";
+import { CreatePageDto, Page, pageApi, PageSection, UpdatePageDto } from "@/lib/api/page.api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, RefreshCw, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, RefreshCw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { PageSectionsEditor } from "./page-editor";
 
 const formSchema = z.object({
 	title: z.string().min(1, "Title is required").max(255, "Title too long"),
 	slug: z.string().optional(),
 	excerpt: z.string().optional(),
-	content: z.string().min(1, "Content is required"),
+	content: z.string().optional(),
+	sections: z.array(z.any()).optional(),
 	featuredImage: z.string().optional(),
 	status: z.enum(['draft', 'published', 'archived']).optional(),
 	seoTitle: z.string().optional(),
@@ -61,6 +62,8 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 	const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
 	const [seoTagInput, setSeoTagInput] = useState('');
 	const [isSlugManual, setIsSlugManual] = useState(false);
+	const [sections, setSections] = useState<PageSection[]>(page?.sections || []);
+	const [isBasicInfoExpanded, setIsBasicInfoExpanded] = useState(true);
 
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -72,6 +75,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			slug: page?.slug || '',
 			excerpt: page?.excerpt || '',
 			content: page?.content || '',
+			sections: page?.sections || [],
 			featuredImage: page?.featuredImage || '',
 			status: page?.status || 'draft',
 			seoTitle: page?.seoTitle || '',
@@ -147,11 +151,17 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 	const onSubmit = async (data: FormData) => {
 		setIsSubmitting(true);
 
+		// Include sections in the data
+		const submitData = {
+			...data,
+			sections: sections,
+		};
+
 		try {
 			if (page) {
-				updateMutation.mutate({ id: page.id.toString(), data });
+				updateMutation.mutate({ id: page.id.toString(), data: submitData });
 			} else {
-				createMutation.mutate(data);
+				createMutation.mutate(submitData);
 			}
 		} catch (error) {
 			console.error('Submit error:', error);
@@ -197,7 +207,8 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			setValue('title', page.title);
 			setValue('slug', page.slug || '');
 			setValue('excerpt', page.excerpt || '');
-			setValue('content', page.content);
+			setValue('content', page.content || '');
+			setValue('sections', page.sections || []);
 			setValue('featuredImage', page.featuredImage || '');
 			setValue('status', page.status || 'draft');
 			setValue('seoTitle', page.seoTitle || '');
@@ -205,6 +216,8 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			setValue('seoTags', page.seoTags || []);
 			setValue('seoImage', page.seoImage || '');
 			setValue('canonicalUrl', page.canonicalUrl || '');
+			// eslint-disable-next-line react-hooks/set-state-in-effect
+			setSections(page.sections || []);
 		}
 	}, [setValue, page]);
 
@@ -262,139 +275,133 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 							{/* Main Content */}
 							<div className="lg:col-span-2 space-y-6">
 								<Card>
-									<CardHeader>
+									<CardHeader className='flex items-center justify-between'>
 										<CardTitle>Basic Information</CardTitle>
+										<Button
+											variant="ghost"
+											size="sm"
+											type="button"
+											onClick={() => setIsBasicInfoExpanded(!isBasicInfoExpanded)}
+										>
+											{isBasicInfoExpanded ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
+										</Button>
 									</CardHeader>
-									<CardContent className="space-y-4">
-										<FormField
-											control={form.control}
-											name="title"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Title *</FormLabel>
-													<FormControl>
-														<Input
-															placeholder="Enter page title..."
-															{...field}
-															onChange={(e) => {
-																field.onChange(e);
-																if (!isSlugManual) {
-																	generateSlug(e.target.value);
-																}
-															}}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+									{
+										isBasicInfoExpanded && (
+											<CardContent className="space-y-4">
+												<FormField
+													control={form.control}
+													name="title"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Title *</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter page title..."
+																	{...field}
+																	onChange={(e) => {
+																		field.onChange(e);
+																		if (!isSlugManual) {
+																			generateSlug(e.target.value);
+																		}
+																	}}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-										<FormField
-											control={form.control}
-											name="slug"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Slug</FormLabel>
-													<FormControl>
-														<div className="relative">
-															<Input
-																placeholder="page-slug"
-																{...field}
-																onChange={(e) => {
-																	field.onChange(e);
-																	setIsSlugManual(true);
-																}}
-															/>
-															<Button
-																type="button"
-																variant="ghost"
-																size="sm"
-																onClick={() => {
-																	const title = form.getValues('title');
-																	if (title) {
-																		generateSlug(title);
-																		setIsSlugManual(false);
-																	}
-																}}
-																className="absolute right-2 top-1/2 -translate-y-1/2 h-6 px-2"
-															>
-																<RefreshCw className="w-3 h-3" />
-															</Button>
-														</div>
-													</FormControl>
-													<FormDescription>
-														URL-friendly version of the title
-													</FormDescription>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+												<FormField
+													control={form.control}
+													name="slug"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Slug</FormLabel>
+															<FormControl>
+																<div className="relative">
+																	<Input
+																		placeholder="page-slug"
+																		{...field}
+																		onChange={(e) => {
+																			field.onChange(e);
+																			setIsSlugManual(true);
+																		}}
+																	/>
+																	<Button
+																		type="button"
+																		variant="ghost"
+																		size="sm"
+																		onClick={() => {
+																			const title = form.getValues('title');
+																			if (title) {
+																				generateSlug(title);
+																				setIsSlugManual(false);
+																			}
+																		}}
+																		className="absolute right-2 top-1/2 -translate-y-1/2 h-6 px-2"
+																	>
+																		<RefreshCw className="w-3 h-3" />
+																	</Button>
+																</div>
+															</FormControl>
+															<FormDescription>
+																URL-friendly version of the title
+															</FormDescription>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-										<FormField
-											control={form.control}
-											name="excerpt"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Excerpt</FormLabel>
-													<FormControl>
-														<Textarea
-															placeholder="Brief description of your page..."
-															rows={3}
-															{...field}
-														/>
-													</FormControl>
-													<FormDescription>
-														A short summary that appears in page listings
-													</FormDescription>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+												<FormField
+													control={form.control}
+													name="excerpt"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Excerpt</FormLabel>
+															<FormControl>
+																<Textarea
+																	placeholder="Brief description of your page..."
+																	rows={3}
+																	{...field}
+																/>
+															</FormControl>
+															<FormDescription>
+																A short summary that appears in page listings
+															</FormDescription>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-										<FormField
-											control={form.control}
-											name="featuredImage"
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<ImageUpload
-															value={field.value}
-															onChange={field.onChange}
-															label="Featured Image"
-															description="Main image that appears with your page"
-															placeholder="https://example.com/featured-image.jpg"
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</CardContent>
+												<FormField
+													control={form.control}
+													name="featuredImage"
+													render={({ field }) => (
+														<FormItem>
+															<FormControl>
+																<ImageUpload
+																	value={field.value}
+																	onChange={field.onChange}
+																	label="Featured Image"
+																	description="Main image that appears with your page"
+																	placeholder="https://example.com/featured-image.jpg"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</CardContent>
+										)
+									}
 								</Card>
 
-								<Card>
-									<CardHeader>
-										<CardTitle>Content *</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<FormField
-											control={form.control}
-											name="content"
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<TiptapEditor
-															value={field.value}
-															onChange={({ html }) => field.onChange(html)}
-															showToolbar={true}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</CardContent>
-								</Card>
+								{/* Page Sections Editor */}
+								<PageSectionsEditor
+									sections={sections}
+									onChange={setSections}
+								/>
 							</div>
 
 							{/* Sidebar */}

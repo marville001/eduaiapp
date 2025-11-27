@@ -1,5 +1,40 @@
 import api from './index';
 
+// Section Types
+export enum PageSectionType {
+  RICH_TEXT = 'rich_text',
+  GRID = 'grid',
+  CHAT = 'chat',
+  HERO = 'hero',
+  CTA = 'cta',
+  FAQ = 'faq',
+  TESTIMONIALS = 'testimonials',
+  FEATURES = 'features',
+}
+
+export interface GridItem {
+  id: string;
+  icon?: string;
+  title: string;
+  description: string;
+}
+
+export interface PageSection {
+  id: string;
+  type: PageSectionType;
+  order: number;
+  title?: string;
+  summary?: string;
+  content?: string;
+  gridItems?: GridItem[];
+  gridColumns?: number;
+  backgroundColor?: string;
+  textColor?: string;
+  buttonText?: string;
+  buttonLink?: string;
+  imageUrl?: string;
+}
+
 // Types
 export interface Page {
   id: number;
@@ -8,6 +43,7 @@ export interface Page {
   slug: string;
   excerpt?: string;
   content: string;
+  sections?: PageSection[];
   featuredImage?: string;
   status: 'draft' | 'published' | 'archived';
   isActive: boolean;
@@ -27,7 +63,8 @@ export interface CreatePageDto {
   title: string;
   slug?: string;
   excerpt?: string;
-  content: string;
+  content?: string;
+  sections?: PageSection[];
   featuredImage?: string;
   status?: 'draft' | 'published' | 'archived';
   readingTime?: number;
@@ -43,6 +80,7 @@ export interface UpdatePageDto {
   slug?: string;
   excerpt?: string;
   content?: string;
+  sections?: PageSection[];
   featuredImage?: string;
   status?: 'draft' | 'published' | 'archived';
   readingTime?: number;

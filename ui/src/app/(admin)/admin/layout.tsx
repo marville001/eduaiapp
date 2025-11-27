@@ -15,7 +15,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex overflow-y-hidden h-screen bg-gray-50">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">

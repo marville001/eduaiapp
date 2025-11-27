@@ -7,6 +7,40 @@ export enum PageStatus {
   ARCHIVED = 'archived'
 }
 
+export enum PageSectionType {
+  RICH_TEXT = 'rich_text',
+  GRID = 'grid',
+  CHAT = 'chat',
+  HERO = 'hero',
+  CTA = 'cta',
+  FAQ = 'faq',
+  TESTIMONIALS = 'testimonials',
+  FEATURES = 'features',
+}
+
+export interface GridItem {
+  id: string;
+  icon?: string;
+  title: string;
+  description: string;
+}
+
+export interface PageSection {
+  id: string;
+  type: PageSectionType;
+  order: number;
+  title?: string;
+  summary?: string;
+  content?: string; // For rich text sections
+  gridItems?: GridItem[]; // For grid sections
+  gridColumns?: number; // Number of columns for grid (2, 3, 4)
+  backgroundColor?: string;
+  textColor?: string;
+  buttonText?: string; // For CTA sections
+  buttonLink?: string; // For CTA sections
+  imageUrl?: string; // For hero sections
+}
+
 @Entity('pages')
 @Index(['id'], { unique: true })
 export class Page extends AbstractEntity<Page> {
@@ -22,8 +56,11 @@ export class Page extends AbstractEntity<Page> {
   @Column({ type: 'text', nullable: true })
   excerpt?: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   content: string;
+
+  @Column({ type: 'json', nullable: true })
+  sections?: PageSection[];
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   featuredImage?: string;
