@@ -1,26 +1,26 @@
-"use client";
-
 import { footerColumnApi } from '@/lib/api/footer-menu.api';
-import { useQuery } from '@tanstack/react-query';
-import { Brain, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
+import settingsApi from '@/lib/api/settings.api';
+import { Brain, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
 import Link from "next/link";
 
-const socialLinks = [
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com/MasomoAI" },
-  { name: "Twitter", icon: Twitter, href: "https://twitter.com/MasomoAI" },
-  { name: "Instagram", icon: Instagram, href: "https://instagram.com/MasomoAI" },
-  { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/company/MasomoAI" },
-  { name: "YouTube", icon: Youtube, href: "https://youtube.com/MasomoAI" },
-];
+export const dynamic = 'force-dynamic';
 
-export default function Footer() {
-  const { data: columnsData } = useQuery({
-    queryKey: ["nav-menus"],
-    queryFn: async () => footerColumnApi.getAll({ includeItems: true }),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-  const columns = (Array.isArray(columnsData) ? columnsData : columnsData?.data) || [];
+
+export default async function Footer() {
+
+  const [footerRes, settings] = await Promise.all([
+    footerColumnApi.getAll({ includeItems: true }).catch(() => null),
+    settingsApi.getSettings()
+  ]);
+
+  const columns = footerRes?.data || [];
+
+  const socialLinks = [
+    { name: "Facebook", icon: Facebook, href: settings?.socialFacebook },
+    { name: "Twitter", icon: Twitter, href: settings?.socialTwitter },
+    { name: "Instagram", icon: Instagram, href: settings?.socialInstagram },
+    { name: "LinkedIn", icon: Linkedin, href: settings?.socialLinkedin },
+  ];
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -44,15 +44,15 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-purple-400" />
-                <span className="text-gray-400">support@MasomoAI.com</span>
+                <span className="text-gray-400">{settings?.supportEmail}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-purple-400" />
-                <span className="text-gray-400">+1 (555) 123-4567</span>
+                <span className="text-gray-400">{settings?.contactPhone}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-4 w-4 text-purple-400" />
-                <span className="text-gray-400">San Francisco, CA</span>
+                <span className="text-gray-400">{settings?.contactAddress}</span>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function Footer() {
         </div>
 
         {/* Newsletter Signup */}
-        <div className="border-t border-gray-800 mt-12 pt-12">
+        {/* <div className="border-t border-gray-800 mt-12 pt-12">
           <div className="max-w-md">
             <h3 className="text-lg font-semibold mb-4">Stay Updated</h3>
             <p className="text-gray-400 mb-4">
@@ -97,7 +97,7 @@ export default function Footer() {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom Footer */}
@@ -111,7 +111,7 @@ export default function Footer() {
 
             {/* Social Links */}
             <div className="flex items-center space-x-4">
-              {socialLinks.map((social) => (
+              {socialLinks.filter(social => social.href).map((social) => (
                 <a
                   key={social.name}
                   href={social.href}

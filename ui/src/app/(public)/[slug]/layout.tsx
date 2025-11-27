@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         creator: '@MasomoAI',
       },
       alternates: {
-        canonical: `/${slug}`,
+        canonical: page.canonicalUrl || `https://ai.edutized.com/${page.slug}`,
       },
       robots: {
         index: true,

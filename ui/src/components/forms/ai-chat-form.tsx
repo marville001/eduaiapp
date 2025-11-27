@@ -38,7 +38,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      subject: 0,
+      subject: "",
       question: "",
       files: [],
     },
@@ -144,7 +144,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
     if (slug && subjects.length > 0) {
       const matchedSubject = subjects.find(subj => subj.slug === slug);
       if (matchedSubject) {
-        setValue("subject", matchedSubject.id);
+        setValue("subject", matchedSubject.id + "");
       }
     }
   }, [slug, subjects, setValue]);
@@ -161,7 +161,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">Subject</FormLabel>
-                  <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value + ""}>
+                  <Select onValueChange={(v) => field.onChange(v)} value={field.value + ""}>
                     <FormControl>
                       <SelectTrigger className="h-14! text-lg w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500">
                         <SelectValue placeholder="Select a subject" />

@@ -248,7 +248,7 @@ export default function TestimonialsSectionEditor({
 					</SortableContext>
 				</DndContext>
 
-				{testimonials.length === 0 && (
+				{testimonials.length === 0 ? (
 					<div className="text-center py-8 border-2 border-dashed rounded-lg">
 						<Star className="h-8 w-8 text-gray-300 mx-auto mb-2" />
 						<p className="text-gray-500">No testimonials yet</p>
@@ -261,6 +261,13 @@ export default function TestimonialsSectionEditor({
 						>
 							<Plus className="h-4 w-4 mr-1" />
 							Add your first testimonial
+						</Button>
+					</div>
+				) : (
+					<div className="flex justify-center py-4">
+						<Button onClick={addItem} type='button' size="sm" className="h-8">
+							<Plus className="h-4 w-4 mr-1" />
+							Add Testimonial
 						</Button>
 					</div>
 				)}

@@ -8,7 +8,7 @@ import {
 	GetFooterColumnsParams,
 	GetFooterItemsParams,
 	UpdateFooterColumnData,
-	UpdateFooterItemData,
+	UpdateFooterItemData
 } from '@/types/footer-menu';
 import api from './index';
 
@@ -16,8 +16,8 @@ export const footerColumnApi = {
 	/**
 	 * Get all footer columns with optional filtering
 	 */
-	getAll: async (params?: GetFooterColumnsParams): Promise<FooterColumn[] | FooterColumnResponse> => {
-		const response = await api.get<{ data: FooterColumn[] | FooterColumnResponse; }>('/footer-columns', {
+	getAll: async (params?: GetFooterColumnsParams): Promise<FooterColumnResponse> => {
+		const response = await api.get<{ data: FooterColumnResponse; }>('/footer-columns', {
 			params,
 		});
 		return response.data?.data;

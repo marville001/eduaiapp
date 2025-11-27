@@ -23,18 +23,10 @@ export function PageView({ page }: PageViewProps) {
 		if (page.id) incrementViews();
 	}, [page.id]);
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		});
-	};
-
 	const hasSections = page.sections && page.sections.length > 0;
 
 	return (
-		<div className="min-h-screen bg-gray-50 py-16">
+		<div className="min-h-screen bg-white z-1225 py-16">
 			{/* Hero Section - Only show if no sections or as header */}
 
 			<div className="container mx-auto px-4 py-8 pt-0">

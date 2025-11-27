@@ -1,32 +1,27 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PageSection } from "@/lib/api/page.api";
+import { MessageSquare } from 'lucide-react';
 
 interface ChatSectionEditorProps {
 	section: PageSection;
 	onUpdate: (section: PageSection) => void;
 }
 
-export default function ChatSectionEditor({
-	section,
-	onUpdate,
-}: ChatSectionEditorProps) {
+export default function ChatSectionEditor({ }: ChatSectionEditorProps) {
 	return (
 		<div className="space-y-4">
-			{/* <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+			<div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
 				<MessageSquare className="h-5 w-5 text-green-600 mt-0.5" />
 				<div>
 					<p className="text-sm font-medium text-green-800">Chat Section</p>
 					<p className="text-sm text-green-700 mt-1">
-						This section will render an interactive AI chat interface. The title
-						and summary below will be displayed above the chat form.
+						This section will render an the AI chat interface.
 					</p>
 				</div>
-			</div> */}
+			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div className="space-y-2">
 					<Label htmlFor={`title-${section.id}`}>Section Title</Label>
 					<Input
@@ -45,7 +40,7 @@ export default function ChatSectionEditor({
 						placeholder="e.g., Get instant answers to your questions"
 					/>
 				</div>
-			</div>
+			</div> */}
 
 		</div>
 	);

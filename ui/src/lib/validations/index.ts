@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Question submission validation
 export const questionSchema = z.object({
-  subject: z.number(),
+  subject: z.string(),
   question: z.string().min(10, "Question must be at least 10 characters long"),
   files: z.array(z.instanceof(File)).optional(),
 });

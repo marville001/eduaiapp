@@ -147,7 +147,7 @@ export function PageSectionsEditor({
 
 	return (
 		<Card className="border-0 shadow-none">
-			<CardHeader className="px-0 pt-0">
+			<CardHeader className="px-3 pt-0">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Layers className="h-5 w-5 text-gray-500" />
@@ -234,7 +234,7 @@ export function PageSectionsEditor({
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="px-0 pb-0">
+			<CardContent className="px-3 pb-0">
 				{sections.length === 0 ? (
 					<div className="text-center py-12 border-2 border-dashed rounded-lg bg-gray-50/50">
 						<Layers className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -297,65 +297,74 @@ export function PageSectionsEditor({
 						</Dialog>
 					</div>
 				) : (
-					<DndContext
-						sensors={sensors}
-						collisionDetection={closestCenter}
-						onDragStart={handleDragStart}
-						onDragEnd={handleDragEnd}
-					>
-						<SortableContext
-							items={sections.map((s) => s.id)}
-							strategy={verticalListSortingStrategy}
+					<>
+						<DndContext
+							sensors={sensors}
+							collisionDetection={closestCenter}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
 						>
-							<div className="space-y-3">
-								{sections.map((section) => (
-									<SortableSection
-										key={section.id}
-										section={section}
-										isCollapsed={collapsedSections.has(section.id)}
-										onToggleCollapse={() => toggleCollapse(section.id)}
-										onUpdate={updateSection}
-										onDelete={() => deleteSection(section.id)}
-										onDuplicate={() => duplicateSection(section)}
-									/>
-								))}
-							</div>
-						</SortableContext>
-						<DragOverlay>
-							{activeSection && (
-								<Card className="border-2 border-primary shadow-lg opacity-90">
-									<CardHeader className="py-3 px-4">
-										<div className="flex items-center gap-3">
-											{(() => {
-												const config = getSectionTypeConfig(activeSection.type);
-												const Icon = config.icon;
-												return (
-													<div
-														className={cn(
-															"flex items-center gap-2 px-3 py-1.5 rounded-full",
-															config.bgColor
-														)}
-													>
-														<Icon className={cn("h-4 w-4", config.color)} />
-														<span
-															className={cn("text-sm font-medium", config.color)}
+							<SortableContext
+								items={sections.map((s) => s.id)}
+								strategy={verticalListSortingStrategy}
+							>
+								<div className="space-y-3">
+									{sections.map((section) => (
+										<SortableSection
+											key={section.id}
+											section={section}
+											isCollapsed={collapsedSections.has(section.id)}
+											onToggleCollapse={() => toggleCollapse(section.id)}
+											onUpdate={updateSection}
+											onDelete={() => deleteSection(section.id)}
+											onDuplicate={() => duplicateSection(section)}
+										/>
+									))}
+								</div>
+							</SortableContext>
+							<DragOverlay>
+								{activeSection && (
+									<Card className="border-2 border-primary shadow-lg opacity-90">
+										<CardHeader className="py-3 px-4">
+											<div className="flex items-center gap-3">
+												{(() => {
+													const config = getSectionTypeConfig(activeSection.type);
+													const Icon = config.icon;
+													return (
+														<div
+															className={cn(
+																"flex items-center gap-2 px-3 py-1.5 rounded-full",
+																config.bgColor
+															)}
 														>
-															{config.label}
-														</span>
-													</div>
-												);
-											})()}
-											{activeSection.title && (
-												<span className="text-sm text-gray-600 truncate">
-													{activeSection.title}
-												</span>
-											)}
-										</div>
-									</CardHeader>
-								</Card>
-							)}
-						</DragOverlay>
-					</DndContext>
+															<Icon className={cn("h-4 w-4", config.color)} />
+															<span
+																className={cn("text-sm font-medium", config.color)}
+															>
+																{config.label}
+															</span>
+														</div>
+													);
+												})()}
+												{activeSection.title && (
+													<span className="text-sm text-gray-600 truncate">
+														{activeSection.title}
+													</span>
+												)}
+											</div>
+										</CardHeader>
+									</Card>
+								)}
+							</DragOverlay>
+						</DndContext>
+
+						<div className="mt-4 flex justify-center py-16">
+							<Button onClick={() => setIsAddDialogOpen(true)} type='button' size="sm" className="h-8">
+								<Plus className="h-4 w-4 mr-1" />
+								Add Section
+							</Button>
+						</div>
+					</>
 				)}
 			</CardContent>
 		</Card>

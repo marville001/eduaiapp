@@ -81,7 +81,7 @@ function GridSection({ section }: { section: PageSection; }) {
 								className="bg-white rounded-sm p-6 shadow-sm hover:shadow transition-shadow"
 							>
 								{item.icon && (
-									<div className="w-16 h-16 mb-4 relative">
+									<div className="w-10 h-10 mb-4 relative">
 										<Image
 											src={item.icon}
 											alt={item.title}
@@ -107,21 +107,11 @@ function GridSection({ section }: { section: PageSection; }) {
 }
 
 // Chat Section - Placeholder for AI chat
-function ChatSection({ section }: { section: PageSection; }) {
+function ChatSection({ }: { section: PageSection; }) {
 	return (
-		<section className="py-16 bg-neutral-100 ">
-			<div className="container mx-auto px-4">
-				<div className="max-w-2xl mx-auto text-center">
-					{section.title && (
-						<h2 className="text-3xl font-bold text-gray-900 mb-4">
-							{section.title}
-						</h2>
-					)}
-					{section.summary && (
-						<p className="text-lg text-gray-600 mb-8">{section.summary}</p>
-					)}
-					<AiChatForm />
-				</div>
+		<section className="py-16 bg-neutral-100 px-4">
+			<div className="max-w-2xl mx-auto text-center">
+				<AiChatForm />
 			</div>
 		</section>
 	);
@@ -294,7 +284,7 @@ function TestimonialsSection({ section }: { section: PageSection; }) {
 											/>
 										</div>
 									) : (
-										<div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+										<div className="w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
 											{item.title.charAt(0).toUpperCase()}
 										</div>
 									)}
@@ -302,7 +292,7 @@ function TestimonialsSection({ section }: { section: PageSection; }) {
 										<h4 className="font-semibold text-gray-900">{item.title}</h4>
 									</div>
 								</div>
-								<p className="text-gray-600 italic">&quot;{item.description}&quot;</p>
+								<p className="text-gray-600 line-clamp-6 italic">&quot;{item.description}&quot;</p>
 							</div>
 						))}
 					</div>
@@ -322,7 +312,7 @@ function FeaturesSection({ section }: { section: PageSection; }) {
 	}[columns] || "md:grid-cols-3";
 
 	return (
-		<section className="py-16 bg-gradient-to-br from-indigo-50 to-purple-50">
+		<section className="py-16 bg-linear-to-br from-indigo-50 to-purple-50">
 			<div className="container mx-auto px-4">
 				<div className="max-w-6xl mx-auto">
 					{section.title && (
@@ -405,7 +395,7 @@ export function PageSections({ sections }: PageSectionsProps) {
 	const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 
 	return (
-		<div className="page-sections bg-white z-[122]">
+		<div className="page-sections bg-white z-122">
 			{sortedSections.map((section) => (
 				<SectionRenderer key={section.id} section={section} />
 			))}
