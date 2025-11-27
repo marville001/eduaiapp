@@ -7,7 +7,6 @@ import { userApi } from '@/lib/api/user.api';
 import { useUserStore } from '@/stores/user.store';
 import { User } from '@/types/users';
 import { SessionProvider, signIn, signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
@@ -34,7 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode; }) {
 
 function AuthContextProvider({ children }: { children: React.ReactNode; }) {
 	const { data: session, status } = useSession();
-	const router = useRouter();
 	const [loading, setLoading] = useState(true);
 
 	const user = useUserStore(state => state.user);
