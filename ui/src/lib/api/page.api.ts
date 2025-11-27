@@ -18,6 +18,7 @@ export interface Page {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +35,7 @@ export interface CreatePageDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 export interface UpdatePageDto {
@@ -50,6 +52,7 @@ export interface UpdatePageDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 // Page API endpoints

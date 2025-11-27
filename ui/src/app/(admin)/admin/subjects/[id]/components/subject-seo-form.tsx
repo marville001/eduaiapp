@@ -1,30 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Globe, Plus, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Subject } from "@/lib/api/subject.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Globe, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const formSchema = z.object({
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   seoTags: z.array(z.string()).optional(),
   seoImage: z.string().optional(),
+  canonicalUrl: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -52,6 +53,7 @@ export default function SubjectSEOForm({
       seoDescription: subject.seoDescription || "",
       seoTags: subject.seoTags || [],
       seoImage: subject.seoImage || "",
+      canonicalUrl: subject.canonicalUrl || "",
     },
   });
 
@@ -61,6 +63,7 @@ export default function SubjectSEOForm({
       seoDescription: data.seoDescription,
       seoTags: data.seoTags,
       seoImage: data.seoImage,
+      canonicalUrl: data.canonicalUrl,
     });
     setHasUnsavedChanges(false);
   };
@@ -98,7 +101,7 @@ export default function SubjectSEOForm({
               {subject.seoTitle || `${subject.name} - Default Title`}
             </p>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               SEO Image URL
@@ -107,6 +110,15 @@ export default function SubjectSEOForm({
               {subject.seoImage || "No image set"}
             </p>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Canonical URL
+          </label>
+          <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
+            {subject.canonicalUrl || "No canonical URL set"}
+          </p>
         </div>
 
         <div>
@@ -210,6 +222,30 @@ export default function SubjectSEOForm({
 
           <FormField
             control={form.control}
+            name="canonicalUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Canonical URL</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://example.com/original-page"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleFieldChange();
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  The preferred URL for this content if it exists on multiple URLs
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="seoDescription"
             render={({ field }) => (
               <FormItem>
@@ -236,7 +272,7 @@ export default function SubjectSEOForm({
           {/* SEO Tags */}
           <div className="space-y-4">
             <FormLabel>SEO Tags</FormLabel>
-            
+
             {/* Current Tags */}
             <div className="flex flex-wrap gap-2">
               {(form.getValues('seoTags') || []).map((tag, index) => (

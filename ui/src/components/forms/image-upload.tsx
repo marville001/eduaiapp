@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, X, Image as ImageIcon, Link, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import Image from 'next/image';
-import api from '@/lib/api';
+import { Input } from '@/components/ui/input';
 import { uploadImage } from '@/lib/api/upload.api';
+import { Image as ImageIcon, Link, Loader2, Upload, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ImageUploadProps {
 	value?: string;
@@ -121,7 +120,7 @@ export function ImageUpload({
 								<div className="space-y-3">
 									<div className="relative aspect-video w-full max-w-md mx-auto rounded-lg overflow-hidden">
 										<Image
-											src={value}
+											src={value?.startsWith('http') ? value : ""}
 											alt="Uploaded image"
 											fill
 											priority

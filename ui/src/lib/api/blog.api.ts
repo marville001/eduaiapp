@@ -34,6 +34,7 @@ export interface Blog {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
   updatedAt: string;
   category?: BlogCategory;
@@ -53,6 +54,7 @@ export interface CreateBlogDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 export interface UpdateBlogDto {
@@ -71,6 +73,7 @@ export interface UpdateBlogDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 export interface CreateBlogCategoryDto {

@@ -14,6 +14,7 @@ export interface Subject {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
   updatedAt: string;
   subSubjects?: Subject[];
@@ -30,6 +31,7 @@ export interface CreateSubjectDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 export interface UpdateSubjectDto {
@@ -43,6 +45,7 @@ export interface UpdateSubjectDto {
   seoDescription?: string;
   seoTags?: string[];
   seoImage?: string;
+  canonicalUrl?: string;
 }
 
 // API endpoints

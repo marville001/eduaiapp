@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
+import { ImageUpload } from "@/components/forms/image-upload";
+import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Form,
 	FormControl,
@@ -18,6 +14,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -25,13 +22,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus, RefreshCw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { CreatePageDto, Page, pageApi, UpdatePageDto } from "@/lib/api/page.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, RefreshCw, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
-import { ImageUpload } from "@/components/forms/image-upload";
-import { pageApi, Page, CreatePageDto, UpdatePageDto } from "@/lib/api/page.api";
+import { z } from "zod";
 
 const formSchema = z.object({
 	title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -44,6 +44,7 @@ const formSchema = z.object({
 	seoDescription: z.string().optional(),
 	seoTags: z.array(z.string()).optional(),
 	seoImage: z.string().optional(),
+	canonicalUrl: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -77,6 +78,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			seoDescription: page?.seoDescription || '',
 			seoTags: page?.seoTags || [],
 			seoImage: page?.seoImage || '',
+			canonicalUrl: page?.canonicalUrl || '',
 		},
 	});
 
@@ -202,6 +204,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			setValue('seoDescription', page.seoDescription || '');
 			setValue('seoTags', page.seoTags || []);
 			setValue('seoImage', page.seoImage || '');
+			setValue('canonicalUrl', page.canonicalUrl || '');
 		}
 	}, [setValue, page]);
 
@@ -555,6 +558,26 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 														placeholder="https://example.com/seo-image.jpg"
 													/>
 												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="canonicalUrl"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Canonical URL</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="https://example.com/original-page"
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription>
+													The preferred URL for this content if it exists on multiple URLs
+												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}

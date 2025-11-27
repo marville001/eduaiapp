@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
+import { ImageUpload } from "@/components/forms/image-upload";
+import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Form,
 	FormControl,
@@ -18,6 +14,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -25,13 +22,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus, RefreshCw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Blog, blogApi, blogCategoryApi, CreateBlogDto, UpdateBlogDto } from "@/lib/api/blog.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, RefreshCw, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { TiptapEditor } from "@/components/tiptap/editor/tiptap-editor";
-import { ImageUpload } from "@/components/forms/image-upload";
-import { blogApi, blogCategoryApi, Blog, CreateBlogDto, UpdateBlogDto } from "@/lib/api/blog.api";
+import { z } from "zod";
 
 const formSchema = z.object({
 	title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -46,6 +46,7 @@ const formSchema = z.object({
 	seoDescription: z.string().optional(),
 	seoTags: z.array(z.string()).optional(),
 	seoImage: z.string().optional(),
+	canonicalUrl: z.string().optional(),
 }).refine((data) => {
 	if (data.status === 'scheduled') {
 		if (!data.scheduledAt) {
@@ -101,6 +102,7 @@ export default function BlogForm({ blog, onSuccess, onCancel, redirectToViewAll 
 			seoDescription: blog?.seoDescription || '',
 			seoTags: blog?.seoTags || [],
 			seoImage: blog?.seoImage || '',
+			canonicalUrl: blog?.canonicalUrl || '',
 		},
 	});
 
@@ -161,6 +163,7 @@ export default function BlogForm({ blog, onSuccess, onCancel, redirectToViewAll 
 			}
 		} catch (error) {
 			console.error('Submit error:', error);
+		} finally {
 			setIsSubmitting(false);
 		}
 	};
@@ -212,6 +215,7 @@ export default function BlogForm({ blog, onSuccess, onCancel, redirectToViewAll 
 			setValue('seoDescription', blog.seoDescription || '');
 			setValue('seoTags', blog.seoTags || []);
 			setValue('seoImage', blog.seoImage || '');
+			setValue('canonicalUrl', blog.canonicalUrl || '');
 		}
 	}, [setValue, blog]);
 
@@ -642,6 +646,26 @@ export default function BlogForm({ blog, onSuccess, onCancel, redirectToViewAll 
 														placeholder="https://example.com/seo-image.jpg"
 													/>
 												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="canonicalUrl"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Canonical URL</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="https://example.com/original-post"
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription>
+													The preferred URL for this content if it exists on multiple URLs
+												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
