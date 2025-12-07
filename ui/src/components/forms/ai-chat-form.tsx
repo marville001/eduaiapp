@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineAILoader } from "@/components/ui/ai-processing-loader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -272,10 +273,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
               className="w-full h-12 bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
             >
               {isLoading || isSubmitting ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Processing...</span>
-                </div>
+                <InlineAILoader text="Submitting" />
               ) : (
                 <div className="flex items-center space-x-2">
                   <Send className="h-4 w-4" />

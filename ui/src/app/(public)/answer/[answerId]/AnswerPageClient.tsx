@@ -1,5 +1,6 @@
 "use client";
 
+import AIProcessingLoader from "@/components/ui/ai-processing-loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,10 +148,7 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 	if (isLoading) {
 		return (
 			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
-				<div className="text-center">
-					<div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading your answer...</p>
-				</div>
+				<AIProcessingLoader variant="minimal" showFacts={false} />
 			</div>
 		);
 	}
@@ -327,19 +325,14 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 			</div>
 
 			<Dialog open={question.status === "pending"}>
-				<DialogContent>
+				<DialogContent className="sm:max-w-lg">
 					<DialogHeader>
-						<DialogTitle />
-						<DialogDescription />
+						<DialogTitle className="sr-only">Processing Your Question</DialogTitle>
+						<DialogDescription className="sr-only">
+							Our AI is analyzing your question and preparing a detailed answer
+						</DialogDescription>
 					</DialogHeader>
-					<div className=" py-5 bg-gray-50 flex items-center justify-center">
-						<div className="text-center">
-							<div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-							<p className="text-gray-600">
-								Your question is being processed. Please wait...
-							</p>
-						</div>
-					</div>
+					<AIProcessingLoader />
 				</DialogContent>
 			</Dialog>
 
