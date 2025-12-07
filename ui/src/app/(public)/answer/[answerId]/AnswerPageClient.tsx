@@ -1,5 +1,6 @@
 "use client";
 
+import LoginPromptModal from "@/components/modals/login-prompt-modal";
 import AIProcessingLoader from "@/components/ui/ai-processing-loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSending, setIsSending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [showLoginModal, setShowLoginModal] = useState(false);
 
 	const router = useRouter();
 	const currentUser = useUserStore(state => state.user);
@@ -43,6 +45,12 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 
 	const sendMessage = async () => {
 		if (!newMessage.trim() || isSending || !question) return;
+
+		// Check if user is logged in before allowing follow-up questions
+		if (!currentUser) {
+			setShowLoginModal(true);
+			return;
+		}
 
 		setIsSending(true);
 		const message = newMessage.trim();
@@ -300,14 +308,27 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 
 						{/* Message Input */}
 						<div className="flex gap-2 bg-white z-10 mt-3">
-							<Textarea
-								value={newMessage}
-								onChange={(e) => setNewMessage(e.target.value)}
-								onKeyPress={handleKeyPress}
-								placeholder="Ask a follow-up question..."
-								className="flex-1 resize-none min-h-[60px]"
-								disabled={isSending}
-							/>
+							<div className="flex-1 relative">
+								<Textarea
+									value={newMessage}
+									onChange={(e) => setNewMessage(e.target.value)}
+									onKeyPress={handleKeyPress}
+									placeholder={currentUser ? "Ask a follow-up question..." : "Sign in to ask follow-up questions..."}
+									className="resize-none min-h-[60px] w-full"
+									disabled={isSending}
+									onFocus={() => {
+										if (!currentUser) {
+											setShowLoginModal(true);
+										}
+									}}
+								/>
+								{!currentUser && (
+									<div
+										className="absolute inset-0 bg-transparent cursor-pointer"
+										onClick={() => setShowLoginModal(true)}
+									/>
+								)}
+							</div>
 							<Button
 								onClick={sendMessage}
 								disabled={!newMessage.trim() || isSending}
@@ -320,6 +341,28 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 								)}
 							</Button>
 						</div>
+
+						{/* Sign in prompt for non-logged users */}
+						{!currentUser && (
+							<div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+								<p className="text-sm text-blue-700 text-center">
+									<button
+										onClick={() => setShowLoginModal(true)}
+										className="font-medium underline hover:text-blue-800"
+									>
+										Sign in
+									</button>
+									{" "}or{" "}
+									<button
+										onClick={() => setShowLoginModal(true)}
+										className="font-medium underline hover:text-blue-800"
+									>
+										create an account
+									</button>
+									{" "}to ask follow-up questions and save your conversation history.
+								</p>
+							</div>
+						)}
 					</>
 				)}
 			</div>
@@ -335,6 +378,18 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 					<AIProcessingLoader />
 				</DialogContent>
 			</Dialog>
+
+			{/* Login Prompt Modal */}
+			<LoginPromptModal
+				open={showLoginModal}
+				onOpenChange={setShowLoginModal}
+				onSuccess={() => {
+					setShowLoginModal(false);
+					loadQuestion();
+				}}
+				title="Continue your learning journey"
+				description="Sign in to ask unlimited follow-up questions and get personalized AI tutoring."
+			/>
 
 		</div>
 	);

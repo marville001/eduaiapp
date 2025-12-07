@@ -34,20 +34,25 @@ const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type RegisterForm = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
-export default function RegisterForm() {
+interface Props {
+  onSuccess?: () => void;
+  isModal?: boolean;
+}
+
+export default function RegisterForm({ onSuccess, isModal = false }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const form = useForm<RegisterForm>({
+  const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: "all"
   });
 
-  const onSubmit = async (data: RegisterForm) => {
+  const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
       const response = await authApi.register({
@@ -59,8 +64,13 @@ export default function RegisterForm() {
 
       toast.success(response.message || 'Account created successfully!');
 
-      // Redirect to login page
-      router.push('/login?registered=true');
+      if (isModal) {
+        // For modal, call onSuccess callback instead of redirecting
+        onSuccess?.();
+      } else {
+        // Redirect to login page
+        router.push('/login?registered=true');
+      }
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Failed to create account. Please try again.';
@@ -75,7 +85,7 @@ export default function RegisterForm() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <Form {...form}>
       <form className="mt-8 space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
