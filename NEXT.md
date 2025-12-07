@@ -1,2 +1,0 @@
--   All SEO Settings to include canonical url
--   Prevent full page refersh on window focus
