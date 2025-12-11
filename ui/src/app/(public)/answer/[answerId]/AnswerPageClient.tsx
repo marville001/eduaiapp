@@ -1,6 +1,7 @@
 "use client";
 
 import LoginPromptModal from "@/components/modals/login-prompt-modal";
+import PromoBannerSidebar from '@/components/promo-banner-sidebar';
 import AIProcessingLoader from "@/components/ui/ai-processing-loader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -179,192 +180,179 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 		);
 	}
 
-	const statusInfo = getStatusInfo(question.status);
-
-	console.log(question);
-
-
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<div className="max-w-4xl max-h-[calc(100vh-100px)] overflow-y-auto mx-auto p-6">
-				{/* Header */}
-				{/* <div className="mb-6">
-
-					<div className="flex items-center justify-between">
-						<h1 className="text-2xl font-bold text-gray-900">Question Answer</h1>
-						<Badge className={statusInfo.color}>
-							{statusInfo.icon}
-							<span className="ml-1">{statusInfo.text}</span>
-						</Badge>
-					</div>
-				</div> */}
-
-				{/* Question Card */}
-				<Card className="mb-6 bg-white">
-					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Your Question</CardTitle>
-							<Badge variant="outline">{question.subject?.name}</Badge>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<p className="text-gray-700 whitespace-pre-wrap">{question.question}</p>
-						{question.fileAttachments && question.fileAttachments.length > 0 && (
-							<div className="mt-4">
-								<p className="text-sm text-gray-600 mb-2">Attachments:</p>
-								<div className="flex flex-wrap gap-2">
-									{question.fileAttachments.map((file, index) => (
-										<Link key={index} href={`${getFileUrl(file.accessKey)}`} target="_blank" className="flex flex-wrap gap-2">
-											<Badge variant="secondary">{file.name}</Badge>
-										</Link>
-									))}
-								</div>
-							</div>
-						)}
-						<div className="mt-4 text-xs text-gray-500">
-							Asked {formatTimestamp(question.createdAt)}
-						</div>
-					</CardContent>
-				</Card>
-
-				{/* Answer Card */}
-				{question.status === "answered" && question.answer && (
-					<Card className="mb-6">
+			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+				<div className="max-h-[calc(100vh-100px)] overflow-y-auto mx-auto col-span-1 lg:col-span-3 w-full">
+					<Card className="mb-6 bg-white">
 						<CardHeader>
-							<CardTitle className="text-lg flex items-center">
-								<Bot className="h-5 w-5 mr-2 text-blue-600" />
-								AI Answer
-							</CardTitle>
+							<div className="flex items-center justify-between">
+								<CardTitle className="text-lg">Your Question</CardTitle>
+								<Badge variant="outline">{question.subject?.name}</Badge>
+							</div>
 						</CardHeader>
 						<CardContent>
-							<p className="text-gray-700 whitespace-pre-wrap">{question.answer}</p>
-							{question.processingTimeMs && (
-								<div className="mt-4 text-xs text-gray-500">
-									Generated in {question.processingTimeMs}ms
-									{question.tokenUsage && ` • ${question.tokenUsage} tokens used`}
+							<p className="text-gray-700 whitespace-pre-wrap">{question.question}</p>
+							{question.fileAttachments && question.fileAttachments.length > 0 && (
+								<div className="mt-4">
+									<p className="text-sm text-gray-600 mb-2">Attachments:</p>
+									<div className="flex flex-wrap gap-2">
+										{question.fileAttachments.map((file, index) => (
+											<Link key={index} href={`${getFileUrl(file.accessKey)}`} target="_blank" className="flex flex-wrap gap-2">
+												<Badge variant="secondary">{file.name}</Badge>
+											</Link>
+										))}
+									</div>
 								</div>
 							)}
-						</CardContent>
-					</Card>
-				)}
-
-				{/* Error Message */}
-				{question.status === "failed" && question.errorMessage && (
-					<Card className="mb-6 border-red-200">
-						<CardContent className="p-6">
-							<div className="flex items-center text-red-600 mb-2">
-								<XCircle className="h-5 w-5 mr-2" />
-								<span className="font-medium">Processing Failed</span>
+							<div className="mt-4 text-xs text-gray-500">
+								Asked {formatTimestamp(question.createdAt)}
 							</div>
-							<p className="text-red-700">{question.errorMessage}</p>
-							<Button
-								variant="outline"
-								className="mt-4"
-								onClick={() => router.push("/")}
-							>
-								Try New Question
-							</Button>
 						</CardContent>
 					</Card>
-				)}
 
-				{/* Chat Section - Only show if question is answered */}
-				{question.status === "answered" && (
-					<>
-						{/* Chat Messages */}
-						{chatMessages.length > 0 && (
-							<div className="space-y-4">
-								{chatMessages.map((message) => (
-									<div
-										key={message.messageId}
-										className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-									>
+					{/* Answer Card */}
+					{question.status === "answered" && question.answer && (
+						<Card className="mb-6">
+							<CardHeader>
+								<CardTitle className="text-lg flex items-center">
+									<Bot className="h-5 w-5 mr-2 text-blue-600" />
+									AI Answer
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<p className="text-gray-700 whitespace-pre-wrap">{question.answer}</p>
+								{question.processingTimeMs && (
+									<div className="mt-4 text-xs text-gray-500">
+										Generated in {question.processingTimeMs}ms
+										{question.tokenUsage && ` • ${question.tokenUsage} tokens used`}
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Error Message */}
+					{question.status === "failed" && question.errorMessage && (
+						<Card className="mb-6 border-red-200">
+							<CardContent className="p-6">
+								<div className="flex items-center text-red-600 mb-2">
+									<XCircle className="h-5 w-5 mr-2" />
+									<span className="font-medium">Processing Failed</span>
+								</div>
+								<p className="text-red-700">{question.errorMessage}</p>
+								<Button
+									variant="outline"
+									className="mt-4"
+									onClick={() => router.push("/")}
+								>
+									Try New Question
+								</Button>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Chat Section - Only show if question is answered */}
+					{question.status === "answered" && (
+						<>
+							{/* Chat Messages */}
+							{chatMessages.length > 0 && (
+								<div className="space-y-4">
+									{chatMessages.map((message) => (
 										<div
-											className={`max-w-[80%] rounded-lg p-3 ${message.role === "user"
-												? "bg-blue-600 text-white"
-												: "bg-white text-gray-900 border border-gray-200"
-												}`}
+											key={message.messageId}
+											className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
 										>
-											<div className="flex items-center mb-1">
-												{message.role === "user" ? (
-													<User className="h-5 w-5 mr-2" />
-												) : (
-													<Bot className="h-5 w-5 mr-2 text-primary" />
-												)}
-												<span className="text-sm font-medium">
-													{message.role === "user" ? "You" : "AI"}
-												</span>
-											</div>
-											<p className="whitespace-pre-wrap">{message.content}</p>
-											<div className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"
-												}`}>
-												{formatTimestamp(message.createdAt)}
+											<div
+												className={`max-w-[80%] rounded-lg p-3 ${message.role === "user"
+													? "bg-blue-600 text-white"
+													: "bg-white text-gray-900 border border-gray-200"
+													}`}
+											>
+												<div className="flex items-center mb-1">
+													{message.role === "user" ? (
+														<User className="h-5 w-5 mr-2" />
+													) : (
+														<Bot className="h-5 w-5 mr-2 text-primary" />
+													)}
+													<span className="text-sm font-medium">
+														{message.role === "user" ? "You" : "AI"}
+													</span>
+												</div>
+												<p className="whitespace-pre-wrap">{message.content}</p>
+												<div className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"
+													}`}>
+													{formatTimestamp(message.createdAt)}
+												</div>
 											</div>
 										</div>
-									</div>
-								))}
-							</div>
-						)}
+									))}
+								</div>
+							)}
 
-						{/* Message Input */}
-						<div className="flex gap-2 bg-white z-10 mt-3">
-							<div className="flex-1 relative">
-								<Textarea
-									value={newMessage}
-									onChange={(e) => setNewMessage(e.target.value)}
-									onKeyPress={handleKeyPress}
-									placeholder={currentUser ? "Ask a follow-up question..." : "Sign in to ask follow-up questions..."}
-									className="resize-none min-h-[60px] w-full"
-									disabled={isSending}
-									onFocus={() => {
-										if (!currentUser) {
-											setShowLoginModal(true);
-										}
-									}}
-								/>
-								{!currentUser && (
-									<div
-										className="absolute inset-0 bg-transparent cursor-pointer"
-										onClick={() => setShowLoginModal(true)}
+							{/* Message Input */}
+							<div className="flex gap-2 bg-white z-10 mt-3">
+								<div className="flex-1 relative">
+									<Textarea
+										value={newMessage}
+										onChange={(e) => setNewMessage(e.target.value)}
+										onKeyPress={handleKeyPress}
+										placeholder={currentUser ? "Ask a follow-up question..." : "Sign in to ask follow-up questions..."}
+										className="resize-none min-h-[60px] w-full"
+										disabled={isSending}
+										onFocus={() => {
+											if (!currentUser) {
+												setShowLoginModal(true);
+											}
+										}}
 									/>
-								)}
+									{!currentUser && (
+										<div
+											className="absolute inset-0 bg-transparent cursor-pointer"
+											onClick={() => setShowLoginModal(true)}
+										/>
+									)}
+								</div>
+								<Button
+									onClick={sendMessage}
+									disabled={!newMessage.trim() || isSending}
+									className="self-end h-[60px] w-[60px]"
+								>
+									{isSending ? (
+										<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+									) : (
+										<Send className="h-4 w-4" />
+									)}
+								</Button>
 							</div>
-							<Button
-								onClick={sendMessage}
-								disabled={!newMessage.trim() || isSending}
-								className="self-end h-[60px] w-[60px]"
-							>
-								{isSending ? (
-									<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-								) : (
-									<Send className="h-4 w-4" />
-								)}
-							</Button>
-						</div>
 
-						{/* Sign in prompt for non-logged users */}
-						{!currentUser && (
-							<div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-								<p className="text-sm text-blue-700 text-center">
-									<button
-										onClick={() => setShowLoginModal(true)}
-										className="font-medium underline hover:text-blue-800"
-									>
-										Sign in
-									</button>
-									{" "}or{" "}
-									<button
-										onClick={() => setShowLoginModal(true)}
-										className="font-medium underline hover:text-blue-800"
-									>
-										create an account
-									</button>
-									{" "}to ask follow-up questions and save your conversation history.
-								</p>
-							</div>
-						)}
-					</>
-				)}
+							{/* Sign in prompt for non-logged users */}
+							{!currentUser && (
+								<div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+									<p className="text-sm text-blue-700 text-center">
+										<button
+											onClick={() => setShowLoginModal(true)}
+											className="font-medium underline hover:text-blue-800"
+										>
+											Sign in
+										</button>
+										{" "}or{" "}
+										<button
+											onClick={() => setShowLoginModal(true)}
+											className="font-medium underline hover:text-blue-800"
+										>
+											create an account
+										</button>
+										{" "}to ask follow-up questions and save your conversation history.
+									</p>
+								</div>
+							)}
+						</>
+					)}
+				</div>
+				<div className="sticky top-24 col-span-1 lg:col-span-2 hidden lg:block">
+					<PromoBannerSidebar placement="ai-tutor" />
+				</div>
 			</div>
 
 			<Dialog open={question.status === "pending"}>

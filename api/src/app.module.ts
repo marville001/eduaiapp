@@ -21,6 +21,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { NavbarMenuModule } from './modules/navbar-menus/navbar-menu.module';
 import { PageModule } from './modules/pages/page.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
+import { PromoBannerModule } from './modules/promo-banners/promo-banner.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SubjectModule } from './modules/subjects/subject.module';
@@ -97,6 +98,7 @@ import { UsersModule } from './modules/users/users.module';
 		FooterMenuModule,
 		TestimonialModule,
 		FaqModule,
+		PromoBannerModule,
 		AiModule,
 		OpenAiModule,
 		AdminModule,

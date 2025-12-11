@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	HelpCircle,
+	Image,
 	Menu,
 	MessageSquare,
 	Star
@@ -37,6 +38,13 @@ const contentAreas = [
 		description: "Frequently asked questions management",
 		icon: HelpCircle,
 		href: "/admin/content/faqs",
+		status: "active",
+	},
+	{
+		title: "Promo Banners",
+		description: "Promotional banners for AI Tutor pages",
+		icon: Image,
+		href: "/admin/content/promo-banners",
 		status: "active",
 	},
 ];

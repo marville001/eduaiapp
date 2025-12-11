@@ -151,7 +151,7 @@ export default function AiChatForm({ isLoading = false, className = "" }: AiChat
   }, [slug, subjects, setValue]);
 
   return (
-    <Card className={`w-full max-w-2xl mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm ${className}`}>
+    <Card className={`w-full shadow-2xl border-0 bg-white/95 backdrop-blur-sm ${className}`}>
       <CardContent className="p-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">

@@ -10,6 +10,7 @@ import { NavbarMenu } from '@/modules/navbar-menus/entities/navbar-menu.entity';
 import { Page } from '@/modules/pages/entities/page.entity';
 import { Permission } from '@/modules/permissions/entities/permission.entity';
 import { Role } from '@/modules/permissions/entities/role.entity';
+import { PromoBanner } from '@/modules/promo-banners/entities/promo-banner.entity';
 import { AiModelConfiguration } from '@/modules/settings/entities/ai-model-configuration.entity';
 import { StripeSetting } from '@/modules/settings/entities/stripe-setting.entity';
 import { SubscriptionPackage } from '@/modules/settings/entities/subscription-package.entity';
@@ -46,7 +47,8 @@ export const entities = [
   Faq,
   StripeSetting,
   SubscriptionPackage,
-  UserSubscription
+  UserSubscription,
+  PromoBanner
 ];
 
 export default new DataSource({

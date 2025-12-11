@@ -22,6 +22,10 @@ const contentNavItems = [
 		title: "FAQs",
 		href: "/admin/content/faqs",
 	},
+	{
+		title: "Promo Banner",
+		href: "/admin/content/promo-banners"
+	}
 ];
 
 export default function ContentLayout({ children }: PropsWithChildren) {

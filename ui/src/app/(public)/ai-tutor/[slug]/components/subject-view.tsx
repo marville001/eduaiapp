@@ -2,7 +2,7 @@ import AiChatForm from "@/components/forms/ai-chat-form";
 import { Subject } from '@/lib/api/subject.api';
 
 interface SubjectViewProps {
-  subject: Subject
+  subject: Subject;
 }
 
 export default async function SubjectView({ subject }: SubjectViewProps) {
