@@ -56,6 +56,7 @@ const menuItems = [
       { title: "Footer Menus", href: "/admin/content/footer-menus" },
       { title: "Testimonials", href: "/admin/content/testimonials" },
       { title: "FAQs", href: "/admin/content/faqs" },
+      { title: "Promo Banners", href: "/admin/content/promo-banners" },
     ],
   },
   {

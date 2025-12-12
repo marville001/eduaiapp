@@ -96,6 +96,18 @@ export class CreateSubscriptionPackageDto {
 	@Max(365)
 	trialPeriodDays?: number;
 
+	// Credit Settings
+	@IsOptional()
+	@IsInt()
+	@Min(-1) // -1 = unlimited
+	creditsAllocation?: number; // Credits given per billing cycle
+
+	@IsOptional()
+	@IsNumber()
+	@Min(0.01)
+	@Max(10)
+	creditMultiplier?: number; // Multiplier for credit costs (1.0 = normal)
+
 	@IsOptional()
 	@IsInt()
 	@Min(0)

@@ -22,7 +22,7 @@ function CheckoutPage() {
 
 	useEffect(() => {
 		if (!isAuthenticated) {
-			router.push('/login?redirect=/subscription/checkout');
+			router.push('/login?redirect=/app/subscription/checkout');
 		}
 	}, [isAuthenticated, router]);
 

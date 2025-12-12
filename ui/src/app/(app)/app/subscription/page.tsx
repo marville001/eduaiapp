@@ -297,7 +297,7 @@ export default function SubscriptionManagementPage() {
 										<p className="text-2xl font-bold">
 											${pkg.price}/{pkg.billingInterval}
 										</p>
-										<Link href={`/subscription/checkout?packageId=${pkg.id}`}>
+										<Link href={`/app/subscription/checkout?packageId=${pkg.id}`}>
 											<Button className="w-full" size="sm">
 												<TrendingUp className="h-4 w-4 mr-2" />
 												Upgrade

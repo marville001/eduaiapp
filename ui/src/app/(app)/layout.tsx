@@ -19,10 +19,6 @@ export default async function Layout({ children }: PropsWithChildren) {
     return redirect('/login');
   }
 
-  if (!currentUser.isAdminUser) {
-    return redirect('/app');
-  }
-
   return (
     <ProtectedRoute>
       {children}

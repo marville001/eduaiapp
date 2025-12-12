@@ -1,10 +1,13 @@
 import { DocumentMeta } from '@/common/class/document-meta';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Permission, RequirePermissions } from '@/common/decorators/permissions.decorator';
+import { CreditGuard, RequireCredits } from '@/common/guards/credit.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@/common/guards/permissions.guard';
+import { CreditConsumptionInterceptor } from '@/common/interceptors/credit-consumption.interceptor';
 import { JwtPayload } from '@/common/interfaces/jwt-payload.interface';
 import { FileValidationPipe } from '@/common/pipes/file-validation.pipe';
+import { CreditTransactionType } from '@/modules/billing/entities/credit-transaction.entity';
 import {
 	BadRequestException,
 	Body,
@@ -42,10 +45,13 @@ export class AiController {
 	) { }
 
 	@Post('ask')
+	// @UseGuards(JwtAuthGuard, CreditGuard)
+	@UseInterceptors(FilesInterceptor('files'), CreditConsumptionInterceptor)
+	@RequireCredits(CreditTransactionType.AI_QUESTION)
 	@ApiOperation({ summary: 'Ask a question to AI' })
 	@ApiResponse({ status: HttpStatus.CREATED, description: 'Question submitted successfully' })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid question data' })
-	@UseInterceptors(FilesInterceptor('files'))
+	@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Insufficient credits' })
 	async askQuestion(
 		@Body() askQuestionDto: AskQuestionDto,
 		@UploadedFiles(FileValidationPipe) files: Array<Express.Multer.File>
@@ -92,10 +98,14 @@ export class AiController {
 	}
 
 	@Post('question/:questionId/chat')
+	@UseGuards(JwtAuthGuard, CreditGuard)
+	@UseInterceptors(CreditConsumptionInterceptor)
+	@RequireCredits(CreditTransactionType.AI_CHAT_MESSAGE)
 	@ApiOperation({ summary: 'Send a chat message' })
 	@ApiResponse({ status: HttpStatus.CREATED, description: 'Message sent successfully' })
 	@ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Question not found' })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot chat on unanswered question' })
+	@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Insufficient credits' })
 	async sendChatMessage(
 		@Param('questionId', ParseUUIDPipe) questionId: string,
 		@Body() sendChatMessageDto: SendChatMessageDto,

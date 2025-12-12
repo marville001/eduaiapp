@@ -254,6 +254,13 @@ export function PackageCard({ package: pkg, onEdit }: PackageCardProps) {
 							{pkg.trialPeriodDays} day free trial
 						</p>
 					)}
+					{
+						pkg.creditsAllocation !== null && (
+							<p className="text-sm text-muted-foreground mt-1">
+								Includes {pkg.creditsAllocation === -1 ? 'unlimited' : pkg.creditsAllocation + ' credits'} per billing period
+							</p>
+						)
+					}
 				</div>
 
 				{/* Description */}

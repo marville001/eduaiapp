@@ -74,6 +74,8 @@ export interface SubscriptionPackage {
 	isFeatured: boolean;
 	isPopular: boolean;
 	trialPeriodDays: number;
+	creditsAllocation: number; // Credits given per billing cycle
+	creditMultiplier: number; // Multiplier for credit costs
 	displayOrder: number;
 	badgeText?: string;
 	badgeColor?: string;
@@ -105,6 +107,8 @@ export interface CreateSubscriptionPackageDto {
 	isFeatured?: boolean;
 	isPopular?: boolean;
 	trialPeriodDays?: number;
+	creditsAllocation?: number; // Credits given per billing cycle (-1 for unlimited)
+	creditMultiplier?: number; // Multiplier for credit costs (1.0 = normal)
 	displayOrder?: number;
 	badgeText?: string;
 	badgeColor?: string;

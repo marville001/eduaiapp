@@ -20,10 +20,10 @@ import { getFileUrl } from '@/lib/utils';
 import { useUserStore } from '@/stores/user.store';
 import { ChatMessage, Question } from "@/types/ai-chat";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Bot, CheckCircle, Clock, MessageSquare, Send, User, XCircle } from "lucide-react";
+import { ArrowLeft, Bot, Send, User, XCircle } from "lucide-react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface AnswerPageClientProps {
@@ -38,6 +38,8 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 	const [isSending, setIsSending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [showLoginModal, setShowLoginModal] = useState(false);
+
+	const chatCardRef = useRef<HTMLDivElement>(null);
 
 	const router = useRouter();
 	const currentUser = useUserStore(state => state.user);
@@ -67,6 +69,7 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 			await loadQuestion();
 
 			toast.success("Message sent successfully!");
+			chatCardRef.current?.scrollTo({ top: chatCardRef.current.scrollHeight, behavior: "smooth" });
 		} catch (error) {
 			console.error("Error sending message:", error);
 			toast.error("Failed to send message. Please try again.");
@@ -80,35 +83,6 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
 			sendMessage();
-		}
-	};
-
-	const getStatusInfo = (status: string) => {
-		switch (status) {
-			case "pending":
-				return {
-					color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-					icon: <Clock className="h-3 w-3" />,
-					text: "Processing..."
-				};
-			case "answered":
-				return {
-					color: "bg-green-100 text-green-800 border-green-200",
-					icon: <CheckCircle className="h-3 w-3" />,
-					text: "Answered"
-				};
-			case "failed":
-				return {
-					color: "bg-red-100 text-red-800 border-red-200",
-					icon: <XCircle className="h-3 w-3" />,
-					text: "Failed"
-				};
-			default:
-				return {
-					color: "bg-gray-100 text-gray-800 border-gray-200",
-					icon: <MessageSquare className="h-3 w-3" />,
-					text: status
-				};
 		}
 	};
 
@@ -128,6 +102,9 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 			const questionData = await aiChatApi.getQuestionWithMessages(answerId);
 			setQuestion(questionData);
 			setChatMessages(questionData.chatMessages || []);
+			setTimeout(() => {
+				chatCardRef.current?.scrollTo({ top: chatCardRef.current.scrollHeight, behavior: "smooth" });
+			}, 100);
 		} catch (err) {
 			setError("Failed to load question. Please try again.");
 			console.error("Error loading question:", err);
@@ -183,7 +160,7 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
-				<div className="max-h-[calc(100vh-100px)] overflow-y-auto mx-auto col-span-1 lg:col-span-3 w-full">
+				<div ref={chatCardRef} className="max-h-[calc(100vh-100px)] overflow-y-auto mx-auto col-span-1 lg:col-span-3 w-full">
 					<Card className="mb-6 bg-white">
 						<CardHeader>
 							<div className="flex items-center justify-between">

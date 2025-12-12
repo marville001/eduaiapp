@@ -59,6 +59,12 @@ const menuItems = [
 		description: "Manage your subscription"
 	},
 	{
+		title: "Billing & Usage",
+		href: "/app/billing",
+		icon: CreditCard,
+		description: "View your credit usage"
+	},
+	{
 		title: "Profile",
 		href: "/app/profile",
 		icon: User,

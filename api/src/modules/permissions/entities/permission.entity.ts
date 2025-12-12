@@ -8,6 +8,7 @@ export enum PermissionResource {
 	AI_MODELS = 'ai_models',
 	QUESTIONS = 'questions',
 	REPORTS = 'reports',
+	BILLING = 'billing',
 }
 
 export enum PermissionAction {

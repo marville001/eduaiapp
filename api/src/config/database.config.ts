@@ -1,6 +1,7 @@
 import { ChatMessage } from '@/modules/ai/entities/chat-message.entity';
 import { Question } from '@/modules/ai/entities/question.entity';
 import { AuditLog } from '@/modules/audit/entities/audit-log.entity';
+import { CreditTransaction, UserCredits } from '@/modules/billing';
 import { BlogCategory } from '@/modules/blogs/entities/blog-category.entity';
 import { Blog } from '@/modules/blogs/entities/blog.entity';
 import { Faq } from '@/modules/faqs/entities/faq.entity';
@@ -48,7 +49,9 @@ export const entities = [
   StripeSetting,
   SubscriptionPackage,
   UserSubscription,
-  PromoBanner
+  PromoBanner,
+  CreditTransaction,
+  UserCredits
 ];
 
 export default new DataSource({

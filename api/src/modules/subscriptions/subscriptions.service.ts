@@ -441,7 +441,7 @@ export class SubscriptionsService {
 		}
 
 		const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-		const returnUrl = `${frontendUrl}/subscription`;
+		const returnUrl = `${frontendUrl}/app/subscription`;
 
 		const session = await this.stripeService.createBillingPortalSession(subscription.stripeCustomerId, returnUrl);
 

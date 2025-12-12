@@ -35,7 +35,7 @@ export function UsageWidget() {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between mb-4">
 						<h3 className="text-sm font-semibold">Usage This Month</h3>
-						<Link href="/subscription">
+						<Link href="/app/subscription">
 							<Button variant="ghost" size="sm">
 								View Details
 							</Button>

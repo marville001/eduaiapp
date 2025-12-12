@@ -63,6 +63,8 @@ const formSchema = z.object({
 	isFeatured: z.boolean(),
 	isPopular: z.boolean(),
 	trialPeriodDays: z.number().min(0).max(365),
+	creditsAllocation: z.number().min(-1).optional(), // -1 for unlimited
+	creditMultiplier: z.number().min(0.01).max(10).optional(),
 	displayOrder: z.number().min(0),
 	badgeText: z.string().max(50).optional(),
 	badgeColor: z.string().max(50).optional(),
@@ -109,6 +111,8 @@ export function PackageFormDialog({
 			isFeatured: false,
 			isPopular: false,
 			trialPeriodDays: 0,
+			creditsAllocation: 0,
+			creditMultiplier: 1,
 			displayOrder: 0,
 			badgeText: "",
 			badgeColor: "",
@@ -139,6 +143,8 @@ export function PackageFormDialog({
 				isFeatured: existingPackage.isFeatured,
 				isPopular: existingPackage.isPopular,
 				trialPeriodDays: existingPackage.trialPeriodDays,
+				creditsAllocation: existingPackage.creditsAllocation ?? 0,
+				creditMultiplier: existingPackage.creditMultiplier ?? 1,
 				displayOrder: existingPackage.displayOrder,
 				badgeText: existingPackage.badgeText || "",
 				badgeColor: existingPackage.badgeColor || "",
@@ -195,6 +201,8 @@ export function PackageFormDialog({
 			maxQuestionsPerMonth: data.maxQuestionsPerMonth ?? undefined,
 			maxChatsPerMonth: data.maxChatsPerMonth ?? undefined,
 			maxFileUploads: data.maxFileUploads ?? undefined,
+			creditsAllocation: data.creditsAllocation ?? 0,
+			creditMultiplier: data.creditMultiplier ?? 1,
 		};
 
 		if (isEdit) {
@@ -316,12 +324,15 @@ export function PackageFormDialog({
 											<FormLabel>Price *</FormLabel>
 											<FormControl>
 												<Input
-													type="number"
-													step="0.01"
-													min="0"
 													{...field}
-													onChange={(e) =>
-														field.onChange(parseFloat(e.target.value) || 0)
+													onChange={(e) => {
+														try {
+															const value = Number(e.target.value);
+															field.onChange(value);
+														} catch (error) {
+															console.error(error);
+														}
+													}
 													}
 												/>
 											</FormControl>
@@ -558,6 +569,73 @@ export function PackageFormDialog({
 												/>
 											</FormControl>
 											<FormDescription>-1 for unlimited</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+						</div>
+
+						{/* Credit Settings */}
+						<div className="space-y-4">
+							<h3 className="text-lg font-medium">Credit Settings</h3>
+							<p className="text-sm text-muted-foreground">
+								Configure the credits allocation for this subscription plan
+							</p>
+
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
+									name="creditsAllocation"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Credits per Billing Cycle</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													placeholder="0"
+													{...field}
+													value={field.value ?? ""}
+													onChange={(e) =>
+														field.onChange(
+															e.target.value ? parseInt(e.target.value, 10) : 0
+														)
+													}
+												/>
+											</FormControl>
+											<FormDescription>
+												Credits given each billing period. Use -1 for unlimited.
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="creditMultiplier"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Credit Multiplier</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													step="0.01"
+													min="0.01"
+													max="10"
+													placeholder="1.00"
+													{...field}
+													value={field.value ?? ""}
+													onChange={(e) =>
+														field.onChange(
+															e.target.value ? parseFloat(e.target.value) : 1
+														)
+													}
+												/>
+											</FormControl>
+											<FormDescription>
+												Cost multiplier (1.0 = normal, 0.5 = half cost)
+											</FormDescription>
 											<FormMessage />
 										</FormItem>
 									)}

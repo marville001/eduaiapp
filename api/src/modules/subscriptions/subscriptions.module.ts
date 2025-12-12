@@ -27,6 +27,6 @@ import { UserSubscriptionRepository } from './user-subscription.repository';
 		UserSubscriptionRepository,
 		SubscriptionPackageRepository,
 	],
-	exports: [SubscriptionsService, StripeService],
+	exports: [SubscriptionsService, StripeService, UserSubscriptionRepository],
 })
 export class SubscriptionsModule { }

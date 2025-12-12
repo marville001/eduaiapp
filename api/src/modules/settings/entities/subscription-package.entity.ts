@@ -88,6 +88,13 @@ export class SubscriptionPackage extends AbstractEntity<SubscriptionPackage> {
 	@Column({ name: 'trial_period_days', type: 'integer', default: 0 })
 	trialPeriodDays: number;
 
+	// Credit Settings
+	@Column({ name: 'credits_allocation', type: 'integer', default: 0 })
+	creditsAllocation: number; // Credits given per billing cycle
+
+	@Column({ name: 'credit_multiplier', type: 'decimal', precision: 3, scale: 2, default: 1.00 })
+	creditMultiplier: number;
+
 	// Display Settings
 	@Column({ name: 'display_order', type: 'integer', default: 0 })
 	displayOrder: number;
@@ -153,5 +160,9 @@ export class SubscriptionPackage extends AbstractEntity<SubscriptionPackage> {
 	canAccessAiModel(modelName: string): boolean {
 		if (!this.aiModelsAccess || this.aiModelsAccess.length === 0) return true;
 		return this.aiModelsAccess.includes(modelName) || this.aiModelsAccess.includes('*');
+	}
+
+	hasUnlimitedCredits(): boolean {
+		return this.creditsAllocation === -1;
 	}
 }
