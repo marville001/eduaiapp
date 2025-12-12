@@ -1,27 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Brain, Copy, RotateCcw } from "lucide-react";
+import { TiptapEditor } from '@/components/tiptap/editor/tiptap-editor';
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-	FormDescription,
 } from "@/components/ui/form";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import { Subject } from "@/lib/api/subject.api";
-import { TiptapEditor } from '@/components/tiptap/editor/tiptap-editor';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Brain, Copy, FunctionSquare, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
 
 const formSchema = z.object({
 	aiPrompt: z.string().optional(),
+	useLatex: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -45,12 +47,14 @@ export default function SubjectAIPromptForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			aiPrompt: subject.aiPrompt || "",
+			useLatex: subject.useLatex || false,
 		},
 	});
 
 	const handleSubmit = (data: FormData) => {
 		onSave({
 			aiPrompt: data.aiPrompt,
+			useLatex: data.useLatex,
 		});
 		setHasUnsavedChanges(false);
 	};
@@ -71,6 +75,22 @@ export default function SubjectAIPromptForm({
 	if (!isEditing) {
 		return (
 			<div className="space-y-6">
+				{/* LaTeX Status */}
+				<div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50">
+					<div className="flex items-center space-x-3">
+						<FunctionSquare className="h-5 w-5 text-primary" />
+						<div>
+							<h3 className="text-sm font-medium">LaTeX Formatting</h3>
+							<p className="text-xs text-gray-500">
+								Format mathematical expressions in responses
+							</p>
+						</div>
+					</div>
+					<Badge variant={subject.useLatex ? "default" : "secondary"}>
+						{subject.useLatex ? "Enabled" : "Disabled"}
+					</Badge>
+				</div>
+
 				<div className="flex items-center space-x-3 mb-4">
 					<Brain className="h-5 w-5 text-primary" />
 					<h3 className="text-lg font-medium">Current AI Prompt</h3>
@@ -118,6 +138,35 @@ export default function SubjectAIPromptForm({
 			{/* Custom Prompt Form */}
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+					{/* LaTeX Toggle */}
+					<FormField
+						control={form.control}
+						name="useLatex"
+						render={({ field }) => (
+							<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-linear-to-r from-purple-50 to-blue-50">
+								<div className="space-y-0.5">
+									<div className="flex items-center space-x-2">
+										<FunctionSquare className="h-5 w-5 text-purple-600" />
+										<FormLabel className="text-base font-medium">LaTeX Formatting</FormLabel>
+									</div>
+									<FormDescription className="text-sm text-gray-600">
+										Enable LaTeX formatting for mathematical expressions in AI responses.
+										When enabled, the AI will format equations using LaTeX notation ($...$ for inline, $$...$$ for blocks).
+									</FormDescription>
+								</div>
+								<FormControl>
+									<Switch
+										checked={field.value}
+										onCheckedChange={(checked: boolean) => {
+											field.onChange(checked);
+											handleFieldChange();
+										}}
+									/>
+								</FormControl>
+							</FormItem>
+						)}
+					/>
+
 					<FormField
 						control={form.control}
 						name="aiPrompt"
@@ -181,7 +230,7 @@ export default function SubjectAIPromptForm({
 					{hasUnsavedChanges && (
 						<div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
 							<p className="text-sm text-yellow-800">
-								You have unsaved changes to the AI prompt
+								You have unsaved changes to the AI settings
 							</p>
 							<div className="flex space-x-2">
 								<Button
@@ -196,7 +245,7 @@ export default function SubjectAIPromptForm({
 									Discard
 								</Button>
 								<Button type="submit" size="sm" disabled={isLoading}>
-									{isLoading ? "Saving..." : "Save Prompt"}
+									{isLoading ? "Saving..." : "Save Settings"}
 								</Button>
 							</div>
 						</div>

@@ -10,6 +10,7 @@ export interface Subject {
   isActive: boolean;
   parentSubjectId?: number;
   aiPrompt?: string;
+  useLatex?: boolean;
   seoTitle?: string;
   seoDescription?: string;
   seoTags?: string[];
@@ -27,6 +28,7 @@ export interface CreateSubjectDto {
   description?: string;
   parentSubjectId?: number;
   aiPrompt?: string;
+  useLatex?: boolean;
   seoTitle?: string;
   seoDescription?: string;
   seoTags?: string[];
@@ -41,6 +43,7 @@ export interface UpdateSubjectDto {
   parentSubjectId?: number;
   isActive?: boolean;
   aiPrompt?: string;
+  useLatex?: boolean;
   seoTitle?: string;
   seoDescription?: string;
   seoTags?: string[];

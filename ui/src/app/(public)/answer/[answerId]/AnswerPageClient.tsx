@@ -13,6 +13,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import LatexRenderer from "@/components/ui/latex-renderer";
 import { Textarea } from "@/components/ui/textarea";
 import { useSettings } from '@/hooks/useSettings';
 import aiChatApi from "@/lib/api/ai-chat.api";
@@ -195,10 +196,19 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 								<CardTitle className="text-lg flex items-center">
 									<Bot className="h-5 w-5 mr-2 text-blue-600" />
 									AI Answer
+									{question.subject?.useLatex && (
+										<Badge variant="outline" className="ml-2 text-xs">
+											LaTeX
+										</Badge>
+									)}
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<p className="text-gray-700 whitespace-pre-wrap">{question.answer}</p>
+								{question.subject?.useLatex ? (
+									<LatexRenderer content={question.answer} className="text-gray-700" />
+								) : (
+									<p className="text-gray-700 whitespace-pre-wrap">{question.answer}</p>
+								)}
 								{question.processingTimeMs && (
 									<div className="mt-4 text-xs text-gray-500">
 										Generated in {question.processingTimeMs}ms
@@ -256,7 +266,11 @@ export default function AnswerPageClient({ answerId }: AnswerPageClientProps) {
 														{message.role === "user" ? "You" : "AI"}
 													</span>
 												</div>
-												<p className="whitespace-pre-wrap">{message.content}</p>
+												{message.role === "assistant" && question.subject?.useLatex ? (
+													<LatexRenderer content={message.content} />
+												) : (
+													<p className="whitespace-pre-wrap">{message.content}</p>
+												)}
 												<div className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"
 													}`}>
 													{formatTimestamp(message.createdAt)}
