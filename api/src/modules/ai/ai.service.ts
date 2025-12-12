@@ -248,8 +248,8 @@ export class AiService {
 		aiModel: AiModelConfiguration,
 	): Promise<{ content: string; tokenUsage?: number; }> {
 		const subject = await this.subjectService.findOne(question.subjectId);
-		// Build the system prompt
-		const systemPrompt = this.buildSystemPrompt(subject.name, subject.aiPrompt);
+		// Build the system prompt with LaTeX support if enabled
+		const systemPrompt = this.buildSystemPrompt(subject.name, subject.aiPrompt, subject.useLatex);
 
 		// Build the user prompt
 		const userPrompt = this.buildUserPrompt(question.question, question.fileAttachments);
@@ -278,9 +278,12 @@ export class AiService {
 		aiModel: AiModelConfiguration,
 		question: Question,
 	): Promise<{ content: string; tokenUsage?: number; }> {
+		// Fetch subject to get LaTeX setting
+		const subject = await this.subjectService.findOne(question.subjectId);
+
 		// Build the conversation history
 		const messages = [
-			{ role: 'system', content: this.buildChatSystemPrompt(question) },
+			{ role: 'system', content: this.buildChatSystemPrompt(question, subject?.useLatex) },
 			...history,
 			{ role: 'user', content: message },
 		];
@@ -288,12 +291,13 @@ export class AiService {
 		return await this.callAiProvider(aiModel, messages);
 	}
 
-	private buildSystemPrompt(subject: string, aiPrompt: string): string {
-		if (aiPrompt && aiPrompt.trim().length > 0) {
-			return aiPrompt;
-		}
+	private buildSystemPrompt(subject: string, aiPrompt: string, useLatex: boolean = false): string {
+		let basePrompt = '';
 
-		return `You are an expert AI tutor specializing in ${subject}. Your role is to:
+		if (aiPrompt && aiPrompt.trim().length > 0) {
+			basePrompt = aiPrompt;
+		} else {
+			basePrompt = `You are an expert AI tutor specializing in ${subject}. Your role is to:
 			1. Provide clear, accurate, and educational explanations
 			2. Break down complex problems step-by-step
 			3. Encourage learning and understanding rather than just giving answers
@@ -301,8 +305,22 @@ export class AiService {
 			5. Provide examples and analogies to help with comprehension
 			6. Be patient and supportive
 
-			Please provide a comprehensive answer to the student's question.`
-			;
+			Please provide a comprehensive answer to the student's question.`;
+		}
+
+		// Add LaTeX formatting instructions if enabled
+		if (useLatex) {
+			basePrompt += `
+
+IMPORTANT: Format mathematical expressions using LaTeX notation:
+- Use $...$ for inline math expressions (e.g., $x^2 + y^2 = z^2$)
+- Use $$...$$ for display/block math expressions (e.g., $$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$)
+- Always use proper LaTeX commands for fractions (\\frac{}{}}), square roots (\\sqrt{}), integrals (\\int), summations (\\sum), etc.
+- Ensure all mathematical formulas, equations, and expressions are properly formatted in LaTeX
+- Use LaTeX for Greek letters (\\alpha, \\beta, \\gamma, etc.), operators, and mathematical symbols`;
+		}
+
+		return basePrompt;
 	}
 
 	private buildUserPrompt(question: string, fileAttachments?: DocumentMeta[]): string {
@@ -316,7 +334,7 @@ export class AiService {
 		return prompt;
 	}
 
-	private buildChatSystemPrompt(question: Question): string {
+	private buildChatSystemPrompt(question: Question, useLatex: boolean = false): string {
 		let prompt = `You are continuing a conversation with a student about their ${question.subject} question. 
 				Original question: "${question.question}"
 				Your previous answer: "${question.answer}"
@@ -326,6 +344,18 @@ export class AiService {
 		if (question.fileAttachments && question.fileAttachments.length > 0) {
 			prompt += `\n\nAttached files: ${question.fileAttachments.map(f => buildFileAccessUrl(f.accessKey)).join(', ')}`;
 			prompt += '\nPlease consider the attached files in your response if relevant.';
+		}
+
+		// Add LaTeX formatting instructions if enabled
+		if (useLatex) {
+			prompt += `
+
+IMPORTANT: Format mathematical expressions using LaTeX notation:
+- Use $...$ for inline math expressions (e.g., $x^2 + y^2 = z^2$)
+- Use $$...$$ for display/block math expressions (e.g., $$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$)
+- Always use proper LaTeX commands for fractions (\\frac{}{}), square roots (\\sqrt{}), integrals (\\int), summations (\\sum), etc.
+- Ensure all mathematical formulas, equations, and expressions are properly formatted in LaTeX
+- Use LaTeX for Greek letters (\\alpha, \\beta, \\gamma, etc.), operators, and mathematical symbols`;
 		}
 
 		return prompt;

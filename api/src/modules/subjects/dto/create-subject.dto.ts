@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateSubjectDto {
   @IsString()
@@ -22,6 +22,10 @@ export class CreateSubjectDto {
   @IsString()
   @IsOptional()
   aiPrompt?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  useLatex?: boolean;
 
   @IsString()
   @IsOptional()

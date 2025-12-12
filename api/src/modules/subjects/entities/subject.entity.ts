@@ -26,6 +26,9 @@ export class Subject extends AbstractEntity<Subject> {
   @Column({ type: 'text', nullable: true })
   aiPrompt?: string;
 
+  @Column({ type: 'boolean', default: false, name: 'use_latex' })
+  useLatex: boolean;
+
   // SEO Fields
   @Column({ type: 'varchar', length: 255, nullable: true })
   seoTitle?: string;
