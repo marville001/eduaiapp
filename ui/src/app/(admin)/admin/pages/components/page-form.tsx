@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { ImageUpload } from "@/components/forms/image-upload";
@@ -25,13 +26,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { CreatePageDto, Page, pageApi, PageSection, UpdatePageDto } from "@/lib/api/page.api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, Plus, RefreshCw, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Eye, Plus, RefreshCw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PageSectionsEditor } from "./page-editor";
+import { PagePreviewModal } from "./page-preview-modal";
 
 const formSchema = z.object({
 	title: z.string().min(1, "Title is required").max(255, "Title too long"),
@@ -64,6 +66,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 	const [isSlugManual, setIsSlugManual] = useState(false);
 	const [sections, setSections] = useState<PageSection[]>(page?.sections || []);
 	const [isBasicInfoExpanded, setIsBasicInfoExpanded] = useState(true);
+	const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -216,7 +219,7 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 			setValue('seoTags', page.seoTags || []);
 			setValue('seoImage', page.seoImage || '');
 			setValue('canonicalUrl', page.canonicalUrl || '');
-			// eslint-disable-next-line react-hooks/set-state-in-effect
+
 			setSections(page.sections || []);
 		}
 	}, [setValue, page]);
@@ -240,6 +243,14 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 									Cancel
 								</Button>
 							)}
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsPreviewOpen(true)}
+							>
+								<Eye className="h-4 w-4 mr-2" />
+								Preview
+							</Button>
 							<Button type="submit" disabled={isSubmitting}>
 								{isSubmitting ? 'Saving...' : page ? 'Update Page' : 'Create Page'}
 							</Button>
@@ -595,6 +606,19 @@ export default function PageForm({ page, onSuccess, onCancel, redirectToViewAll 
 					)}
 				</form>
 			</Form>
+
+			{/* Preview Modal */}
+			<PagePreviewModal
+				open={isPreviewOpen}
+				onOpenChange={setIsPreviewOpen}
+				page={{
+					...page,
+					title: form.watch('title') || page?.title || '',
+					excerpt: form.watch('excerpt') || page?.excerpt || '',
+					featuredImage: form.watch('featuredImage') || page?.featuredImage || '',
+					sections: sections,
+				}}
+			/>
 		</div>
 	);
 }
