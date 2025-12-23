@@ -30,6 +30,10 @@ export class AiModelConfigurationService {
     return model;
   }
 
+  async getModelByName(modelName: string): Promise<AiModelConfiguration | null> {
+    return this.aiModelRepository.findByModelName(modelName);
+  }
+
   async getDefaultModel(): Promise<AiModelConfiguration | null> {
     return this.aiModelRepository.findDefaultModel();
   }

@@ -132,6 +132,46 @@ export class CreditTransaction extends AbstractEntity<CreditTransaction> {
 	@Column({ name: 'metadata', type: 'simple-json', nullable: true })
 	metadata?: Record<string, any>;
 
+	// ==================== TOKEN USAGE FIELDS ====================
+
+	/**
+	 * Number of input tokens used (for AI operations)
+	 */
+	@Column({ name: 'input_tokens', type: 'int', nullable: true })
+	inputTokens?: number;
+
+	/**
+	 * Number of output tokens used (for AI operations)
+	 */
+	@Column({ name: 'output_tokens', type: 'int', nullable: true })
+	outputTokens?: number;
+
+	/**
+	 * Total tokens used (for AI operations)
+	 */
+	@Column({ name: 'total_tokens', type: 'int', nullable: true })
+	totalTokens?: number;
+
+	/**
+	 * AI model used for this transaction
+	 */
+	@Column({ name: 'ai_model', type: 'varchar', length: 100, nullable: true })
+	aiModel?: string;
+
+	/**
+	 * Token cost breakdown (JSON) - stores detailed pricing info
+	 * { inputCost, outputCost, totalCost, minimumApplied, modelMultiplier, finalCost }
+	 */
+	@Column({ name: 'token_cost_breakdown', type: 'simple-json', nullable: true })
+	tokenCostBreakdown?: {
+		inputCost: number;
+		outputCost: number;
+		totalCost: number;
+		minimumApplied: boolean;
+		modelMultiplier: number;
+		finalCost: number;
+	};
+
 	/**
 	 * Expiration date for promotional/bonus credits
 	 */
@@ -165,5 +205,14 @@ export class CreditTransaction extends AbstractEntity<CreditTransaction> {
 
 	getAbsoluteAmount(): number {
 		return Math.abs(Number(this.amount));
+	}
+
+	hasTokenUsage(): boolean {
+		return this.isAiUsage() && (this.inputTokens != null || this.outputTokens != null);
+	}
+
+	getTokenUsageSummary(): string {
+		if (!this.hasTokenUsage()) return '';
+		return `${this.inputTokens || 0} in / ${this.outputTokens || 0} out`;
 	}
 }

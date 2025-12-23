@@ -263,7 +263,7 @@ ui/src/app/(protected)/billing/
 
 ## 🔐 Credit Costs
 
-Default credit costs per operation:
+Default credit costs per operation (legacy fixed costs - use token-based pricing instead):
 
 | Operation         | Credits |
 | ----------------- | ------- |
@@ -273,6 +273,84 @@ Default credit costs per operation:
 | Image Generation  | 20      |
 | Advanced AI Model | +10     |
 | Generic Feature   | 1       |
+
+---
+
+## 🎯 Token-Based Pricing System
+
+### Overview
+
+The system now supports dynamic token-based pricing that charges based on actual input/output tokens used by AI operations. Token pricing can be configured per AI model through the admin panel.
+
+### Pricing Configuration
+
+Each AI model in the `ai_model_configurations` table has the following pricing fields:
+
+| Field                     | Type    | Default | Description                         |
+| ------------------------- | ------- | ------- | ----------------------------------- |
+| input_cost_per_1k_tokens  | decimal | 1.0     | Credits per 1000 input tokens       |
+| output_cost_per_1k_tokens | decimal | 3.0     | Credits per 1000 output tokens      |
+| minimum_credits           | integer | 1       | Minimum credits charged per request |
+| model_multiplier          | decimal | 1.0     | Multiplier for premium models       |
+
+### Cost Calculation Formula
+
+```
+inputCost = (inputTokens × inputCostPer1kTokens) / 1000
+outputCost = (outputTokens × outputCostPer1kTokens) / 1000
+totalCost = inputCost + outputCost
+
+// Apply minimum credits rule
+costAfterMinimum = max(totalCost, minimumCredits)
+
+// Apply model multiplier
+costAfterMultiplier = costAfterMinimum × modelMultiplier
+
+// Apply user's subscription multiplier
+finalCost = ceil(costAfterMultiplier × userSubscriptionMultiplier)
+```
+
+### Default Pricing by Model
+
+| Model           | Input (per 1K) | Output (per 1K) | Min Credits | Multiplier |
+| --------------- | -------------- | --------------- | ----------- | ---------- |
+| gpt-4o          | 2.5            | 10              | 1           | 1.0        |
+| gpt-4o-mini     | 0.15           | 0.6             | 1           | 1.0        |
+| gpt-4-turbo     | 5              | 15              | 1           | 1.0        |
+| gpt-3.5-turbo   | 0.25           | 0.75            | 1           | 1.0        |
+| claude-3-opus   | 7.5            | 37.5            | 2           | 1.0        |
+| claude-3-sonnet | 1.5            | 7.5             | 1           | 1.0        |
+| claude-3-haiku  | 0.125          | 0.625           | 1           | 1.0        |
+
+### Admin Configuration
+
+Administrators can update token pricing for each AI model through:
+
+1. **Admin Panel**: Navigate to Settings → AI Models → Edit Model
+2. **API**: `PATCH /settings/ai-models/:id` with pricing fields
+
+Example update request:
+
+```json
+{
+    "inputCostPer1kTokens": 2.5,
+    "outputCostPer1kTokens": 10.0,
+    "minimumCredits": 1,
+    "modelMultiplier": 1.0
+}
+```
+
+### Transaction Tracking
+
+Token usage is tracked in each credit transaction:
+
+| Field                | Description                        |
+| -------------------- | ---------------------------------- |
+| input_tokens         | Number of input tokens used        |
+| output_tokens        | Number of output tokens generated  |
+| total_tokens         | Sum of input and output tokens     |
+| ai_model             | Model name used for the operation  |
+| token_cost_breakdown | JSON breakdown of cost calculation |
 
 ---
 

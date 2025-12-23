@@ -45,10 +45,10 @@ export class AiController {
 	) { }
 
 	@Post('ask')
-	// @UseGuards(JwtAuthGuard, CreditGuard)
+	@UseGuards(CreditGuard)
 	@UseInterceptors(FilesInterceptor('files'), CreditConsumptionInterceptor)
 	@RequireCredits(CreditTransactionType.AI_QUESTION)
-	@ApiOperation({ summary: 'Ask a question to AI' })
+	@ApiOperation({ summary: 'Ask a question to AI (public endpoint - userId optional in body for credit tracking)' })
 	@ApiResponse({ status: HttpStatus.CREATED, description: 'Question submitted successfully' })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid question data' })
 	@ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Insufficient credits' })

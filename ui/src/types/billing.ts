@@ -58,6 +58,37 @@ export interface CreditTransaction {
 	expiresAt?: string;
 	createdAt: string;
 	updatedAt: string;
+	// Token-based pricing fields
+	inputTokens?: number;
+	outputTokens?: number;
+	totalTokens?: number;
+	aiModel?: string;
+	tokenCostBreakdown?: TokenCostBreakdown;
+}
+
+// Token Usage Details
+export interface TokenUsage {
+	inputTokens: number;
+	outputTokens: number;
+	totalTokens: number;
+}
+
+// Token Cost Breakdown
+export interface TokenCostBreakdown {
+	inputCost: number;
+	outputCost: number;
+	totalCost: number;
+	minimumApplied: boolean;
+	modelMultiplier: number;
+	finalCost: number;
+}
+
+// Credit Info returned with AI responses
+export interface CreditInfoResponse {
+	consumed: number;
+	remaining: number;
+	tokenUsage?: TokenUsage;
+	tokenCostBreakdown?: TokenCostBreakdown;
 }
 
 // Usage Summary
@@ -149,6 +180,33 @@ export const isCredit = (transaction: CreditTransaction): boolean => {
 // Helper function to format credits
 export const formatCredits = (credits: number): string => {
 	return new Intl.NumberFormat().format(Math.abs(credits));
+};
+
+// Helper function to format token count
+export const formatTokens = (tokens: number): string => {
+	if (tokens >= 1000000) {
+		return `${(tokens / 1000000).toFixed(2)}M`;
+	}
+	if (tokens >= 1000) {
+		return `${(tokens / 1000).toFixed(1)}K`;
+	}
+	return new Intl.NumberFormat().format(tokens);
+};
+
+// Helper function to format token usage summary
+export const formatTokenUsage = (transaction: CreditTransaction): string => {
+	if (!transaction.inputTokens && !transaction.outputTokens) {
+		return '';
+	}
+	const input = formatTokens(transaction.inputTokens || 0);
+	const output = formatTokens(transaction.outputTokens || 0);
+	return `${input} in / ${output} out`;
+};
+
+// Helper function to check if transaction has token usage
+export const hasTokenUsage = (transaction: CreditTransaction): boolean => {
+	return (transaction.inputTokens != null && transaction.inputTokens > 0) ||
+		(transaction.outputTokens != null && transaction.outputTokens > 0);
 };
 
 // Helper function to format price (accepts decimal price, e.g., 9.99)

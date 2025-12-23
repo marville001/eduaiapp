@@ -20,6 +20,12 @@ export interface AiModelConfiguration {
   topP: number;
   frequencyPenalty: number;
   presencePenalty: number;
+  // Token Pricing Configuration
+  inputCostPer1kTokens: number;
+  outputCostPer1kTokens: number;
+  minimumCredits: number;
+  modelMultiplier: number;
+  // Timestamps
   createdAt: string;
   updatedAt: string;
   lastConnectionAt?: string;
@@ -41,6 +47,11 @@ export interface CreateAiModelDto {
   presencePenalty?: number;
   isDefault?: boolean;
   isActive?: boolean;
+  // Token Pricing Configuration
+  inputCostPer1kTokens?: number;
+  outputCostPer1kTokens?: number;
+  minimumCredits?: number;
+  modelMultiplier?: number;
 }
 
 export interface UpdateAiModelDto extends Partial<CreateAiModelDto> {

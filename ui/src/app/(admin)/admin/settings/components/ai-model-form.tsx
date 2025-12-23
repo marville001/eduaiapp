@@ -22,6 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import aiModelsApi from "@/lib/api/ai-models.api";
 import {
   AI_MODEL_DEFAULTS,
@@ -33,7 +39,7 @@ import {
 } from "@/types/ai-models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -53,6 +59,11 @@ const formSchema = z.object({
   presencePenalty: z.string().optional(),
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
+  // Token Pricing Configuration
+  inputCostPer1kTokens: z.string().optional(),
+  outputCostPer1kTokens: z.string().optional(),
+  minimumCredits: z.string().optional(),
+  modelMultiplier: z.string().optional(),
 });
 // .refine(data => {
 //   if (data.maxTokens && isNaN(Number(data.maxTokens))) {
@@ -91,6 +102,11 @@ export default function AiModelForm({ model, onSuccess }: AiModelFormProps) {
       presencePenalty: (model?.presencePenalty || AI_MODEL_DEFAULTS.presencePenalty) + "",
       isActive: model?.isActive ?? AI_MODEL_DEFAULTS.isActive,
       isDefault: model?.isDefault ?? AI_MODEL_DEFAULTS.isDefault,
+      // Token Pricing Configuration
+      inputCostPer1kTokens: (model?.inputCostPer1kTokens ?? 1.0) + "",
+      outputCostPer1kTokens: (model?.outputCostPer1kTokens ?? 3.0) + "",
+      minimumCredits: (model?.minimumCredits ?? 1) + "",
+      modelMultiplier: (model?.modelMultiplier ?? 1.0) + "",
     },
   });
 
@@ -129,6 +145,11 @@ export default function AiModelForm({ model, onSuccess }: AiModelFormProps) {
       topP: data.topP ? Number(data.topP) : undefined,
       frequencyPenalty: data.frequencyPenalty ? Number(data.frequencyPenalty) : undefined,
       presencePenalty: data.presencePenalty ? Number(data.presencePenalty) : undefined,
+      // Token Pricing Configuration
+      inputCostPer1kTokens: data.inputCostPer1kTokens ? Number(data.inputCostPer1kTokens) : undefined,
+      outputCostPer1kTokens: data.outputCostPer1kTokens ? Number(data.outputCostPer1kTokens) : undefined,
+      minimumCredits: data.minimumCredits ? Number(data.minimumCredits) : undefined,
+      modelMultiplier: data.modelMultiplier ? Number(data.modelMultiplier) : undefined,
     };
 
     if (isEditing) {
@@ -423,6 +444,138 @@ export default function AiModelForm({ model, onSuccess }: AiModelFormProps) {
                     </FormControl>
                     <FormDescription>
                       Reduces repetition of frequent tokens
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Token Pricing Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Token Pricing Configuration</CardTitle>
+            <CardDescription>
+              Configure credit costs based on token usage for this model
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="inputCostPer1kTokens"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Input Cost (per 1K tokens)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="1.0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Credits charged per 1000 input tokens
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="outputCostPer1kTokens"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Output Cost (per 1K tokens)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="3.0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Credits charged per 1000 output tokens
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="minimumCredits"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1">
+                      Minimum Credits
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger type="button">
+                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>The minimum number of credits charged for each request, regardless of how few tokens are used. This ensures a baseline cost even for very short interactions.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="1"
+                        min="0"
+                        placeholder="1"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Minimum credits charged per request
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="modelMultiplier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1">
+                      Model Multiplier
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger type="button">
+                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>A multiplier applied to the final cost calculation. Use values greater than 1 for premium/expensive models (e.g., 1.5x, 2x) or less than 1 for budget models (e.g., 0.5x). The final cost is calculated as: (token cost) × (model multiplier) × (user subscription multiplier).</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        max="10"
+                        placeholder="1.0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Multiplier for premium model pricing (0.1-10)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

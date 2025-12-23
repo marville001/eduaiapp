@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SettingsModule } from '../settings/settings.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { BillingController } from './billing.controller';
 import { CreditTransactionRepository } from './credit-transaction.repository';
@@ -15,6 +16,7 @@ import { UserCreditsRepository } from './user-credits.repository';
 			CreditTransaction,
 		]),
 		SubscriptionsModule, // Required for credit multiplier from user's subscription
+		SettingsModule, // Required for AI model token pricing configuration
 	],
 	controllers: [BillingController],
 	providers: [

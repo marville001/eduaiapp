@@ -122,6 +122,12 @@ export class AiModelConfigurationRepository extends AbstractRepository<AiModelCo
     });
   }
 
+  async findByModelName(modelName: string): Promise<AiModelConfiguration | null> {
+    return this.repository.findOne({
+      where: { modelName },
+    });
+  }
+
   async countActiveModels(): Promise<number> {
     return this.repository.count({
       where: { isActive: true },

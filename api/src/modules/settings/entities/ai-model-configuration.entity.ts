@@ -55,6 +55,19 @@ export class AiModelConfiguration extends AbstractEntity<AiModelConfiguration> {
   @Column({ name: 'presence_penalty', type: 'decimal', precision: 3, scale: 2, default: 0.0 })
   presencePenalty: number;
 
+  // Token Pricing Configuration
+  @Column({ name: 'input_cost_per_1k_tokens', type: 'decimal', precision: 10, scale: 4, default: 1.0 })
+  inputCostPer1kTokens: number;
+
+  @Column({ name: 'output_cost_per_1k_tokens', type: 'decimal', precision: 10, scale: 4, default: 3.0 })
+  outputCostPer1kTokens: number;
+
+  @Column({ name: 'minimum_credits', type: 'integer', default: 1 })
+  minimumCredits: number;
+
+  @Column({ name: 'model_multiplier', type: 'decimal', precision: 5, scale: 2, default: 1.0 })
+  modelMultiplier: number;
+
   // Connection status columns
   @Column({ name: 'last_connection_at', type: 'timestamp', nullable: true })
   lastConnectionAt?: Date;
@@ -97,5 +110,20 @@ export class AiModelConfiguration extends AbstractEntity<AiModelConfiguration> {
   getMaskedApiKey(): string {
     if (!this.apiKeyEncrypted) return 'Not configured';
     return '••••••••••••••••';
+  }
+
+  // Helper method to get token pricing config
+  getTokenPricing(): {
+    inputCostPer1kTokens: number;
+    outputCostPer1kTokens: number;
+    minimumCredits: number;
+    modelMultiplier: number;
+  } {
+    return {
+      inputCostPer1kTokens: Number(this.inputCostPer1kTokens),
+      outputCostPer1kTokens: Number(this.outputCostPer1kTokens),
+      minimumCredits: this.minimumCredits,
+      modelMultiplier: Number(this.modelMultiplier),
+    };
   }
 }

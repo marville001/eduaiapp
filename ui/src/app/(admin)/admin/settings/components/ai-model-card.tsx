@@ -205,6 +205,29 @@ export default function AiModelCard({
           </div>
         </div>
 
+        {/* Token Pricing Configuration */}
+        <div className="border-t pt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Token Pricing</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500">Input Cost</span>
+              <p className="font-medium">{model.inputCostPer1kTokens || 1.0} credits/1K</p>
+            </div>
+            <div>
+              <span className="text-gray-500">Output Cost</span>
+              <p className="font-medium">{model.outputCostPer1kTokens || 3.0} credits/1K</p>
+            </div>
+            <div>
+              <span className="text-gray-500">Min Credits</span>
+              <p className="font-medium">{model.minimumCredits || 1}</p>
+            </div>
+            <div>
+              <span className="text-gray-500">Multiplier</span>
+              <p className="font-medium">{model.modelMultiplier || 1.0}x</p>
+            </div>
+          </div>
+        </div>
+
         {/* API Key Section */}
         <div className="border-t pt-4">
           <div className="flex items-center justify-between mb-2">

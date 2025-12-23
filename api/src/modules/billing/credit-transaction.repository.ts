@@ -17,6 +17,19 @@ export interface CreateTransactionDto {
 	metadata?: Record<string, any>;
 	expiresAt?: Date;
 	status?: CreditTransactionStatus;
+	// Token-based pricing fields
+	inputTokens?: number;
+	outputTokens?: number;
+	totalTokens?: number;
+	aiModel?: string;
+	tokenCostBreakdown?: {
+		inputCost: number;
+		outputCost: number;
+		totalCost: number;
+		minimumApplied: boolean;
+		modelMultiplier: number;
+		finalCost: number;
+	};
 }
 
 export interface TransactionFilters {

@@ -4,6 +4,7 @@ import { DotPattern } from '@/components/ui/dot-pattern';
 import { cn } from '@/lib/utils';
 import { PropsWithChildren } from 'react';
 
+export const dynamic = 'force-dynamic';
 
 const Layout = ({ children }: PropsWithChildren) => {
   return (

@@ -4,14 +4,23 @@ import {
 	Logger,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { AiModelConfigurationService } from '../settings/ai-model-configuration.service';
 import { UserSubscriptionRepository } from '../subscriptions/user-subscription.repository';
 import { CreditTransactionRepository } from './credit-transaction.repository';
 import { CreditTransaction, CreditTransactionStatus, CreditTransactionType } from './entities/credit-transaction.entity';
+import {
+	calculateTokenCost,
+	estimateOperationCost,
+	TokenCostBreakdown,
+	TokenPricingConfig,
+	TokenUsage,
+} from './token-pricing.config';
 import { UserCreditsRepository } from './user-credits.repository';
 
 /**
- * Configuration for credit costs per AI operation
- * Can be moved to database settings for dynamic configuration
+ * @deprecated Use token-based pricing instead
+ * Legacy fixed costs per AI operation - kept for backward compatibility
+ * The new system calculates costs based on actual input/output tokens
  */
 export const CREDIT_COSTS = {
 	[CreditTransactionType.AI_QUESTION]: 5,           // Base cost for asking a question
@@ -25,13 +34,16 @@ export const CREDIT_COSTS = {
 export interface ConsumeCreditsDto {
 	userId: number;
 	transactionType: CreditTransactionType;
-	amount?: number; // Optional override for dynamic pricing
+	amount?: number; // Optional override for dynamic pricing (deprecated)
 	description: string;
 	referenceId?: string;
 	referenceType?: string;
 	metadata?: Record<string, any>;
 	ipAddress?: string;
 	userAgent?: string;
+	// New token-based fields
+	tokenUsage?: TokenUsage;
+	modelName?: string;
 }
 
 export interface AllocateCreditsDto {
@@ -65,6 +77,7 @@ export class CreditService {
 		private readonly transactionRepo: CreditTransactionRepository,
 		private readonly subscriptionRepo: UserSubscriptionRepository,
 		private readonly eventEmitter: EventEmitter2,
+		private readonly aiModelConfigService: AiModelConfigurationService,
 	) { }
 
 	// ==================== BALANCE OPERATIONS ====================
@@ -96,7 +109,8 @@ export class CreditService {
 	}
 
 	/**
-	 * Get the cost for a specific operation
+	 * @deprecated Use token-based pricing instead
+	 * Get the legacy fixed cost for a specific operation
 	 */
 	getCreditCost(transactionType: CreditTransactionType): number {
 		return CREDIT_COSTS[transactionType] || 1;
@@ -115,6 +129,57 @@ export class CreditService {
 	}
 
 	/**
+	 * Get token pricing configuration from database for a specific model
+	 * Falls back to default pricing if model not found in database
+	 */
+	async getModelTokenPricing(modelName: string): Promise<TokenPricingConfig | undefined> {
+		try {
+			const model = await this.aiModelConfigService.getModelByName(modelName);
+			if (model) {
+				return model.getTokenPricing();
+			}
+		} catch (error) {
+			this.logger.warn(`Failed to fetch token pricing for model ${modelName}: ${error.message}`);
+		}
+		return undefined; // Will fall back to default pricing
+	}
+
+	/**
+	 * Calculate token-based cost for an AI operation
+	 * This is the new primary method for calculating costs
+	 * Fetches pricing from database if available, falls back to defaults
+	 */
+	async calculateTokenBasedCost(
+		userId: number,
+		tokenUsage: TokenUsage,
+		modelName: string,
+	): Promise<TokenCostBreakdown> {
+		const [userMultiplier, modelPricing] = await Promise.all([
+			this.getUserCreditMultiplier(userId),
+			this.getModelTokenPricing(modelName),
+		]);
+		return calculateTokenCost(tokenUsage, modelName, userMultiplier, modelPricing);
+	}
+
+	/**
+	 * Estimate cost for pre-authorization checks
+	 * Uses estimated token counts based on operation type
+	 * Fetches pricing from database if available, falls back to defaults
+	 */
+	async estimateOperationCost(
+		userId: number,
+		operationType: string,
+		modelName: string = 'default',
+	): Promise<TokenCostBreakdown> {
+		const [userMultiplier, modelPricing] = await Promise.all([
+			this.getUserCreditMultiplier(userId),
+			this.getModelTokenPricing(modelName),
+		]);
+		return estimateOperationCost(operationType, modelName, userMultiplier, modelPricing);
+	}
+
+	/**
+	 * @deprecated Use calculateTokenBasedCost instead
 	 * Calculate the actual cost after applying the user's credit multiplier
 	 */
 	async calculateAdjustedCost(
@@ -133,23 +198,38 @@ export class CreditService {
 	/**
 	 * Consume credits for an AI operation
 	 * This is the main method called by AI services
-	 * Automatically applies the user's credit multiplier from their subscription
+	 * 
+	 * NEW: Supports token-based pricing when tokenUsage and modelName are provided
+	 * LEGACY: Falls back to fixed costs when token info is not available
 	 */
 	async consumeCredits(dto: ConsumeCreditsDto): Promise<{
 		success: boolean;
 		transaction?: CreditTransaction;
 		remainingBalance: number;
 		error?: string;
+		tokenCostBreakdown?: TokenCostBreakdown;
 	}> {
-		const { userId, transactionType } = dto;
+		const { userId, transactionType, tokenUsage, modelName } = dto;
 
-		// Calculate the adjusted cost using the user's credit multiplier
-		const { baseCost, multiplier, adjustedCost } = await this.calculateAdjustedCost(
-			userId,
-			transactionType,
-			dto.amount,
-		);
-		const amount = adjustedCost;
+		let amount: number;
+		let tokenCostBreakdown: TokenCostBreakdown | undefined;
+		let baseCost: number;
+		let multiplier: number;
+
+		// Calculate cost based on token usage (new system) or fixed cost (legacy)
+		if (tokenUsage && modelName) {
+			// Token-based pricing
+			tokenCostBreakdown = await this.calculateTokenBasedCost(userId, tokenUsage, modelName);
+			amount = tokenCostBreakdown.finalCost;
+			baseCost = tokenCostBreakdown.totalCost;
+			multiplier = tokenCostBreakdown.modelMultiplier;
+		} else {
+			// Legacy fixed-cost pricing
+			const adjustedCost = await this.calculateAdjustedCost(userId, transactionType, dto.amount);
+			amount = adjustedCost.adjustedCost;
+			baseCost = adjustedCost.baseCost;
+			multiplier = adjustedCost.multiplier;
+		}
 
 		// Get current balance
 		const credits = await this.userCreditsRepo.findOrCreate(userId);
@@ -165,12 +245,14 @@ export class CreditService {
 				required: amount,
 				available: currentBalance,
 				transactionType,
+				tokenUsage,
 			});
 
 			return {
 				success: false,
 				remainingBalance: currentBalance,
 				error: `Insufficient credits. Required: ${amount}, Available: ${currentBalance}`,
+				tokenCostBreakdown,
 			};
 		}
 
@@ -182,10 +264,11 @@ export class CreditService {
 				success: false,
 				remainingBalance: currentBalance,
 				error: 'Failed to deduct credits. Please try again.',
+				tokenCostBreakdown,
 			};
 		}
 
-		// Create transaction record with multiplier info
+		// Create transaction record with token usage info
 		const transaction = await this.transactionRepo.create({
 			userId,
 			transactionType,
@@ -195,19 +278,36 @@ export class CreditService {
 			description: dto.description,
 			referenceId: dto.referenceId,
 			referenceType: dto.referenceType,
+			// Token usage fields
+			inputTokens: tokenUsage?.inputTokens,
+			outputTokens: tokenUsage?.outputTokens,
+			totalTokens: tokenUsage?.totalTokens,
+			aiModel: modelName,
+			tokenCostBreakdown: tokenCostBreakdown ? {
+				inputCost: tokenCostBreakdown.inputCost,
+				outputCost: tokenCostBreakdown.outputCost,
+				totalCost: tokenCostBreakdown.totalCost,
+				minimumApplied: tokenCostBreakdown.minimumApplied,
+				modelMultiplier: tokenCostBreakdown.modelMultiplier,
+				finalCost: tokenCostBreakdown.finalCost,
+			} : undefined,
 			metadata: {
 				...dto.metadata,
 				baseCost,
 				multiplier,
 				adjustedCost: amount,
+				pricingType: tokenUsage ? 'token-based' : 'legacy-fixed',
 			},
 			ipAddress: dto.ipAddress,
 			userAgent: dto.userAgent,
 			status: CreditTransactionStatus.COMPLETED,
 		});
 
+		const tokenInfo = tokenUsage
+			? ` (${tokenUsage.inputTokens} in / ${tokenUsage.outputTokens} out tokens)`
+			: '';
 		this.logger.log(
-			`Consumed ${amount} credits for user ${userId} (base: ${baseCost}, multiplier: ${multiplier}). New balance: ${newBalance}`
+			`Consumed ${amount} credits for user ${userId} (base: ${baseCost}, multiplier: ${multiplier})${tokenInfo}. New balance: ${newBalance}`
 		);
 
 		// Check if user is now low on credits
@@ -239,18 +339,57 @@ export class CreditService {
 	/**
 	 * Pre-check if user can perform an operation
 	 * Use this before expensive operations to fail fast
-	 * Applies the user's credit multiplier to calculate actual cost
+	 * 
+	 * NEW: Uses token-based estimation for AI operations
+	 * Estimates the cost based on typical token usage for the operation type
 	 */
 	async canPerformOperation(
 		userId: number,
 		transactionType: CreditTransactionType,
 		customAmount?: number,
-	): Promise<{ allowed: boolean; cost: number; balance: number; shortfall?: number; multiplier?: number; }> {
-		const { adjustedCost: cost, multiplier } = await this.calculateAdjustedCost(userId, transactionType, customAmount);
+		modelName?: string,
+	): Promise<{
+		allowed: boolean;
+		cost: number;
+		balance: number;
+		shortfall?: number;
+		multiplier?: number;
+		estimatedTokens?: { input: number; output: number; };
+	}> {
 		const balance = await this.getBalance(userId);
 
+		// Use token-based estimation for AI operations
+		const aiOperations = [
+			CreditTransactionType.AI_QUESTION,
+			CreditTransactionType.AI_CHAT_MESSAGE,
+			CreditTransactionType.AI_DOCUMENT_ANALYSIS,
+			CreditTransactionType.AI_IMAGE_GENERATION,
+			CreditTransactionType.AI_ADVANCED_MODEL,
+		];
+
+		let cost: number;
+		let multiplier: number;
+		let estimatedTokens: { input: number; output: number; } | undefined;
+
+		if (aiOperations.includes(transactionType)) {
+			// Token-based estimation
+			const operationType = transactionType.replace('ai_', '');
+			const estimation = await this.estimateOperationCost(userId, operationType, modelName || 'default');
+			cost = estimation.finalCost;
+			multiplier = estimation.modelMultiplier;
+			estimatedTokens = {
+				input: estimation.inputTokens,
+				output: estimation.outputTokens,
+			};
+		} else {
+			// Legacy fixed cost for non-AI operations
+			const adjusted = await this.calculateAdjustedCost(userId, transactionType, customAmount);
+			cost = adjusted.adjustedCost;
+			multiplier = adjusted.multiplier;
+		}
+
 		if (balance.available >= cost) {
-			return { allowed: true, cost, balance: balance.available, multiplier };
+			return { allowed: true, cost, balance: balance.available, multiplier, estimatedTokens };
 		}
 
 		return {
@@ -259,6 +398,7 @@ export class CreditService {
 			balance: balance.available,
 			shortfall: cost - balance.available,
 			multiplier,
+			estimatedTokens,
 		};
 	}
 

@@ -19,7 +19,6 @@ import { ChevronDown, GraduationCap, Home, LogOut, Menu, X } from "lucide-react"
 import Link from "next/link";
 import { useState } from "react";
 
-
 export default function NavigationRenderer({ menus, settings }: { menus: NavbarMenu[]; settings: SystemSetting; }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { logout } = useAuth();

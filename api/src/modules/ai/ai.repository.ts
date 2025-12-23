@@ -39,18 +39,34 @@ export class AiRepository extends AbstractRepository<Question> {
 		processingTimeMs?: number,
 		tokenUsage?: number,
 		errorMessage?: string,
+		tokenDetails?: {
+			inputTokens?: number;
+			outputTokens?: number;
+			totalTokens?: number;
+			modelName?: string;
+		},
 	): Promise<Question> {
 		console.log({ questionId });
 		const question = await this.findQuestionById(questionId);
 		console.log({ question });
 
-		await this.questionRepository.update({ questionId }, {
+		const updateData: Partial<Question> = {
 			answer,
 			status,
 			processingTimeMs,
 			tokenUsage,
 			errorMessage,
-		});
+		};
+
+		// Add token details to metadata if provided
+		// if (tokenDetails) {
+		// 	updateData.metadata = {
+		// 		...(question?.metadata || {}),
+		// 		tokenDetails,
+		// 	};
+		// }
+
+		await this.questionRepository.update({ questionId }, updateData);
 
 		return await this.findQuestionById(questionId);
 	}

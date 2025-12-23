@@ -2,6 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import OpenAI from 'openai';
 import { AiModelConfigurationService } from '../../settings/ai-model-configuration.service';
 
+export interface TokenUsageDetails {
+	inputTokens: number;
+	outputTokens: number;
+	totalTokens: number;
+}
+
+export interface AiResponse {
+	content: string;
+	tokenUsage: TokenUsageDetails;
+	modelName: string;
+}
+
 @Injectable()
 export class OpenAiService {
 	private readonly logger = new Logger(OpenAiService.name);
@@ -29,7 +41,7 @@ export class OpenAiService {
 		}
 	}
 
-	async chat(input: OpenAI.Responses.ResponseInput) {
+	async chat(input: OpenAI.Responses.ResponseInput): Promise<AiResponse> {
 		const model = await this.modelService.getDefaultModel();
 		if (!model) {
 			this.logger.error('Failed to find default AI model configuration');
@@ -43,9 +55,23 @@ export class OpenAiService {
 
 		const client = await this.getInstance(apiKey);
 
-		return await client.responses.create({
+		const response = await client.responses.create({
 			model: model.modelName,
 			input,
 		});
+
+		// Extract detailed token usage from OpenAI response
+		const usage = response.usage;
+		const tokenUsage: TokenUsageDetails = {
+			inputTokens: usage?.input_tokens || 0,
+			outputTokens: usage?.output_tokens || 0,
+			totalTokens: usage?.total_tokens || 0,
+		};
+
+		return {
+			content: response.output_text,
+			tokenUsage,
+			modelName: model.modelName,
+		};
 	}
 }

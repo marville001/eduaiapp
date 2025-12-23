@@ -9,7 +9,10 @@ import { AskQuestionDto } from './dto/ask-question.dto';
 import { SendChatMessageDto } from './dto/send-chat-message.dto';
 import { ChatMessage, MessageRole } from './entities/chat-message.entity';
 import { Question, QuestionStatus } from './entities/question.entity';
-import { OpenAiService } from './openai/openai.service';
+import { AiResponse, OpenAiService, TokenUsageDetails } from './openai/openai.service';
+
+// Re-export for use by other modules
+export { AiResponse, TokenUsageDetails };
 
 @Injectable()
 export class AiService {
@@ -153,16 +156,23 @@ export class AiService {
 
 			const processingTime = Date.now() - startTime;
 
-			// Update question with answer
+			// Update question with answer and detailed token usage
 			await this.aiRepository.updateQuestionAnswer(
 				question.questionId,
 				response.content,
 				QuestionStatus.ANSWERED,
 				processingTime,
-				response.tokenUsage,
+				response.tokenUsage.totalTokens,
+				undefined,
+				{
+					inputTokens: response.tokenUsage.inputTokens,
+					outputTokens: response.tokenUsage.outputTokens,
+					totalTokens: response.tokenUsage.totalTokens,
+					modelName: response.modelName,
+				},
 			);
 
-			this.logger.log(`Question ${question.id} processed successfully in ${processingTime}ms`);
+			this.logger.log(`Question ${question.id} processed successfully in ${processingTime}ms. Tokens: ${response.tokenUsage.inputTokens} in / ${response.tokenUsage.outputTokens} out`);
 		} catch (error) {
 			console.log(error);
 
@@ -201,18 +211,23 @@ export class AiService {
 
 			const processingTime = Date.now() - startTime;
 
-			// Save AI response
+			// Save AI response with detailed token usage
 			await this.aiRepository.createChatMessage({
 				questionId: question.id,
 				userId: question.userId,
 				role: MessageRole.ASSISTANT,
 				content: response.content,
 				aiModelId: aiModel.id,
-				tokenUsage: response.tokenUsage,
+				tokenUsage: response.tokenUsage.totalTokens,
 				processingTimeMs: processingTime,
+				metadata: {
+					inputTokens: response.tokenUsage.inputTokens,
+					outputTokens: response.tokenUsage.outputTokens,
+					modelName: response.modelName,
+				},
 			});
 
-			this.logger.log(`Chat message for question ${question.id} processed in ${processingTime}ms`);
+			this.logger.log(`Chat message for question ${question.id} processed in ${processingTime}ms. Tokens: ${response.tokenUsage.inputTokens} in / ${response.tokenUsage.outputTokens} out`);
 		} catch (error) {
 			this.logger.error(`Chat message processing failed for question ${question.id}:`, error);
 
@@ -246,7 +261,7 @@ export class AiService {
 	private async generateAiResponse(
 		question: Question,
 		aiModel: AiModelConfiguration,
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		const subject = await this.subjectService.findOne(question.subjectId);
 		// Build the system prompt with LaTeX support if enabled
 		const systemPrompt = this.buildSystemPrompt(subject.name, subject.aiPrompt, subject.useLatex);
@@ -277,7 +292,7 @@ export class AiService {
 		history: { role: string; content: string; }[],
 		aiModel: AiModelConfiguration,
 		question: Question,
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		// Fetch subject to get LaTeX setting
 		const subject = await this.subjectService.findOne(question.subjectId);
 
@@ -364,7 +379,7 @@ IMPORTANT: Format mathematical expressions using LaTeX notation:
 	private async callAiProvider(
 		aiModel: AiModelConfiguration,
 		messages: any[],
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		const apiKey = await this.aiModelService.getDecryptedApiKey(aiModel.id);
 
 		if (!apiKey) {
@@ -385,25 +400,22 @@ IMPORTANT: Format mathematical expressions using LaTeX notation:
 		}
 	}
 
-	private async callOpenAI(messages: any[]) {
-		const response = await this.openAiService.chat(messages as any);
-		return {
-			content: response.output_text,
-			tokenUsage: response.usage.total_tokens,
-		};
+	private async callOpenAI(messages: any[]): Promise<AiResponse> {
+		return await this.openAiService.chat(messages as any);
 	}
 
 	private async callAnthropic(
 		aiModel: AiModelConfiguration,
 		messages: { role: string; content: string; }[],
 		apiKey: string,
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		// Placeholder implementation - would use Anthropic SDK
 		this.logger.log(`Calling Anthropic with model ${aiModel.modelName}`);
 
 		return {
 			content: 'This is a mock response from Anthropic. The actual implementation would use the Anthropic API.',
-			tokenUsage: 120,
+			tokenUsage: { inputTokens: 50, outputTokens: 70, totalTokens: 120 },
+			modelName: aiModel.modelName,
 		};
 	}
 
@@ -411,13 +423,14 @@ IMPORTANT: Format mathematical expressions using LaTeX notation:
 		aiModel: AiModelConfiguration,
 		messages: { role: string; content: string; }[],
 		apiKey: string,
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		// Placeholder implementation - would use Google AI SDK
 		this.logger.log(`Calling Google AI with model ${aiModel.modelName}`);
 
 		return {
 			content: 'This is a mock response from Google AI. The actual implementation would use the Google AI API.',
-			tokenUsage: 140,
+			tokenUsage: { inputTokens: 60, outputTokens: 80, totalTokens: 140 },
+			modelName: aiModel.modelName,
 		};
 	}
 
@@ -425,13 +438,14 @@ IMPORTANT: Format mathematical expressions using LaTeX notation:
 		aiModel: AiModelConfiguration,
 		messages: { role: string; content: string; }[],
 		apiKey: string,
-	): Promise<{ content: string; tokenUsage?: number; }> {
+	): Promise<AiResponse> {
 		// Placeholder implementation - would make HTTP request to custom endpoint
 		this.logger.log(`Calling custom provider at ${aiModel.apiEndpoint}`);
 
 		return {
 			content: 'This is a mock response from a custom provider. The actual implementation would make an HTTP request.',
-			tokenUsage: 100,
+			tokenUsage: { inputTokens: 40, outputTokens: 60, totalTokens: 100 },
+			modelName: aiModel.modelName,
 		};
 	}
 }

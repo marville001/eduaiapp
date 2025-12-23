@@ -5,7 +5,9 @@ import {
 	CreditTransaction,
 	CreditTransactionType,
 	formatCredits,
+	formatTokenUsage,
 	getTransactionTypeLabel,
+	hasTokenUsage,
 	isCredit,
 } from '@/types/billing';
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +17,7 @@ import {
 	ArrowUpCircle,
 	ChevronLeft,
 	ChevronRight,
+	Cpu,
 	Filter,
 	Loader2,
 } from 'lucide-react';
@@ -181,9 +184,18 @@ export default function TransactionHistory({
 									</div>
 								</div>
 
-								{/* Balance after */}
-								<div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-									Balance: {formatCredits(transaction.balanceAfter)} credits
+								{/* Balance after and Token usage */}
+								<div className="mt-2 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+									<span>Balance: {formatCredits(transaction.balanceAfter)} credits</span>
+									{hasTokenUsage(transaction) && (
+										<span className="flex items-center gap-1">
+											<Cpu className="h-3 w-3" />
+											{formatTokenUsage(transaction)}
+											{transaction.aiModel && (
+												<span className="ml-1 text-gray-500">({transaction.aiModel})</span>
+											)}
+										</span>
+									)}
 								</div>
 							</div>
 						);

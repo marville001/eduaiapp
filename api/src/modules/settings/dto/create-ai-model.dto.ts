@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsString, IsOptional, IsUrl, IsNumber, Min, Max, IsBoolean, MaxLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator';
 import { AiProvider } from '../entities/ai-model-configuration.entity';
 
 export class CreateAiModelDto {
@@ -78,6 +78,36 @@ export class CreateAiModelDto {
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean = false;
+
+  // Token Pricing Configuration
+  @ApiPropertyOptional({ description: 'Cost in credits per 1000 input tokens', minimum: 0, default: 1.0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  inputCostPer1kTokens?: number = 1.0;
+
+  @ApiPropertyOptional({ description: 'Cost in credits per 1000 output tokens', minimum: 0, default: 3.0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  outputCostPer1kTokens?: number = 3.0;
+
+  @ApiPropertyOptional({ description: 'Minimum credits charged per request', minimum: 0, default: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  minimumCredits?: number = 1;
+
+  @ApiPropertyOptional({ description: 'Multiplier for premium model pricing', minimum: 0.1, maximum: 10, default: 1.0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.1)
+  @Max(10)
+  @Type(() => Number)
+  modelMultiplier?: number = 1.0;
 
   @ApiPropertyOptional({ description: 'Whether the model is active', default: true })
   @IsOptional()
