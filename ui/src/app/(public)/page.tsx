@@ -7,6 +7,8 @@ import PricingSection from "@/components/sections/pricing-section";
 import SocialProofSection from "@/components/sections/social-proof-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <main>
